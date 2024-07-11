@@ -52,8 +52,8 @@ B <- 0.2 #partial eta-sq for Factor B
 alpha <- 0.05
 power <- 0.8
 
-pwr.2way(a = 2, b = 3, eta2.A = A, eta2.B = B,  sig.level = alpha,
-         power = power)
+#pwr.2way(a = 2, b = 3, eta2.A = A, eta2.B = B,  sig.level = alpha,
+        # power = power) -- doesn't actually exist
 
 ########################################################
 
