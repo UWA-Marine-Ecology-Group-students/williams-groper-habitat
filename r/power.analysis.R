@@ -1,71 +1,111 @@
 ###power analysis bait comp
 
 #install.packages("pwr")
+#install.packages("pwr2")
 library(pwr)
+library(pwr2)
 
-#### EXAMPLES FROM CHATGPT
+#####  ONE WAY ANOVA 
 
-#   example for 2 sample t-test
+#n = sample size per level
+#k = no. levels in factor
+#f = effect size (cohen's f) want to detect
+#sig.level = 0.05
+#power = usually 0.8
 
-effect_size <- 0.5 #Cohen's d??? - from chatgpt not sure what this is
-alpha <- 0.5
-power <- 0.8 #usually set to give 80% chance of detecting true difference
+## cohen's f - the mean difference between groups relative to the variability
+## within groups
 
-##calculating required sample size
-pwr.t.test(d=effect_size, sig.level = alpha, power = power)
+# small effect, f = 0.1
+# medium effect, f = 0.25
+# large effect, f = 0.4
 
-#   Example for one-way ANOVA
+pwr.anova.test(k = 3, f = 0.25, sig.level = 0.05, power = 0.8)
+# n = 52.4 for each group (150 drops)
 
-effect_size <- 0.5 
-alpha <- 0.5
-power <- 0.8
-groups <- 3 #no. groups
+pwr.anova.test(k =3, f = 0.1, sig.level = 0.05, power = 0.8)
+#n = 322 - 600 drops
 
-pwr.anova.test(k=groups, f=effect_size, sig.level = alpha, power = power)
+pwr.anova.test(k = 3, f = 0.4, sig.level = 0.05, power = 0.8)
+# n = 21 = 65 drops
 
-#   example for regression 
-effect_size <- 1.5 # must be at least 1
-alpha <- 0.5
-power <- 0.8
-predictors <- 3
+## the interwebs say to use f = 0.5 because it indicates a moderate
+## to large difference
 
-pwr.f2.test(u = effect_size, v= predictors, sig.level = alpha, power = power) 
-
-# example for 2 factor anova with interaction
-
-A <- 0.1 #partial eta-sq for factor A
-B <- 0.2 #partial eta-sq for Factor B
-int <- 0.05 #partial eta-sq for interaction 
-
-alpha <- 0.05
-power <- 0.8
-
-pwr.2way(a = 2, b = 3, eta2.A = A, eta2.B = B, eta2.AB = int, sig.level = alpha,
-         power = power)
-## a and b are number of levels for each factor
-
-#   example 2 factor WITHOUT interaction
-
-A <- 0.1 #partial eta-sq for factor A
-B <- 0.2 #partial eta-sq for Factor B
-
-alpha <- 0.05
-power <- 0.8
-
-#pwr.2way(a = 2, b = 3, eta2.A = A, eta2.B = B,  sig.level = alpha,
-        # power = power) -- doesn't actually exist
-
-########################################################
-
-#   Bait comp 1 factor ANOVA
-
-effect_size <- 0.5 # doesn't like effect size 1 or > 1
-alpha <- 0.5
-power <- 0.8
-groups <- 3 #no. groups
-
-pwr.anova.test(k= groups, f= effect_size, sig.level = alpha, power = power)
-
-#effect size of 0.5 = 3.75 drops per group
+pwr.anova.test(k=3, f=0.5, sig.level = 0.05, power = 0.8)
+#n = 13.89 giving 42 drops (or 45 to round up)
 
 
+
+### two way anova
+
+#a = no. groups in factor a
+#b = no. groups in factor b
+#alpha = sig level
+#size.A = sample size per group in factor A
+#size.B = sample size per group in factor B
+#f.A = effect size of Factor A
+#f.B = effect size of Factor B
+#delta.A = the smallest difference among groups in A
+#delta.B = the smallest difference among groups in B
+#sigma.A = s.d 
+#sigma.B = s.d.
+#if effect sizes of A and B are known then put them into the function
+#if delta sizes are known, put f.A & f.B as NULL and put in dleta instead
+#same with sigma
+
+#effect size between the factors?
+pwr.2way(a=3, b=4, alpha=0.05, size.A=21, size.B=21, f.A=0.5, f.B=0.5)
+## power= 0.99999
+
+pwr.2way(a=3, b=4, alpha=0.05, size.A=15, size.B=15, f.A=0.5, f.B=0.5)
+#power = 0.999976
+
+pwr.2way(a=3, b=4, alpha=0.05, size.A=12, size.B=12, f.A=0.5, f.B=0.5)
+#power = 0.9996138
+
+## delta - smallest difference among groups in a factor
+
+pwr.2way(a=3, b=4, alpha=0.05, size.A=12, size.B=12, delta.A=2, delta.B=2, sigma.A=2, sigma.B=2)
+
+
+## calculate sample size for two-way ANOVA models
+# parameters as above
+# beta = type 2 error probability
+# B= iterations
+
+ss.2way(a=3, b=4, alpha = 0.05, beta = 0.1, delta.A=1, delta.B=2, sigma.A=2,
+        sigma.B=2, B=100)
+#power = 0.9
+#n = 26 in each group
+
+ss.2way(a=3, b=4, alpha = 0.05, beta = 0.1, delta.A=2, delta.B=2, sigma.A=2,
+        sigma.B=2, B=100)
+#power = 0.9
+#n = 10 in each group
+
+ss.2way(a=3, b=4, alpha = 0.05, beta = 0.2, delta.A=2, delta.B=2, sigma.A=2,
+        sigma.B=2, B=100)
+
+
+## calculate sample size for one-way ANOVA models
+
+#k - bait type levels
+ss.1way(k=3, alpha=0.05, beta=0.1, f=0.5, delta=2, sigma=2, B=100)
+#n = 18
+
+#k - deployment times levels
+ss.1way(k=4, alpha=0.05, beta=0.1, f=0.5, delta=2, sigma=2, B=100)
+#n = 16
+
+## power plot - one way ANOVA models
+
+n <- seq(2, 30, by=4)
+f<- 0.5
+pwr.plot(n=n, k=4, f=f, alpha = 0.05)
+
+############### Power analysis 2 factor ANOVA with interaction
+
+#https://daniellakens.blogspot.com/2020/03/effect-sizes-and-power-for-interactions.html
+#install.packages("Superpower")
+library(Superpower)
