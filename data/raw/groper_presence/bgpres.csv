@@ -1,0 +1,46 @@
+count,sample,longitude_dd,latitude_dd,location,source,method
+1,INV-BV-03,120.95625,-34.02375,Eastern Recherche,globalarch,bruvs
+1,INV-BV-11,120.9485867,-34.03604,Eastern Recherche,globalarch,bruvs
+2,INV-BV-36,120.9386308,-34.06377339,Eastern Recherche,globalarch,bruvs
+1,SAL-BV-001,123.6283059,-34.46670461,Eastern Recherche,globalarch,bruvs
+1,SAL-BV-C07,123.5222674,-34.40662698,Eastern Recherche,globalarch,bruvs
+1,SAL-BV-C10,123.5699235,-34.4601941,Eastern Recherche,globalarch,bruvs
+4,SAL-BV-D08,123.561841,-34.34624401,Eastern Recherche,globalarch,bruvs
+1,INV-BV-201,120.9502883,-34.036405,investigator island,meg,bruvs
+1,INV-BV-DOC-18,121.4995017,-33.87819,investigator island,meg,bruvs
+1,INV-BV-DOC-1,121.3535783,-33.843135,investigator island,meg,bruvs
+20,bb1,124.13,-33.8536,new year island,bushblitz,dovs
+12,bb2,124.1258,-33.8628,new year island,bushblitz,dovs
+20,bb3,124.1299,-33.8447,daw island,bushblitz,dovs
+8,bb4,125.3386,-33.7257,pointer island,bushblitz,dovs
+10,bb7,124.1352,-33.8508,daw island,bushblitz,dovs
+12,bb12,123.2136,-34.0689,middle island,bushblitz,dovs
+8,bb13,123.2138,-34.0686,middle island,bushblitz,dovs
+8,bb15,123.18,-34.0674,goose island,bushblitz,dovs
+6,bb16,123.1803,-34.0834,middle island,bushblitz,dovs
+5,bb18,123.1771,-34.1009,middle island,bushblitz,dovs
+3,bb23,123.5169,-34.0006,pasley island,bushblitz,dovs
+1,bb24,123.5169,-34.0006,pasley island,bushblitz,dovs
+15,bb25,122.6543,-33.9974,mart island,bushblitz,dovs
+15,bb26,122.6548,-33.9994,mart island,bushblitz,dovs
+6,bb27,122.2564,-34.1183,mondrain island,bushblitz,dovs
+0.25,WA102,120.895689,-34.059844,investigator island,jordan,dens
+0.75,WA103,122.230036,-34.110183,mondrain island,jordan,dens
+0.25,WA104,122.235866,-34.119831,mondrain island,jordan,dens
+3.75,WA105,122.537397,-34.003955,cornwall island,jordan,dens
+3,WA107,124.125982,-33.851323,daw island,jordan,dens
+0.5,WA108,124.134915,-33.85225,daw island,jordan,dens
+2,site1,122.1053861,-33.99032222,cape le grande,eden,obs
+2,site2,122.1090056,-34.01234444,cape le grande,eden,obs
+5,site3,122.1254722,-34.01369722,cape le grande,eden,obs
+8,site4,122.1445333,-34.01602222,cape le grande,eden,obs
+5,site5,122.1334611,-34.03081111,cape le grande,eden,obs
+5,site6,122.1915667,-34.01106944,cape le grande,eden,obs
+1,site7,122.222236,-33.991342,cape le grande,eden,obs
+1,site8,122.269953,-33.972078,cape le grande,eden,obs
+1,site9,122.118919,-33.979778,cape le grande,eden,obs
+1,site10,121.985608,-33.837589,cape le grande,eden,obs
+1,site11,122.279242,-33.998058,cape le grande,eden,obs
+1,site12,122.275028,-33.976294,cape le grande,eden,obs
+1,site13,122.227917,-34.0031,cape le grande,eden,obs
+1,site14,122.239903,-34.004639,cape le grande,eden,obs

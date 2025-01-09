@@ -1,0 +1,89 @@
+count,sample,longitude_dd,latitude_dd,location,source,method
+1,12001,121.81898,-33.9219,Esperance,globalarch,bruvs
+1,12017,123.13932,-33.9486,Arid,globalarch,bruvs
+1,12024,122.83636,-34.00044,Duke,globalarch,bruvs
+2,12026,122.84339,-34.00084,Duke,globalarch,bruvs
+1,12027,122.84655,-34.00037,Duke,globalarch,bruvs
+1,12503,122.01014,-33.98445,Esperance,globalarch,bruvs
+1,12504,122.02677,-33.97812,Esperance,globalarch,bruvs
+1,12505,122.00883,-33.97036,Esperance,globalarch,bruvs
+1,12506,121.9935,-33.97524,Esperance,globalarch,bruvs
+1,12507,122.02586,-33.99032,Esperance,globalarch,bruvs
+1,12508,122.01423,-33.96813,Esperance,globalarch,bruvs
+1,12510,122.01204,-33.98465,Esperance,globalarch,bruvs
+1,12512,122.02382,-33.96449,Esperance,globalarch,bruvs
+1,12513,122.02441,-33.97686,Esperance,globalarch,bruvs
+1,12519,123.22997,-34.03639,Arid,globalarch,bruvs
+1,12520,123.23099,-34.0393,Arid,globalarch,bruvs
+1,12522,123.16434,-34.02492,Arid,globalarch,bruvs
+1,12523,123.16858,-34.01738,Arid,globalarch,bruvs
+2,12524,123.17252,-34.01791,Arid,globalarch,bruvs
+1,12525,123.1759,-34.01406,Arid,globalarch,bruvs
+1,12527,123.16898,-34.02004,Arid,globalarch,bruvs
+1,12528,123.17643,-34.01633,Arid,globalarch,bruvs
+1,12540,122.62601,-33.98592,Duke,globalarch,bruvs
+2,12542,122.65369,-34.00318,Duke,globalarch,bruvs
+2,12543,122.6661,-33.98888,Duke,globalarch,bruvs
+1,12546,122.57934,-34.00998,Duke,globalarch,bruvs
+1,12547,122.57674,-34.01065,Duke,globalarch,bruvs
+1,12552,122.57241,-34.01324,Duke,globalarch,bruvs
+1,12554,122.59748,-33.93294,Duke,globalarch,bruvs
+1,2045,122.63693,-33.98553,Duke,globalarch,bruvs
+1,2057,122.63702,-34.00262,Duke,globalarch,bruvs
+1,2058,122.63957,-34.00008,Duke,globalarch,bruvs
+1,2239,122.64598,-33.98847,Duke,globalarch,bruvs
+1,2251,122.65213,-33.99557,Duke,globalarch,bruvs
+1,2260,122.66118,-33.99075,Duke,globalarch,bruvs
+1,2262,122.65875,-33.99202,Duke,globalarch,bruvs
+1,2492,122.5874,-33.93133,Duke,globalarch,bruvs
+1,2634,123.2368,-34.02738,Arid,globalarch,bruvs
+1,4224,123.1097,-34.09427,Arid,globalarch,bruvs
+1,4285,123.21735,-34.07858,Arid,globalarch,bruvs
+1,4336,123.20703,-34.0199,Arid,globalarch,bruvs
+1,7126,122.0195,-33.99732,Esperance,globalarch,bruvs
+1,78,121.90693,-33.92732,Esperance,globalarch,bruvs
+1,INV-BV-03,120.95625,-34.02375,Eastern Recherche,globalarch,bruvs
+1,INV-BV-11,120.9485867,-34.03604,Eastern Recherche,globalarch,bruvs
+2,INV-BV-36,120.9386308,-34.06377339,Eastern Recherche,globalarch,bruvs
+1,SAL-BV-001,123.6283059,-34.46670461,Eastern Recherche,globalarch,bruvs
+1,SAL-BV-C07,123.5222674,-34.40662698,Eastern Recherche,globalarch,bruvs
+1,SAL-BV-C10,123.5699235,-34.4601941,Eastern Recherche,globalarch,bruvs
+4,SAL-BV-D08,123.561841,-34.34624401,Eastern Recherche,globalarch,bruvs
+1,INV-BV-201,120.9502883,-34.036405,investigator island,meg,bruvs
+1,INV-BV-DOC-18,121.4995017,-33.87819,investigator island,meg,bruvs
+1,INV-BV-DOC-1,121.3535783,-33.843135,investigator island,meg,bruvs
+20,bb1,124.13,-33.8536,new year island,bushblitz,dovs
+12,bb2,124.1258,-33.8628,new year island,bushblitz,dovs
+20,bb3,124.1299,-33.8447,daw island,bushblitz,dovs
+8,bb4,125.3386,-33.7257,pointer island,bushblitz,dovs
+10,bb7,124.1352,-33.8508,daw island,bushblitz,dovs
+12,bb12,123.2136,-34.0689,middle island,bushblitz,dovs
+8,bb13,123.2138,-34.0686,middle island,bushblitz,dovs
+8,bb15,123.18,-34.0674,goose island,bushblitz,dovs
+6,bb16,123.1803,-34.0834,middle island,bushblitz,dovs
+5,bb18,123.1771,-34.1009,middle island,bushblitz,dovs
+3,bb23,123.5169,-34.0006,pasley island,bushblitz,dovs
+1,bb24,123.5169,-34.0006,pasley island,bushblitz,dovs
+15,bb25,122.6543,-33.9974,mart island,bushblitz,dovs
+15,bb26,122.6548,-33.9994,mart island,bushblitz,dovs
+6,bb27,122.2564,-34.1183,mondrain island,bushblitz,dovs
+0.25,WA102,120.895689,-34.059844,investigator island,jordan,dens
+0.75,WA103,122.230036,-34.110183,mondrain island,jordan,dens
+0.25,WA104,122.235866,-34.119831,mondrain island,jordan,dens
+3.75,WA105,122.537397,-34.003955,cornwall island,jordan,dens
+3,WA107,124.125982,-33.851323,daw island,jordan,dens
+0.5,WA108,124.134915,-33.85225,daw island,jordan,dens
+2,site1,122.1053861,-33.99032222,cape le grande,eden,obs
+2,site2,122.1090056,-34.01234444,cape le grande,eden,obs
+5,site3,122.1254722,-34.01369722,cape le grande,eden,obs
+8,site4,122.1445333,-34.01602222,cape le grande,eden,obs
+5,site5,122.1334611,-34.03081111,cape le grande,eden,obs
+5,site6,122.1915667,-34.01106944,cape le grande,eden,obs
+1,site7,122.222236,-33.991342,cape le grande,eden,obs
+1,site8,122.269953,-33.972078,cape le grande,eden,obs
+1,site9,122.118919,-33.979778,cape le grande,eden,obs
+1,site10,121.985608,-33.837589,cape le grande,eden,obs
+1,site11,122.279242,-33.998058,cape le grande,eden,obs
+1,site12,122.275028,-33.976294,cape le grande,eden,obs
+1,site13,122.227917,-34.0031,cape le grande,eden,obs
+1,site14,122.239903,-34.004639,cape le grande,eden,obs

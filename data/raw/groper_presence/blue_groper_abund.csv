@@ -1,0 +1,30 @@
+source,sample,date,location,lat,long,abund
+meg,INV-BV-201,2024-05-18,investigator island,-34.036405,120.9502883,1
+meg,INV-BV-DOC-18,2024-05-27,investigator island,-33.87819,121.4995017,1
+meg,INV-BV-DOC-1,2024-05-27,investigator island,-33.843135,121.3535783,1
+bushblitz,bb1,2023-04-01,new year island,-33.8536,124.13,20
+bushblitz,bb2,2023-04-01,new year island,-33.8628,124.1258,12
+bushblitz,bb3,2023-04-01,daw island,-33.8447,124.1299,20
+bushblitz,bb4,2023-04-01,pointer island,-33.7257,125.3386,8
+bushblitz,bb7,2023-04-01,daw island,-33.8508,124.1352,10
+bushblitz,bb12,2023-04-01,middle island,-34.0689,123.2136,12
+bushblitz,bb13,2023-04-01,middle island,-34.0686,123.2138,8
+bushblitz,bb15,2023-04-01,goose island,-34.0674,123.18,8
+bushblitz,bb16,2023-04-01,middle island,-34.0834,123.1803,6
+bushblitz,bb18,2023-04-01,middle island,-34.1009,123.1771,5
+bushblitz,bb23,2023-04-01,pasley island,-34.0006,123.5169,3
+bushblitz,bb24,2023-04-01,pasley island,-34.0006,123.5169,1
+bushblitz,bb25,2023-04-01,mart island,-33.9974,122.6543,15
+bushblitz,bb26,2023-04-01,mart island,-33.9994,122.6548,15
+bushblitz,bb27,2023-04-01,mondrain island,-34.1183,122.2564,6
+jordan,WA102,2023-04-01,investigator island,-34.059844,120.895689,0.25
+jordan,WA103,2023-04-01,mondrain island,-34.110183,122.230036,0.75
+jordan,WA104,2023-04-01,mondrain island,-34.119831,122.235866,0.25
+jordan,WA105,2023-04-01,cornwall island,-34.003955,122.537397,3.75
+jordan,WA107,2023-04-01,daw island,-33.851323,124.125982,3
+jordan,WA108,2023-04-01,daw island,-33.85225,124.134915,0.5
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
