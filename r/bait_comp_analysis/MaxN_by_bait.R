@@ -45,11 +45,26 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
 
 summary(maxn.all)
 
+## summary stas for bait
+
 aggregate(maxn ~ bait, data = maxn.all, FUN = mean)
 aggregate(maxn ~ bait, data = maxn.all, FUN = median)
 aggregate(maxn ~ bait, data = maxn.all, FUN = min)
 aggregate(maxn ~ bait, data = maxn.all, FUN = max)
 
+## summary stas for location
+
+aggregate(maxn ~ location, data = maxn.all, FUN = mean)
+aggregate(maxn ~ location, data = maxn.all, FUN = median)
+aggregate(maxn ~ location, data = maxn.all, FUN = min)
+aggregate(maxn ~ location, data = maxn.all, FUN = max)
+
+## summary stas for date
+
+aggregate(maxn ~ date, data = maxn.all, FUN = mean)
+aggregate(maxn ~ date, data = maxn.all, FUN = median)
+aggregate(maxn ~ date, data = maxn.all, FUN = min)
+aggregate(maxn ~ date, data = maxn.all, FUN = max)
 ## plot Freq. distribution of MaxNs ## plot Frmin()eq. distribution of MaxNs 
 hist(maxn.all$maxn)
 
@@ -86,6 +101,7 @@ mod1 <- glmer(maxn ~ bait + (1|location), data = maxn.all,
 
 summary(mod1)
 anova(mod1)
+
 #r.squaredGLMM(mod1)
 
 ## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
@@ -113,7 +129,76 @@ postmod1 <- emmeans(mod1, ~ bait)  # Specify the fixed factor of interest
 # Perform pairwise comparisons
 pairs(postmod1)
 
+#plotting residuals
 
+r <- residuals(mod1)
+
+# Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
+# also look for large residuals not explained by the model
+plot(r, main = "Residuals from Poisson MaxN no SC", 
+     xlab = "Index", ylab = "Residuals")
+
+
+##############
+### Running with Location as fixed effect
+
+
+mod2 <- glm(maxn ~ bait + location, data = maxn.all,
+              family = "poisson")
+
+summary(mod2)
+anova(mod2)
+logLik(mod2)
+#r.squaredGLMM(mod1)
+
+## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
+
+# Alternatively, calculate deviance and residual degrees of freedom
+# dispersion statistic
+deviance(mod2)/df.residual(mod2)
+
+# Mean and variance of the response variable
+mean_response <- mean(maxn.all$maxn)
+var_response <- var(maxn.all$maxn)
+
+# Compare the mean and variance
+mean_response
+var_response
+
+## Post - hoc for location
+
+postmod2 <- emmeans(mod2, ~ location)  # Specify the fixed factor of interest
+
+# Perform pairwise comparisons
+pairs(postmod2)
+
+## visualising post-hoc tests
+
+pairwise_results <- contrast(postmod2, method = "pairwise")
+summary(pairwise_results)
+
+# Convert pairwise results to a data frame
+pairwise_df <- as.data.frame(pairwise_results)
+
+#plot
+ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
+  labs(x = "Pairwise Comparisons", y = "Estimate", title = "Post Hocs from Poisson with No RE") +
+  theme_minimal() +
+  coord_flip()
+
+#plotting residuals
+
+r <- residuals(mod2)
+
+# Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
+# also look for large residuals not explained by the model
+plot(r, main = "Residuals from Poisson MaxN no RE", 
+     xlab = "Index", ylab = "Residuals")
+
+
+###########################################
 ### RUNNING WITH NEGATIVE BINOMIAL JUST TO SEE
 
 nb1 <- glmmTMB(maxn~bait + (1|location), 
@@ -135,7 +220,7 @@ r <- residuals(nb1)
 
 # Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
 # also look for large residuals not explained by the model
-plot(r, main = "Residuals from Poisson MaxN no SC", 
+plot(r, main = "Residuals from Negative Binomial MaxN with RE(location)", 
      xlab = "Index", ylab = "Residuals")
 
 ## Pearson residuals - 
@@ -149,7 +234,45 @@ pearson_residuals <- residuals(nb1, type = "pearson")
 var(pearson_residuals)
 
 # Plot Pearson residuals
-plot(pearson_residuals, main = "Pearson Residuals - Poisson - MaxN no SC")
+plot(pearson_residuals, main = "Pearson Residuals - Negative Binomial - MaxN with RE(location)")
+
+
+### Negative binomial with Location as fixed effect 
+
+nb2 <- glmmTMB(maxn~bait + location, 
+               data = maxn.all, 
+               family = "nbinom2")  # Negative Binomial with two parameters
+
+
+summary(nb2)
+### warning message - didn't like it ###
+
+## checking for overdispersion
+# dispersion statistic 
+
+deviance(nb2)/df.residual(nb2)
+
+#plotting residuals
+
+r <- residuals(nb2)
+
+# Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
+# also look for large residuals not explained by the model
+plot(r, main = "Residuals from Negative Binomial MaxN no RE", 
+     xlab = "Index", ylab = "Residuals")
+
+## Pearson residuals - 
+# checking to see if variance of residuals is larger than expected
+
+pearson_residuals <- residuals(nb1, type = "pearson")
+
+#Calculate variance of the pearson residuals - if around 1 indicates that poisson assumption
+# of constant variance is actually reasonable - but as this is a negative binomial would expect
+# it to be larger than 1
+var(pearson_residuals)
+
+# Plot Pearson residuals
+plot(pearson_residuals, main = "Pearson Residuals - Negative Binomial - MaxN no RE")
 
 
 #############################################################

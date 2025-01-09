@@ -47,11 +47,23 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
   glimpse()
 
 summary(sum.stage)
-
+## summary details for bait type
 aggregate(maxn ~ bait, data = sum.stage, FUN = mean)
 aggregate(maxn ~ bait, data = sum.stage, FUN = median)
 aggregate(maxn ~ bait, data = sum.stage, FUN = min)
 aggregate(maxn ~ bait, data = sum.stage, FUN = max)
+
+## summary details for location
+aggregate(maxn ~ location, data = sum.stage, FUN = mean)
+aggregate(maxn ~ location, data = sum.stage, FUN = median)
+aggregate(maxn ~ location, data = sum.stage, FUN = min)
+aggregate(maxn ~ location, data = sum.stage, FUN = max)
+
+## summary details for date
+aggregate(maxn ~ date, data = sum.stage, FUN = mean)
+aggregate(maxn ~ date, data = sum.stage, FUN = median)
+aggregate(maxn ~ date, data = sum.stage, FUN = min)
+aggregate(maxn ~ date, data = sum.stage, FUN = max)
 
 ## plot Freq. distribution of MaxNs 
 
@@ -138,6 +150,8 @@ ggplot(plot_data, aes(x = observed, y = predicted)) +
 
 ## if Overdispersed - next step is to do a negative binomial
 
+######## 
+## NEGATIVE BINOMIAL MODEl
 
 # Fit a GLMM with Negative Binomial distribution
 glm2 <- glmmTMB(maxn~bait + (1|location), 
@@ -217,12 +231,33 @@ logLik(glm3)
 
 
 ##### WITH TWEEDIE
-help(glmer)
-twe1 <- glmmTMB(maxn~bait + (1|location), data = sum.stage, family = tweedie(link = "log"))
 
-summary(twe1)
+twe1 <- glmmTMB(maxn~bait + (1|location), 
+                data = sum.stage, 
+                family = tweedie(link = "log"))
+
+summary(twe1) #doesn't seem to be liking the random effects
+
+twe2 <- glmmTMB(maxn~bait, 
+                data = sum.stage, 
+                family = tweedie(link = "log"))
 
 
+summary(twe2)
+
+
+
+#### with poisson log
+
+poislog <- glmmTMB(maxn~bait + (1|location),
+                   data = sum.stage,
+                   family = poisson(link = "log"))
+
+summary(poislog)
+
+AIC(poislog)
+BIC(poislog)
+logLik(poislog)
 
 ###############################################################################
 ###############################################################################
@@ -281,6 +316,4 @@ ggplot(sum.stage, aes(x = date, y = maxn)) +
 dmod <- lm(maxn~date, data = sum.stage)
 summary(dmod)
 
-####################
-# summary stats - move to new script
-##########
+
