@@ -38,23 +38,19 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::mutate(date = substr(date_time, 1, 10))%>%
   dplyr::mutate(time = substr(date_time, 12, 19))%>%
   dplyr::mutate(date = as.factor(date))%>%
-  #dplyr::mutate(date = as.numeric(julian(date)))%>%
+  dplyr::group_by(opcode)%>%
+  dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
+  dplyr::ungroup()%>%
   glimpse()
 
 summary(maxn.all)
 
-# sliced the highest maxN by opcode first and run
+aggregate(maxn ~ bait, data = maxn.all, FUN = mean)
+aggregate(maxn ~ bait, data = maxn.all, FUN = median)
+aggregate(maxn ~ bait, data = maxn.all, FUN = min)
+aggregate(maxn ~ bait, data = maxn.all, FUN = max)
 
-test <- maxn.all %>% 
-  dplyr::group_by(opcode)%>%
-  dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>%
-  dplyr::ungroup()%>%
-  glimpse()
-  
-  
-maxn.all <- test
-
-## plot Freq. distribution of MaxNs 
+## plot Freq. distribution of MaxNs ## plot Frmin()eq. distribution of MaxNs 
 hist(maxn.all$maxn)
 
 #sexier

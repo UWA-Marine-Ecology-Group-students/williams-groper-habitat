@@ -34,25 +34,28 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   dplyr::mutate(date = substr(date_time, 1, 10))%>%
   dplyr::mutate(time = substr(date_time, 12, 19))%>%
   dplyr::mutate(date = as.factor(date))%>%
-  glimpse()
-
-test <- maxn.stage %>%
   dplyr::group_by(opcode, stage)%>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>%
   dplyr::ungroup()%>%
   glimpse()
 
-maxn.stage <- test
 
-maxn.stage <- maxn.stage %>%
+sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
   dplyr::group_by(opcode, family, genus, species, bait, longitude_dd, latitude_dd,date_time, location, depth_m, date, time) %>%
   dplyr::summarise(maxn=sum(maxn))%>%
   dplyr::ungroup()%>%
   glimpse()
 
+summary(sum.stage)
+
+aggregate(maxn ~ bait, data = sum.stage, FUN = mean)
+aggregate(maxn ~ bait, data = sum.stage, FUN = median)
+aggregate(maxn ~ bait, data = sum.stage, FUN = min)
+aggregate(maxn ~ bait, data = sum.stage, FUN = max)
+
 ## plot Freq. distribution of MaxNs 
 
-ggplot(maxn.stage, aes(x = maxn)) +
+ggplot(sum.stage, aes(x = maxn)) +
   geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
   labs(title = "Histogram of Maxn Values",
        x = "Maxn Value",
@@ -67,7 +70,7 @@ ggplot(maxn.stage, aes(x = maxn)) +
 
 
 #####
-ggplot(maxn.stage, aes(x = bait, y = maxn, fill = bait)) +
+ggplot(sum.stage, aes(x = bait, y = maxn, fill = bait)) +
   geom_jitter(alpha = 0.5) +
   labs(x = "Bait", y = "MaxN", title = "MaxN by Bait with Size Class")+
   scale_y_continuous(
@@ -85,7 +88,7 @@ ggplot(maxn.stage, aes(x = bait, y = maxn, fill = bait)) +
 
 ## GLMER using lme4
 
-glm1 <- glmer(maxn~bait + (1|location), data = maxn.stage, family = "poisson")
+glm1 <- glmer(maxn~bait + (1|location), data = sum.stage, family = "poisson")
 summary(glm1)
 
 ## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
@@ -118,7 +121,7 @@ plot(maxn.stage$maxn, predicted_values,
 ## with ggplot
 
 # Get the observed values from the data
-observed_values <- maxn.stage$maxn
+observed_values <- sum.stage$maxn
 
 # Create a data frame for plotting
 plot_data <- data.frame(observed = observed_values, predicted = predicted_values)
@@ -138,7 +141,7 @@ ggplot(plot_data, aes(x = observed, y = predicted)) +
 
 # Fit a GLMM with Negative Binomial distribution
 glm2 <- glmmTMB(maxn~bait + (1|location), 
-                data = maxn.stage, 
+                data = sum.stage, 
                 family = "nbinom2")  # Negative Binomial with two parameters
 
 summary(glm2)
@@ -171,7 +174,7 @@ var(pearson_residuals)
 plot(pearson_residuals, main = "Pearson Residuals - Negative Binomial")
 
 ## Fit poisson model using glmmTMB package
-glm3 <- glmmTMB(maxn~bait + (1|location), data = maxn.stage, family = "poisson")
+glm3 <- glmmTMB(maxn~bait + (1|location), data = sum.stage, family = "poisson")
 
 ## Compare Poisson and Negative Binomial log likelihood tests
 # with poisson listed first below, p<0.05 means NB model better
@@ -182,14 +185,14 @@ lrtest(glm3, glm2)
 predicted_values <- predict(glm2, type = "response")
 
 # Plot observed vs predicted
-plot(maxn.stage$maxn, predicted_values, 
+plot(sum.stage$maxn, predicted_values, 
      main = "Observed vs Predicted Values", 
      xlab = "Observed", ylab = "Predicted")
 
 ## with ggplot
 
 # Get the observed values from the data
-observed_values <- maxn.stage$maxn
+observed_values <- sum.stage$maxn
 
 # Create a data frame for plotting
 plot_data <- data.frame(observed = observed_values, predicted = predicted_values)
@@ -215,7 +218,7 @@ logLik(glm3)
 
 ##### WITH TWEEDIE
 help(glmer)
-twe1 <- glmmTMB(maxn~bait + (1|location), data = maxn.stage, family = tweedie(link = "log"))
+twe1 <- glmmTMB(maxn~bait + (1|location), data = sum.stage, family = tweedie(link = "log"))
 
 summary(twe1)
 
@@ -224,12 +227,12 @@ summary(twe1)
 ###############################################################################
 ###############################################################################
 #### checking other variables
-plot(maxn~location, data = maxn.stage)
+plot(maxn~location, data = sum.stage)
 plot(maxn~depth_m, 
      col = c(bait),
-     data = maxn.stage)
+     data = sum.stage)
 
-ggplot(maxn.stage, aes(x = depth_m, y = maxn)) +
+ggplot(sum.stage, aes(x = depth_m, y = maxn)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "red")+
   labs(x = "Depth (m)", y = "MaxN", title = "MaxN with Size Class by Depth")+
@@ -239,29 +242,34 @@ ggplot(maxn.stage, aes(x = depth_m, y = maxn)) +
   theme_cowplot()
 
 ## Linear Regression for depth & MaxN
-model <- lm(depth_m ~ maxn, data = maxn.stage)
+model <- lm(depth_m ~ maxn, data = sum.stage)
 summary(model)
 
 ## location plot
-ggplot(maxn.stage, aes(x = location, y = maxn)) +
+ggplot(sum.stage, aes(x = location, y = maxn)) +
   geom_boxplot(outlier.color = "red", outlier.size = 2) +
   labs(x = "Location", y = "MaxN", title = "MaxN with Size Class by Location")+
   scale_y_continuous(
     breaks = c(0, 5, 10, 15), 
     limits = c(0,15)) +
+  scale_x_discrete(limits = c("mart", "twin", "arid", "middle"),
+                   labels = c("Mart & York Is.", "Twin Peak Is.", "Cape Arid", "Middle Is."))+
+  stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )+
   theme_cowplot()
+
+
 
 ## model maxn by location
 lmod <- lmer(maxn~location + (1|date),
-             data = maxn.stage)
+             data = sum.stage)
 summary(lmod)
 anova(lmod)
 
-lmod2 <- lm(maxn~location, data = maxn.stage)
+lmod2 <- lm(maxn~location, data = sum.stage)
 anova(lmod2)
 
 ## MaxN by Date
-ggplot(maxn.stage, aes(x = date, y = maxn)) +
+ggplot(sum.stage, aes(x = date, y = maxn)) +
   geom_boxplot(outlier.color = "red", outlier.size = 2) +
   labs(x = "Date", y = "MaxN", title = "MaxN with Size Class by Date")+
   scale_y_continuous(
@@ -270,15 +278,9 @@ ggplot(maxn.stage, aes(x = date, y = maxn)) +
   theme_cowplot()
 
 ## modelling Maxn & Date
-dmod <- lm(maxn~date, data = maxn.stage)
+dmod <- lm(maxn~date, data = sum.stage)
 summary(dmod)
 
 ####################
 # summary stats - move to new script
 ##########
-
-table(maxn.stage$location)
-table(maxn.stage$bait)
-
-summary(maxn.all$maxn)
-summary(maxn.stage$maxn)
