@@ -1,3 +1,4 @@
+##########################################################################
 ### Merge EventMeasure database output tables into maxn and length files
 
 rm(list=ls()) # Clear memory
@@ -37,7 +38,8 @@ which(is.na(period$period))
 #metadata (labsheet)
 metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"), method = "BRUVs") %>%
   dplyr::select(opcode, bait, longitude_dd, latitude_dd, date_time, location,
-                depth_m, successful_count) %>%
+                depth_m, successful_count, successful_habitat_forward, 
+                maxn_by_size, behaviour_success, approach_success) %>%
   dplyr::mutate(date_time = mdy_hm(date_time, tz = "GMT")) %>% 
   dplyr::mutate(date_time = with_tz(date_time, tzone = "Asia/Singapore"))%>%
   dplyr::mutate(date_time = format(date_time, "%Y/%m/%dT%H:%M:%S")) %>%
@@ -45,11 +47,10 @@ metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"), method =
   glimpse()
 
 ##create 'samples' in metadata
-test <- period %>%
+metadata <- period %>%
   dplyr::full_join(metadata, by="opcode")%>%
   glimpse()
 
-metadata <- test
 
 #saving metadata as RDS
 saveRDS(metadata, file = here::here(paste0("./data/tidy/",
