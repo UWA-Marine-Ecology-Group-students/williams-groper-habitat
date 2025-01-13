@@ -17,6 +17,7 @@ name <- "2024_Wudjari_bait_comp"
 #######################################
 ######      MaxN by Bait ##############
 #######################################
+habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")
 
 maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::mutate(species = "gouldii", bait = as.factor(bait), location = as.factor(location))%>%

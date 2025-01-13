@@ -29,6 +29,9 @@ name <- "2024_Wudjari_bait_comp"
 ######        HYPOTHESIS 1 = MaxN will be higher with abalone
 ####################
 
+# read in habitat data
+habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")
+
 ### MaxN (all) by period 
 
 maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
@@ -38,9 +41,12 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::mutate(date = substr(date_time, 1, 10))%>%
   dplyr::mutate(time = substr(date_time, 12, 19))%>%
   dplyr::mutate(date = as.factor(date))%>%
+  dplyr::mutate(longitude_dd = as.numeric(longitude_dd),
+                latitude_dd = as.numeric(latitude_dd)) %>%
   dplyr::group_by(opcode)%>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
   dplyr::ungroup()%>%
+  left_join(habitat)%>% #joining to habitat 
   glimpse()
 
 summary(maxn.all)
@@ -290,4 +296,6 @@ plot(pearson_residuals, main = "Pearson Residuals - Negative Binomial - MaxN no 
 
 model <- lm(depth_m ~ maxn, data = maxn.all)
 summary(model)
+
+
 
