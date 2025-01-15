@@ -8,6 +8,10 @@ rm(list=ls())
 
 library(tidyverse)
 library(ggplot2)
+#install.packages("ggforce")
+library(ggforce)
+install.packages('scatterpie')
+library(scatterpie)
 library(cowplot)
 library(RColorBrewer)
 library(paletteer)
@@ -17,7 +21,32 @@ name <- "2024_Wudjari_bait_comp"
 #######################################
 ######      MaxN by Bait ##############
 #######################################
-habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")
+habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
+  dplyr::rename(inverts = "Sessile invertebrates", rock = "Consolidated (hard)", 
+                sand = "Unconsolidated (soft)")%>%
+  glimpse()
+
+#creating a df for adding more specific site names
+site <- data.frame(
+        opcode = sprintf("%03d", 001:108), 
+        stringsAsFactors = FALSE) %>%
+  dplyr::mutate(site_name = case_when(
+    between(as.numeric(opcode), 1, 18)  ~ "middle",
+    between(as.numeric(opcode), 19, 30) ~ "arid",
+    between(as.numeric(opcode), 31, 36) ~ "ruby",
+    between(as.numeric(opcode), 37, 48 ) ~ "ct",
+    between(as.numeric(opcode), 49,54 ) ~ "twin",
+    between(as.numeric(opcode), 55,66 ) ~ "mart",
+    between(as.numeric(opcode), 67,72 ) ~ "york",
+    between(as.numeric(opcode), 73,78 ) ~ "finger",
+    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
+    between(as.numeric(opcode), 91, 93 ) ~ "miss",
+    between(as.numeric(opcode), 94,102 ) ~ "lucky",
+    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
+  dplyr::mutate(opcode = as.character(opcode))%>%
+  glimpse()
+  
+#read in maxn data and joining
 
 maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::mutate(species = "gouldii", bait = as.factor(bait), location = as.factor(location))%>%
@@ -30,6 +59,8 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
   dplyr::ungroup()%>%
   dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
+  left_join(habitat)%>%
+  left_join(site)%>%
   glimpse()
 
 ##### COLOUR SCHEMES
@@ -47,6 +78,90 @@ bait_col <- c("abalone" = "#27ae60",
 ## Date
 
 #scale_fill_paletteer_d("rcartocolor::BluGrn")+
+
+
+#1. Bubble plot of MaxNs with lat & long as axis
+#TODO - trouble shoot
+#flip y axis as currently in reverse 
+ggplot(maxn.all, aes(x = longitude_dd, y = latitude_dd , size = maxn))+
+  geom_point()
+
+
+#2 bubble plot with relief  
+ggplot(maxn.all, aes(x = longitude_dd, y = latitude_dd , size = mean.relief))+
+  geom_point()
+
+
+#3 Bubble plot  with habitat classes - maybe col = the highest value? with alpha = %cover of that hab?
+  
+
+#3. spatial plot with pie chart of habitat composition & maxn by size
+#TODO - trouble shoot this one
+
+summary(maxn.all)
+  
+ggplot(maxn.all, aes(x = longitude_dd, y = latitude_dd)) +
+  geom_scatterpie(
+    aes(r = maxn ),  # Scale the size of pie charts
+    cols = c("Macroalgae", "Scytothalia", "Ecklonia", "Sargassum", "Canopy",
+             "inverts", "rock", "sand")) +  # Habitat composition columns
+  coord_fixed()
+
+
+names(maxn.all)
+any(is.na(maxn.all))
+which(is.na(maxn.all$longitude_dd))
+which(is.na(maxn.all$latitude_dd))
+
+cols <- c("Macroalgae", "Scytothalia", "Ecklonia", "Sargassum", "Canopy",
+          "inverts", "rock", "sand")
+all(cols %in% names(maxn.all))
+
+
+########## MaxN by habitat types
+## ECKLONIA
+ggplot(maxn.all, aes(x = Ecklonia, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "%Ecklonia", y = "MaxN", title = "MaxN by %Ecklonia Cover")+
+  theme_cowplot()+
+  theme(legend.position = "none")  
+  
+## SCYTOTHALIA
+ggplot(maxn.all, aes(x = Scytothalia, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "%Scytothalia", y = "MaxN", title = "MaxN by %Scytothalia Cover")+
+  theme_cowplot()+
+  theme(legend.position = "none")  
+
+## Sargassum
+ggplot(maxn.all, aes(x = Sargassum, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "%Sargassum", y = "MaxN", title = "MaxN by %Sargassum Cover")+
+  theme_cowplot()+
+  theme(legend.position = "none")  
+
+## Macroalgae
+ggplot(maxn.all, aes(x = Macroalgae, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "%Macroalgae", y = "MaxN", title = "MaxN by %Macroalgae Cover (Non Canopy Forming")+
+  theme_cowplot()+
+  theme(legend.position = "none")  
+
+##Sessile Inverts
+ggplot(maxn.all, aes(x = inverts, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "%inverts", y = "MaxN", title = "MaxN by %Sessile Invertebrate Cover")+
+  theme_cowplot()+
+  theme(legend.position = "none")  
+
+##Mean Relief
+ggplot(maxn.all, aes(x = mean.relief, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "mean Relief", y = "MaxN", title = "MaxN by mean Relief")+
+  theme_cowplot()+
+  theme(legend.position = "none")  
+
+
 
 
 ####################################
@@ -156,7 +271,14 @@ ggplot(maxn.all, aes(x = date, y = maxn, fill = date)) +
 #################################################
 ## MaxN by STAGE per OPCODE
 ##################################################
+## habitat
 
+habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
+  dplyr::rename(inverts = "Sessile invertebrates", rock = "Consolidated (hard)", 
+                sand = "Unconsolidated (soft)")%>%
+  glimpse()
+
+## TODO - - MERGE HABITAT AND STAGE DATA
 ## MaxN(stage) dataframe
 
 maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS") %>%

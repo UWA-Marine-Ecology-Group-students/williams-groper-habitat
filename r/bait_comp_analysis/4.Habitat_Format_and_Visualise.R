@@ -164,31 +164,7 @@ ggplot() +
 #           mean(as.numeric(plot.habitat$latitude_dd)), zoom = 12)
 
 
-##
-#Choose an individual habitat class to visualise as spatial bubble plots.
-# hab.name <- 'Sessile invertebrates'
-# 
-# overzero <-  tidy.habitat %>% 
-#   filter(habitat %in% hab.name & number > 0) 
-# 
-# equalzero <- tidy.habitat %>% 
-#   filter(habitat %in% hab.name & number == 0)
 
-
-#Bubble plot of individual habitat classes
-# bubble.plot <- leaflet(data = tidy.habitat) %>%                     
-#   addTiles() %>%                                                    
-#   addProviderTiles('Esri.WorldImagery', group = "World Imagery") %>%
-#   addLayersControl(baseGroups = c("Open Street Map", "World Imagery"), options = layersControlOptions(collapsed = FALSE))
-# 
-# if (nrow(overzero)) {                                               
-#   bubble.plot <- bubble.plot %>%
-#     addCircleMarkers(data = overzero, lat = ~ latitude_dd, lng = ~ longitude_dd, radius = ~ number + 3, fillOpacity = 0.5, stroke = FALSE, label = ~ as.character(sample))}
-# 
-# if (nrow(equalzero)) {                                            
-#   bubble.plot <- bubble.plot %>%
-#     addCircleMarkers(data = equalzero, lat = ~ latitude_dd, lng = ~ longitude_dd, radius = 2, fillOpacity = 0.5, color = "white", stroke = FALSE, label = ~ as.character(sample))}
-# bubble.plot
 
 saveRDS(tidy.habitat, file = here::here(paste0("./data/tidy/", name, "_tidier.habitat.rds")))
 
