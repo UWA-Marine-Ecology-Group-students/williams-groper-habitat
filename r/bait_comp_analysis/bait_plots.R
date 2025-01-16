@@ -10,7 +10,7 @@ library(tidyverse)
 library(ggplot2)
 #install.packages("ggforce")
 library(ggforce)
-install.packages('scatterpie')
+#install.packages('scatterpie')
 library(scatterpie)
 library(cowplot)
 library(RColorBrewer)
@@ -30,7 +30,7 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
 site <- data.frame(
         opcode = sprintf("%03d", 001:108), 
         stringsAsFactors = FALSE) %>%
-  dplyr::mutate(site_name = case_when(
+  dplyr::mutate(site = case_when(
     between(as.numeric(opcode), 1, 18)  ~ "middle",
     between(as.numeric(opcode), 19, 30) ~ "arid",
     between(as.numeric(opcode), 31, 36) ~ "ruby",
@@ -61,6 +61,10 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
   left_join(habitat)%>%
   left_join(site)%>%
+  dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
+                latitude_dd = as.numeric(latitude_dd))%>%
+  dplyr::mutate(site = as.factor(site))%>%
+  dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   glimpse()
 
 ##### COLOUR SCHEMES
@@ -79,50 +83,66 @@ bait_col <- c("abalone" = "#27ae60",
 
 #scale_fill_paletteer_d("rcartocolor::BluGrn")+
 
+##############
+## habitat plots
 
 #1. Bubble plot of MaxNs with lat & long as axis
-#TODO - trouble shoot
-#flip y axis as currently in reverse 
-ggplot(maxn.all, aes(x = longitude_dd, y = latitude_dd , size = maxn))+
-  geom_point()
 
+ggplot(maxn.all, aes(x = longitude_dd, y = latitude_dd))+
+  geom_point(aes(size = maxn, colour = Ecklonia)) +
+  scale_color_gradient(
+    low = "lightgreen", high = "darkgreen",  # Gradient from blue (low %) to red (high %)
+    name = "% Ecklonia Cover") +    # Legend title
+  labs(title = "Bubble Plot of MaxN with % Ecklonia Cover",
+    x = "Longitude",
+    y = "Latitude",
+    size = "MaxN") +
+  theme_minimal()
 
 #2 bubble plot with relief  
-ggplot(maxn.all, aes(x = longitude_dd, y = latitude_dd , size = mean.relief))+
-  geom_point()
+ggplot(maxn.all, aes(x = longitude_dd, y = latitude_dd))+
+  geom_point(aes(size = maxn, colour = mean.relief)) +
+  scale_color_gradient(
+    low = "grey", high = "black",  # Gradient from blue (low %) to red (high %)
+    name = "Mean Relief") +
+  labs(title = "Bubble Plot of MaxN with mean Relief",
+       x = "Longitude",
+       y = "Latitude",
+       size = "MaxN") +
+  theme_minimal()
 
 
-#3 Bubble plot  with habitat classes - maybe col = the highest value? with alpha = %cover of that hab?
-  
+#3 Bubble plotwith habitat classes - maybe col = the highest value? with alpha = %cover of that hab?
+#Scytothalia
+ggplot(maxn.all, aes(x = longitude_dd, y = latitude_dd))+
+  geom_point(aes(size = maxn, colour = Scytothalia)) +
+  scale_color_gradient(
+    low = "lightblue", high = "darkblue",  # Gradient from blue (low %) to red (high %)
+    name = "% Scytothalia Cover") +    # Legend title
+  labs(title = "Bubble Plot of MaxN with % Scytothalia Cover",
+       x = "Longitude",
+       y = "Latitude",
+       size = "MaxN") +
+  theme_minimal() 
 
 #3. spatial plot with pie chart of habitat composition & maxn by size
 #TODO - trouble shoot this one
 
-summary(maxn.all)
-  
-ggplot(maxn.all, aes(x = longitude_dd, y = latitude_dd)) +
-  geom_scatterpie(
-    aes(r = maxn ),  # Scale the size of pie charts
-    cols = c("Macroalgae", "Scytothalia", "Ecklonia", "Sargassum", "Canopy",
-             "inverts", "rock", "sand")) +  # Habitat composition columns
-  coord_fixed()
 
-
-names(maxn.all)
-any(is.na(maxn.all))
-which(is.na(maxn.all$longitude_dd))
-which(is.na(maxn.all$latitude_dd))
-
-cols <- c("Macroalgae", "Scytothalia", "Ecklonia", "Sargassum", "Canopy",
-          "inverts", "rock", "sand")
-all(cols %in% names(maxn.all))
-
+ggplot() + 
+  geom_scatterpie(aes(x=longitude_dd, y=latitude_dd, r = maxn / 350), 
+                  data=maxn.all,
+                  cols=c("Macroalgae", "Scytothalia", "Ecklonia", "Sargassum", "Canopy",
+                         "inverts", "rock", "sand")) + 
+  coord_equal()+
+  theme_minimal()
 
 ########## MaxN by habitat types
 ## ECKLONIA
 ggplot(maxn.all, aes(x = Ecklonia, y = maxn)) +
   geom_jitter(alpha = 0.5) +
   labs(x = "%Ecklonia", y = "MaxN", title = "MaxN by %Ecklonia Cover")+
+  geom_smooth(method = "lm", colour = "darkgreen", se = TRUE)+
   theme_cowplot()+
   theme(legend.position = "none")  
   
@@ -130,6 +150,7 @@ ggplot(maxn.all, aes(x = Ecklonia, y = maxn)) +
 ggplot(maxn.all, aes(x = Scytothalia, y = maxn)) +
   geom_jitter(alpha = 0.5) +
   labs(x = "%Scytothalia", y = "MaxN", title = "MaxN by %Scytothalia Cover")+
+  geom_smooth(method = "lm", colour = "darkblue", se = TRUE)+
   theme_cowplot()+
   theme(legend.position = "none")  
 
@@ -137,6 +158,7 @@ ggplot(maxn.all, aes(x = Scytothalia, y = maxn)) +
 ggplot(maxn.all, aes(x = Sargassum, y = maxn)) +
   geom_jitter(alpha = 0.5) +
   labs(x = "%Sargassum", y = "MaxN", title = "MaxN by %Sargassum Cover")+
+  geom_smooth(method = "lm", colour = "grey2", se = TRUE)+
   theme_cowplot()+
   theme(legend.position = "none")  
 
@@ -144,6 +166,7 @@ ggplot(maxn.all, aes(x = Sargassum, y = maxn)) +
 ggplot(maxn.all, aes(x = Macroalgae, y = maxn)) +
   geom_jitter(alpha = 0.5) +
   labs(x = "%Macroalgae", y = "MaxN", title = "MaxN by %Macroalgae Cover (Non Canopy Forming")+
+  geom_smooth(method = "lm", colour = "grey2", se = TRUE)+
   theme_cowplot()+
   theme(legend.position = "none")  
 
@@ -151,6 +174,7 @@ ggplot(maxn.all, aes(x = Macroalgae, y = maxn)) +
 ggplot(maxn.all, aes(x = inverts, y = maxn)) +
   geom_jitter(alpha = 0.5) +
   labs(x = "%inverts", y = "MaxN", title = "MaxN by %Sessile Invertebrate Cover")+
+  geom_smooth(method = "lm", colour = "grey2", se = TRUE)+
   theme_cowplot()+
   theme(legend.position = "none")  
 
@@ -158,6 +182,7 @@ ggplot(maxn.all, aes(x = inverts, y = maxn)) +
 ggplot(maxn.all, aes(x = mean.relief, y = maxn)) +
   geom_jitter(alpha = 0.5) +
   labs(x = "mean Relief", y = "MaxN", title = "MaxN by mean Relief")+
+  geom_smooth(method = "lm", colour = "grey2", se = TRUE)+
   theme_cowplot()+
   theme(legend.position = "none")  
 
@@ -252,6 +277,20 @@ ggplot(maxn.all, aes(x= location, y = maxn, fill = location))+
   theme(legend.position = "none")
 
 
+########################################
+### MaxN by site
+ggplot(maxn.all, aes(x= site, y = maxn, fill = location))+
+  stat_summary(fun = mean, geom = "bar", color = "black", width = 0.6) +  # Bars
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
+  labs(x = "Site", y = "Mean MaxN", title = "Dynamite Plot MaxN by Site")+
+  #scale_fill_paletteer_d("MetBrewer::Hokusai2")+
+  scale_x_discrete(labels = c(
+    "Mart Is.", "Twin Peak Is.", "CT Group", "Ruby Is.", "Cape Arid", "Middle Is."))+
+  theme_cowplot()+
+  labs(fill = "Location")
+  #theme(legend.position = "none")
+
+
 ########
 ### MaxN by Date
 
@@ -278,7 +317,27 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
                 sand = "Unconsolidated (soft)")%>%
   glimpse()
 
-## TODO - - MERGE HABITAT AND STAGE DATA
+
+#creating a df for adding more specific site names
+site <- data.frame(
+  opcode = sprintf("%03d", 001:108), 
+  stringsAsFactors = FALSE) %>%
+  dplyr::mutate(site = case_when(
+    between(as.numeric(opcode), 1, 18)  ~ "middle",
+    between(as.numeric(opcode), 19, 30) ~ "arid",
+    between(as.numeric(opcode), 31, 36) ~ "ruby",
+    between(as.numeric(opcode), 37, 48 ) ~ "ct",
+    between(as.numeric(opcode), 49,54 ) ~ "twin",
+    between(as.numeric(opcode), 55,66 ) ~ "mart",
+    between(as.numeric(opcode), 67,72 ) ~ "york",
+    between(as.numeric(opcode), 73,78 ) ~ "finger",
+    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
+    between(as.numeric(opcode), 91, 93 ) ~ "miss",
+    between(as.numeric(opcode), 94,102 ) ~ "lucky",
+    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
+  dplyr::mutate(opcode = as.character(opcode))%>%
+  glimpse()
+
 ## MaxN(stage) dataframe
 
 maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS") %>%
@@ -292,6 +351,12 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>%
   dplyr::ungroup()%>%
   dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
+  left_join(habitat)%>%
+  left_join(site)%>%
+  dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
+                latitude_dd = as.numeric(latitude_dd))%>%
+  dplyr::mutate(site = as.factor(site))%>%
+  dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   glimpse()
 
 ##DF with the MaxN per Stage summed for each opcode
@@ -302,6 +367,13 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
                   location, depth_m, date, time) %>%
   dplyr::summarise(maxn=sum(maxn))%>%
   dplyr::ungroup()%>%
+  left_join(habitat)%>%
+  left_join(site)%>%
+  dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
+                latitude_dd = as.numeric(latitude_dd))%>%
+  dplyr::mutate(site = as.factor(site))%>%
+  dplyr::mutate(site = factor(site, 
+                levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   glimpse()
 
 ############################# 
@@ -404,6 +476,19 @@ ggplot(sum.stage, aes(x= location, y = maxn, fill = location))+
   theme_cowplot()+
   theme(legend.position = "none")
 
+######################################
+### By Site
+
+ggplot(sum.stage, aes(x= site, y = maxn, fill = location))+
+  stat_summary(fun = mean, geom = "bar", color = "black", width = 0.6) +  # Bars
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
+  labs(x = "Site", y = "Mean MaxN", title = "Dynamite Plot MaxN(stage) by Site")+
+  #scale_fill_paletteer_d("MetBrewer::Hokusai2")+
+  scale_x_discrete(labels = c(
+    "Mart Is.", "Twin Peak Is.", "CT Group", "Ruby Is.", "Cape Arid", "Middle Is."))+
+  theme_cowplot()+
+  labs(fill = "Location")
+#theme(legend.position = "none")
 
 ######################################
 ## by date
@@ -458,6 +543,81 @@ ggplot(dat, aes(x = stage, y = maxn, fill = stage)) +
   theme(legend.position = "none")
 
 
+################
+## HAbitat
+# Bubble Plot
+
+#1. Bubble plot of MaxNs with lat & long as axis
+
+ggplot(sum.stage, aes(x = longitude_dd, y = latitude_dd))+
+  geom_point(aes(size = maxn * 2, colour = Ecklonia)) +
+  scale_color_gradient(
+    low = "lightgreen", high = "darkgreen",  # Gradient from blue (low %) to red (high %)
+    name = "% Ecklonia Cover") +    # Legend title
+  labs(title = "MaxN(stage) with % Ecklonia Cover",
+       x = "Longitude",
+       y = "Latitude",
+       size = "MaxN") +
+  theme_minimal()
+
+#2 bubble plot with relief  
+ggplot(sum.stage, aes(x = longitude_dd, y = latitude_dd))+
+  geom_point(aes(size = maxn, colour = mean.relief)) +
+  scale_color_gradient(
+    low = "grey", high = "black",  # Gradient from blue (low %) to red (high %)
+    name = "Mean Relief") +
+  labs(title = "MaxN(stage) with mean Relief",
+       x = "Longitude",
+       y = "Latitude",
+       size = "MaxN") +
+  theme_minimal()
+
+
+#3 Bubble plotwith habitat classes - maybe col = the highest value? with alpha = %cover of that hab?
+#Scytothalia
+ggplot(sum.stage, aes(x = longitude_dd, y = latitude_dd))+
+  geom_point(aes(size = maxn, colour = Scytothalia)) +
+  scale_color_gradient(
+    low = "lightblue", high = "darkblue",  # Gradient from blue (low %) to red (high %)
+    name = "% Scytothalia Cover") +    # Legend title
+  labs(title = "MaxN(stage) with % Scytothalia Cover",
+       x = "Longitude",
+       y = "Latitude",
+       size = "MaxN") +
+  theme_minimal() 
+
+#3. spatial plot with pie chart of habitat composition & maxn by size
+#TODO - trouble shoot this one
+
+ggplot() + 
+  geom_scatterpie(aes(x=longitude_dd, y=latitude_dd, r = maxn / 350), 
+                  data=sum.stage,
+                  cols=c("Macroalgae", "Scytothalia", "Ecklonia", "Sargassum", "Canopy",
+                         "inverts", "rock", "sand")) + 
+  coord_equal()+
+  theme_minimal()
+
+########## MaxN by habitat types
+## ECKLONIA
+ggplot(maxn.all, aes(x = Ecklonia, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "%Ecklonia", y = "MaxN", title = "MaxN by %Ecklonia Cover")+
+  geom_smooth(method = "lm", colour = "darkgreen", se = TRUE)+
+  theme_cowplot()+
+  theme(legend.position = "none")  
+
+## SCYTOTHALIA
+ggplot(maxn.all, aes(x = Scytothalia, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "%Scytothalia", y = "MaxN", title = "MaxN by %Scytothalia Cover")+
+  geom_smooth(method = "lm", colour = "darkblue", se = TRUE)+
+  theme_cowplot()+
+  theme(legend.position = "none")  
+
+
+
+###############################################################################
+###############################################################################
 ## exploratory plots
 #colour scheme
 

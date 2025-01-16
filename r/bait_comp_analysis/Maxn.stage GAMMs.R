@@ -1,5 +1,5 @@
 ###########################
-## Exploratory GAMMS
+## Exploratory GAMMS - MaxN(stage)
 ##########################
 
 rm(list=ls()) # Clear memory
@@ -27,11 +27,11 @@ library(patchwork)
 #name <- "2024_Wudjari_bait_comp"
 name <- "bc"
 
-# read in habitat data
 habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
   dplyr::rename(inverts = "Sessile invertebrates", rock = "Consolidated (hard)", 
                 sand = "Unconsolidated (soft)")%>%
   glimpse()
+
 
 #creating a df for adding more specific site names
 site <- data.frame(
@@ -53,25 +53,45 @@ site <- data.frame(
   dplyr::mutate(opcode = as.character(opcode))%>%
   glimpse()
 
-### MaxN (all) by period 
+## MaxN(stage) dataframe
 
-maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
+maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS") %>%
   dplyr::mutate(species = "gouldii", bait = as.factor(bait), location = as.factor(location))%>%
   dplyr::mutate(depth_m = as.numeric(depth_m))%>%
   dplyr::mutate(period = as.factor(period))%>%
   dplyr::mutate(date = substr(date_time, 1, 10))%>%
   dplyr::mutate(time = substr(date_time, 12, 19))%>%
   dplyr::mutate(date = as.factor(date))%>%
-  dplyr::mutate(longitude_dd = as.numeric(longitude_dd),
-                latitude_dd = as.numeric(latitude_dd)) %>%
-  dplyr::group_by(opcode)%>%
-  dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
+  dplyr::group_by(opcode, stage)%>%
+  dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>%
   dplyr::ungroup()%>%
-  left_join(habitat)%>% #joining to habitat 
+  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
+  #left_join(habitat)%>%
+  #left_join(site)%>%
+  #dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
+  #              latitude_dd = as.numeric(latitude_dd))%>%
+  #dplyr::mutate(site = as.factor(site))%>%
+  #dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
+  glimpse()
+
+##DF with the MaxN per Stage summed for each opcode
+
+sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
+  dplyr::group_by(opcode, family, genus, species, bait, 
+                  longitude_dd, latitude_dd, date_time, 
+                  location, depth_m, date, time) %>%
+  dplyr::summarise(maxn=sum(maxn))%>%
+  dplyr::ungroup()%>%
+  left_join(habitat)%>%
   left_join(site)%>%
+  dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
+                latitude_dd = as.numeric(latitude_dd))%>%
   dplyr::mutate(site = as.factor(site))%>%
+  dplyr::mutate(site = factor(site, 
+                              levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   dplyr::mutate(Canopy = Scytothalia + Ecklonia + Canopy)%>%
   glimpse()
+
 
 
 # Set the predictors for modeling - don't include factors - just continuous var 
@@ -81,28 +101,27 @@ pred.vars <- c("depth_m", "Macroalgae", "Scytothalia", "Ecklonia", "Sargassum",
 
 
 # Check the correlations between predictor variables - looking for NAs
-summary(maxn.all[,pred.vars])
+summary(sum.stage[,pred.vars])
 
 
 #checking for correlations between variables
-round(cor(maxn.all[ , pred.vars]), 2)
+round(cor(sum.stage[ , pred.vars]), 2)
 
 # check individual predictors to see if any need transformed
-CheckEM::plot_transformations(pred.vars = pred.vars, dat = maxn.all)
+CheckEM::plot_transformations(pred.vars = pred.vars, dat = sum.stage)
 
 #Reset the predictor variables to remove any highly correlated variables and include any transformed variables.
-pred.vars <- c("depth_m", "Macroalgae", "Scytothalia", "Ecklonia", "Canopy", 
-                "mean.relief") 
+pred.vars <- c("depth_m", "Macroalgae", "Canopy", "mean.relief") 
 
 
 #Check to make sure response variables have less than 80% zeroes. 
 #Full-subset GAM modelling will produce unreliable results if your data is too zero inflated.
 
-unique.vars <- unique(as.character(maxn.all$species))
+unique.vars <- unique(as.character(sum.stage$species))
 
 resp.vars <- character()
 for(i in 1:length(unique.vars)){
-  temp.dat <- maxn.all[which(maxn.all$species == unique.vars[i]), ]
+  temp.dat <- sum.stage[which(sum.stage$species == unique.vars[i]), ]
   if(length(which(temp.dat$maxn == 0)) / nrow(temp.dat) < 0.8){
     resp.vars <- c(resp.vars, unique.vars[i])}
 }
@@ -111,7 +130,7 @@ resp.vars
 ##add directory to save model outputs & set up environment for model selection
 ### Re-run from here down everytime
 
-outdir <- ("output/baitcomp") 
+outdir <- ("output/baitcomp/maxn.stage") 
 out.all <- list()
 var.imp <- list()
 
@@ -121,7 +140,7 @@ factor.vars <- c("bait") #don't include the RE factor
 
 ## Running Full Sub-set Gamms
 for(i in 1:length(resp.vars)){
-  use.dat = as.data.frame(maxn.all[which(maxn.all$species == resp.vars[i]),])
+  use.dat = as.data.frame(sum.stage[which(sum.stage$species == resp.vars[i]),])
   print(resp.vars[i])
   
   Model1  <- gam(maxn ~ bait + s(mean.relief, k = 3, bs = 'cr') +
@@ -184,10 +203,7 @@ write.csv(all.var.imp, file = paste(outdir, paste(name, "all.var.imp.csv", sep =
 # summary(gamm1)
 
 
-
-### plottig importance scores
-print(all.var.imp)
-
+###########################################################################
 # Convert wide to long format
 importance_long <- all.var.imp %>%
   pivot_longer(
@@ -196,7 +212,6 @@ importance_long <- all.var.imp %>%
     values_to = "Importance"    # New column for importance values
   )
 
-print(importance_long)
 
 # Heatmap for one model
 

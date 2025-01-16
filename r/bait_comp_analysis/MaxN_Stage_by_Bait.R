@@ -20,10 +20,39 @@ library(cowplot)
 library(emmeans)
 #install.packages("glmmTMB")
 library(glmmTMB)
+#install.packages("DHARMa")
+library(DHARMa)
 
 name <- "2024_Wudjari_bait_comp"
 
 # Read in the formatted data
+
+
+# read in habitat data
+habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
+  dplyr::rename(inverts = "Sessile invertebrates", rock = "Consolidated (hard)", 
+                sand = "Unconsolidated (soft)")%>%
+  glimpse()
+
+#creating a df for adding more specific site names
+site <- data.frame(
+  opcode = sprintf("%03d", 001:108), 
+  stringsAsFactors = FALSE) %>%
+  dplyr::mutate(site= case_when(
+    between(as.numeric(opcode), 1, 18)  ~ "middle",
+    between(as.numeric(opcode), 19, 30) ~ "arid",
+    between(as.numeric(opcode), 31, 36) ~ "ruby",
+    between(as.numeric(opcode), 37, 48 ) ~ "ct",
+    between(as.numeric(opcode), 49,54 ) ~ "twin",
+    between(as.numeric(opcode), 55,66 ) ~ "mart",
+    between(as.numeric(opcode), 67,72 ) ~ "york",
+    between(as.numeric(opcode), 73,78 ) ~ "finger",
+    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
+    between(as.numeric(opcode), 91, 93 ) ~ "miss",
+    between(as.numeric(opcode), 94,102 ) ~ "lucky",
+    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
+  dplyr::mutate(opcode = as.character(opcode))%>%
+  glimpse()
 
 ## MaxN by STAGE per OPCODE
 
@@ -44,9 +73,13 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
   dplyr::group_by(opcode, family, genus, species, bait, longitude_dd, latitude_dd,date_time, location, depth_m, date, time) %>%
   dplyr::summarise(maxn=sum(maxn))%>%
   dplyr::ungroup()%>%
+  left_join(habitat)%>% #joining to habitat 
+  left_join(site)%>%
+  dplyr::mutate(site = as.factor(site))%>%
   glimpse()
 
 summary(sum.stage)
+
 ## summary details for bait type
 aggregate(maxn ~ bait, data = sum.stage, FUN = mean)
 aggregate(maxn ~ bait, data = sum.stage, FUN = median)
@@ -91,6 +124,334 @@ ggplot(sum.stage, aes(x = bait, y = maxn, fill = bait)) +
   theme_cowplot() + 
   stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )
 
+
+
+
+
+
+################################################################################
+################################################################################ 
+## Running with habitat in it
+
+p1 <- glmer(maxn ~ bait + (1|site), data = sum.stage,
+            family = "poisson")
+
+summary(p1)
+anova(p1)
+
+## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
+#deviance / residual degrees of freedom
+
+deviance(p1)/df.residual(p1)
+
+# Compare the mean and variance of response
+mean(sum.stage$maxn)
+var(sum.stage$maxn)
+
+
+#plotting residuals
+
+r <- residuals(p1)
+
+# Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
+# also look for large residuals not explained by the model
+plot(r, main = "Residuals from Poisson MaxN(stage)", 
+     xlab = "Index", ylab = "Residuals")
+
+pears.p1 <- residuals(p1, type = "pearson")
+var(pears.p1)
+
+### with mean.relief
+p2 <- glmer(maxn ~ bait + mean.relief + (1|site),
+            data = sum.stage,
+            family = "poisson")
+summary(p2)
+anova(p2)
+
+deviance(p2)/df.residual(p2)
+
+r2 <- residuals(p2)
+plot(r2, main = "MaxN(stage)~Bait + Mean.relief", 
+     xlab = "Index", ylab = "Residuals")
+
+pears.p2 <- residuals(p2, type = "pearson")
+
+### with mean.relief & Scytothalia
+
+p3 <- glmer(maxn ~ bait + mean.relief + Scytothalia + (1|site),
+            data = sum.stage,
+            family = "poisson")
+summary(p3)
+
+deviance(p3)/df.residual(p3)
+
+r3 <- residuals(p3)
+plot(r3, main = "MaxN(stage)~Bait + Mean.relief + Scytothalia", 
+     xlab = "Index", ylab = "Residuals")
+
+### with Scytothalia
+
+p4 <- glmer(maxn ~ bait +  Scytothalia + (1|site),
+            data = sum.stage,
+            family = "poisson")
+summary(p4)
+
+deviance(p4)/df.residual(p4)
+
+r4 <- residuals(p4)
+plot(r4, main = "MaxN(stage)~Bait + Scytothalia", 
+     xlab = "Index", ylab = "Residuals")
+
+## Post - hoc 
+
+post4 <- emmeans(p4, ~ bait)  # Specify the fixed factor of interest
+
+# Perform pairwise comparisons
+pairs(post4)
+
+## visualising post-hoc tests
+
+pairwise_results <- contrast(post4, method = "pairwise")
+
+# Convert pairwise results to a data frame
+pairwise_df <- as.data.frame(pairwise_results)
+
+#plot
+ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
+  labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + Scytothalia") +
+  theme_minimal() +
+  coord_flip()
+
+###
+# with Ecklonia
+
+p5 <- glmer(maxn ~ bait +  Ecklonia + (1|site),
+            data = sum.stage,
+            family = "poisson")
+summary(p5)
+
+deviance(p5)/df.residual(p5)
+
+post5 <- emmeans(p5, ~ bait)
+pairs(post5)
+pairwise_results <- contrast(post5, method = "pairwise")
+
+# Convert pairwise results to a data frame
+pairwise_df <- as.data.frame(pairwise_results)
+
+#plot
+ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
+  labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + Ecklonia") +
+  theme_minimal() +
+  coord_flip()
+
+
+######## --- Poisson distribution looks overdispersed so repeating with NB model
+
+## NEGATIVE BINOMIAL MODEl
+
+nb1 <- glmmTMB(maxn~bait + (1|site), 
+                data = sum.stage, 
+                family = "nbinom2")  # Negative Binomial with two parameters
+
+summary(nb1)
+
+## checking for overdispersion
+# dispersion statistic 
+
+deviance(nb1)/df.residual(nb1)
+
+#plotting residuals
+
+nbr1 <- residuals(nb1)
+
+# Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
+# also look for large residuals not explained by the model
+plot(nbr1, main = "NB: MaxN(stage)~bait", 
+     xlab = "Index", ylab = "Residuals")
+
+## Pearson residuals - 
+# checking to see if variance of residuals is larger than expected
+
+pears1 <- residuals(nb1, type = "pearson")
+
+#Calculate variance of the pearson residuals - 
+#if around 1 indicates that poisson assumption
+# of constant variance is actually reasonable - 
+# but as this is a negative binomial would expect
+# it to be larger than 1
+var(pears1)
+
+# Plot Pearson residuals
+plot(pears1, main = "Pearson - MaxN(stage)~bait")
+
+## Fit poisson model using glmmTMB package
+pois1 <- glmmTMB(maxn~bait + (1|site), data = sum.stage, family = "poisson")
+
+## Compare Poisson and Negative Binomial log likelihood tests
+# with poisson listed first below, p<0.05 means NB model better
+#lrtest(nb1, pois1) doesn't work
+logLik(nb1, pois1)
+logLik(nb1)
+logLik(pois1)
+AIC(pois1)
+
+#with DHARMa package - check residuals
+sim_res <- simulateResiduals(fittedModel = nb1)
+plot(sim_res)
+
+## with Mean Relief
+nb2 <- glmmTMB(maxn~bait + mean.relief + (1|site), 
+               data = sum.stage, 
+               family = "nbinom2")
+
+summary(nb2)
+deviance(nb2)/df.residual(nb2)
+
+#checking residuals
+nbr2 <- residuals(nb2)
+
+plot(nbr2, main = "NB: MaxN(stage)~bait + mean relief", 
+     xlab = "Index", ylab = "Residuals")
+
+pears2 <- residuals(nb2, type = "pearson")
+
+var(pears2)
+
+# Plot Pearson residuals
+plot(pears2, main = "Pearson - MaxN(stage)~bait + mean.relief")
+
+#with DHARMa package - check residuals
+sim_res <- simulateResiduals(fittedModel = nb2)
+plot(sim_res)
+
+### Mean Relief & Scytothalia
+nb3 <- glmmTMB(maxn~bait + mean.relief + Scytothalia + (1|site), 
+               data = sum.stage, 
+               family = "nbinom2")
+summary(nb3)
+deviance(nb3)/df.residual(nb3)
+
+#checking residuals
+nbr3 <- residuals(nb3)
+plot(nbr3, main = "NB: MaxN(stage)~bait + mean relief + Scyto", 
+     xlab = "Index", ylab = "Residuals")
+
+pears3 <- residuals(nb3, type = "pearson")
+
+var(pears3)
+
+plot(pears3, main = "Pearson - MaxN(stage)~bait + mean.relief + Scyto")
+
+#with DHARMa package - check residuals
+sim_res <- simulateResiduals(fittedModel = nb3)
+plot(sim_res)
+
+### Scytothalia
+nb4 <- glmmTMB(maxn~bait +  Scytothalia + (1|site), 
+               data = sum.stage, 
+               family = "nbinom2")
+summary(nb4)
+deviance(nb4)/df.residual(nb4)
+
+#checking residuals
+nbr4 <- residuals(nb4)
+plot(nbr4, main = "NB: MaxN(stage)~bait + Scyto", 
+     xlab = "Index", ylab = "Residuals")
+
+pears4 <- residuals(nb4, type = "pearson")
+
+var(pears4)
+
+plot(pears4, main = "Pearson - MaxN(stage)~bait + Scyto")
+
+# post-hocs for significant result
+
+post4 <- emmeans(nb4, ~bait)
+pairs(post4) #default Tukey
+#pairs(post5, adjust = "tukey")
+
+post4_df <- as.data.frame(post4)
+post4_df
+ggplot(post4_df, aes(x = bait, y = emmean)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2) + #throwing error
+  theme_minimal()
+
+plot(post4, main = "Post Hoc - NB:MaxN(stage)~bait + Scytothalia")
+
+#with DHARMa package - check residuals
+sim_res <- simulateResiduals(fittedModel = nb4)
+plot(sim_res)
+
+### Ecklonia
+nb5 <- glmmTMB(maxn~bait +  Ecklonia + (1|site), 
+               data = sum.stage, 
+               family = "nbinom2")
+summary(nb5)
+deviance(nb5)/df.residual(nb5)
+
+#checking residuals
+nbr5 <- residuals(nb5)
+plot(nbr5, main = "NB: MaxN(stage)~bait + Ecklonia", 
+     xlab = "Index", ylab = "Residuals")
+
+pears5 <- residuals(nb5, type = "pearson")
+
+var(pears5)
+
+plot(pears5, main = "Pearson - MaxN(stage)~bait + Ecklonia")
+
+# post-hocs for significant result
+
+post5 <- emmeans(nb5, ~bait)
+pairs(post5) #default Tukey
+#pairs(post5, adjust = "tukey")
+
+post5_df <- as.data.frame(post5)
+post5_df
+ggplot(post5_df, aes(x = bait, y = emmean)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2) + #throwing error
+  theme_minimal()
+
+plot(post5, main = "Post Hoc - NB:MaxN(stage)~bait + Ecklonia")
+
+#with DHARMa package - check residuals
+sim_res <- simulateResiduals(fittedModel = nb5)
+plot(sim_res)
+
+### Mean Relief & Ecklonia
+nb6 <- glmmTMB(maxn~bait + mean.relief +  Ecklonia + (1|site), 
+               data = sum.stage, 
+               family = "nbinom2")
+summary(nb6)
+deviance(nb6)/df.residual(nb6)
+
+#checking residuals
+nbr6 <- residuals(nb6)
+plot(nbr6, main = "NB: MaxN(stage)~bait + mean relief +  Ecklonia", 
+     xlab = "Index", ylab = "Residuals")
+
+pears6 <- residuals(nb6, type = "pearson")
+
+var(pears6)
+
+plot(pears6, main = "Pearson - MaxN(stage)~bait + mean relief + Ecklonia")
+
+
+#with DHARMa package - check residuals
+sim_res <- simulateResiduals(fittedModel = nb6)
+plot(sim_res)
+
+plot(Scytothalia~Ecklonia, data = sum.stage)
+##############################################################################
+################################################################################
+##############################################################################
 ## First did an LMER - but its not normally distributed (here is the code anyway)
 
 #mod3 <- lmer(maxn~bait + (1|location), data = maxn.stage)

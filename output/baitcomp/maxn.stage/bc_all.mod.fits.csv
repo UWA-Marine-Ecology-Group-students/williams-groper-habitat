@@ -1,0 +1,7 @@
+"","species","formula","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth_m","Macroalgae","Canopy","mean.relief","bait","cumsum.wi"
+"depth_m+mean.relief","gouldii","s(depth_m, k = 3, bs = ""cr"") + s(mean.relief, k = 3, bs = ""cr"") + s(location, bs = ""re"")",218.451288397969,225.163986368166,0.12661,NA,4.04,1,0,1.296,0.171,0.136,1,0,0,1,0,0.171
+"depth_m","gouldii","s(depth_m, k = 3, bs = ""cr"") + s(location, bs = ""re"")",219.385935493525,224.528063054878,0.06383,NA,3,1,0.935,0.66,0.107,0.187,1,0,0,0,0,0.278
+"depth_m+Macroalgae+mean.relief","gouldii","s(depth_m, k = 3, bs = ""cr"") + s(Macroalgae, k = 3, bs = ""cr"") + s(mean.relief, k = 3, bs = ""cr"") + s(location, bs = ""re"")",219.736896868146,228.112865643134,0.15667,NA,5.23,1,1.286,4.245,0.09,0.031,1,1,0,1,0,0.368
+"depth_m+Macroalgae","gouldii","s(depth_m, k = 3, bs = ""cr"") + s(Macroalgae, k = 3, bs = ""cr"") + s(location, bs = ""re"")",219.872525695646,227.317111892528,0.12483,NA,4.43,1,1.421,3.449,0.084,0.046,1,1,0,0,0,0.452
+"mean.relief","gouldii","s(mean.relief, k = 3, bs = ""cr"") + s(location, bs = ""re"")",220.259091401021,226.073770929273,0.06818,NA,3.43,1,1.808,2.206,0.069,0.086,0,0,0,1,0,0.521
+"null","gouldii","s(location, bs = ""re"")",220.345409658279,223.868180689516,0,NA,2,1,1.894,0,0.066,0.26,0,0,0,0,0,0.587

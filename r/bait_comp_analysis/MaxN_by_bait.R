@@ -30,9 +30,32 @@ name <- "2024_Wudjari_bait_comp"
 ####################
 
 # read in habitat data
-habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")
+habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
+  dplyr::rename(inverts = "Sessile invertebrates", rock = "Consolidated (hard)", 
+                sand = "Unconsolidated (soft)")%>%
+  glimpse()
 
-### MaxN (all) by period 
+#creating a df for adding more specific site names
+site <- data.frame(
+  opcode = sprintf("%03d", 001:108), 
+  stringsAsFactors = FALSE) %>%
+  dplyr::mutate(site= case_when(
+    between(as.numeric(opcode), 1, 18)  ~ "middle",
+    between(as.numeric(opcode), 19, 30) ~ "arid",
+    between(as.numeric(opcode), 31, 36) ~ "ruby",
+    between(as.numeric(opcode), 37, 48 ) ~ "ct",
+    between(as.numeric(opcode), 49,54 ) ~ "twin",
+    between(as.numeric(opcode), 55,66 ) ~ "mart",
+    between(as.numeric(opcode), 67,72 ) ~ "york",
+    between(as.numeric(opcode), 73,78 ) ~ "finger",
+    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
+    between(as.numeric(opcode), 91, 93 ) ~ "miss",
+    between(as.numeric(opcode), 94,102 ) ~ "lucky",
+    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
+  dplyr::mutate(opcode = as.character(opcode))%>%
+  glimpse()
+
+### MaxN (all) 
 
 maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::mutate(species = "gouldii", bait = as.factor(bait), location = as.factor(location))%>%
@@ -47,6 +70,8 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
   dplyr::ungroup()%>%
   left_join(habitat)%>% #joining to habitat 
+  left_join(site)%>%
+  dplyr::mutate(site = as.factor(site))%>%
   glimpse()
 
 summary(maxn.all)
@@ -98,7 +123,122 @@ ggplot(maxn.all, aes(x = bait, y = maxn, fill = bait)) +
   theme_cowplot() +
 stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )
 
+################################################################################
+################################################################################ 
+## Running with habitat in it
 
+p1 <- glmer(maxn ~ bait + (1|site), data = maxn.all,
+            family = "poisson")
+
+summary(p1)
+anova(p1)
+
+#r.squaredGLMM(p1)
+
+## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
+#deviance / residual degrees of freedom
+
+deviance(p1)/df.residual(p1)
+
+# Compare the mean and variance of response
+mean(maxn.all$maxn)
+var(maxn.all$maxn)
+
+
+#plotting residuals
+
+r <- residuals(p1)
+
+# Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
+# also look for large residuals not explained by the model
+plot(r, main = "Residuals from Poisson MaxN", 
+     xlab = "Index", ylab = "Residuals")
+
+
+### with mean.relief
+p2 <- glmer(maxn ~ bait + mean.relief + (1|site),
+            data = maxn.all,
+            family = "poisson")
+summary(p2)
+anova(p2)
+
+deviance(p2)/df.residual(p2)
+
+r2 <- residuals(p2)
+plot(r2, main = "MaxN~Bait + Mean.relief", 
+     xlab = "Index", ylab = "Residuals")
+
+### with mean.relief & Scytothalia
+
+p3 <- glmer(maxn ~ bait + mean.relief + Scytothalia + (1|site),
+            data = maxn.all,
+            family = "poisson")
+summary(p3)
+
+deviance(r3)/df.residual(r3)
+
+r3 <- residuals(p3)
+plot(r3, main = "MaxN~Bait + Mean.relief + Scytothalia", 
+     xlab = "Index", ylab = "Residuals")
+
+### with Scytothalia
+
+p4 <- glmer(maxn ~ bait +  Scytothalia + (1|site),
+            data = maxn.all,
+            family = "poisson")
+summary(p4)
+
+deviance(p4)/df.residual(p4)
+
+r4 <- residuals(p4)
+plot(r4, main = "MaxN~Bait + Scytothalia", 
+     xlab = "Index", ylab = "Residuals")
+
+## Post - hoc for location
+
+post4 <- emmeans(p4, ~ bait)  # Specify the fixed factor of interest
+
+# Perform pairwise comparisons
+pairs(post4)
+
+## visualising post-hoc tests
+
+pairwise_results <- contrast(post4, method = "pairwise")
+
+# Convert pairwise results to a data frame
+pairwise_df <- as.data.frame(pairwise_results)
+
+#plot
+ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
+  labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN ~ bait + Scytothalia") +
+  theme_minimal() +
+  coord_flip()
+
+###
+# with Ecklonia
+
+p5 <- glmer(maxn ~ bait +  Ecklonia + (1|site),
+            data = maxn.all,
+            family = "poisson")
+summary(p5)
+
+deviance(p5)/df.residual(p5)
+
+
+### with site nested in location for completeness?
+
+p6 <-glmer(maxn~bait + Scytothalia + (site|location),
+           data = maxn.all,
+           family = "poisson")
+
+summary(p6)
+deviance(p6)/df.residual(p6)
+
+#############################################################################
+############################################################################
+###   before habitat added
 
 ## GLMER using LME4 package
 
@@ -279,23 +419,5 @@ var(pearson_residuals)
 
 # Plot Pearson residuals
 plot(pearson_residuals, main = "Pearson Residuals - Negative Binomial - MaxN no RE")
-
-
-#############################################################
-### LMER with lme4 package -- distribution non-normal so not using this
-
-#mod2 <- lmer(maxn ~ bait + (1|location) , data = maxn.all)
-#summary(mod2)
-#anova(mod2)
-#r.squaredGLMM(mod2)
-
-#anova(mod1, mod2)
-
-
-#### Checking other variables
-
-model <- lm(depth_m ~ maxn, data = maxn.all)
-summary(model)
-
 
 
