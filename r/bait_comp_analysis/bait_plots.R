@@ -663,3 +663,24 @@ ggplot(data = maxn.stage, aes(x = bait, y = periodtime, colour = bait))+
 
 ############
 
+
+
+
+
+#################
+## plot saving ##
+#################
+
+folder_path <- "./plots/"
+
+# change title
+png(file.path(folder_path, "poster_pred.png"), width = 600, height = 400)
+
+# plot code
+
+ggmod.pred1
+
+# Close the PNG device
+dev.off()
+
+
