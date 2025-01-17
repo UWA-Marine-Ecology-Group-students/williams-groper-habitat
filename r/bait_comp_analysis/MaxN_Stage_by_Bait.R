@@ -448,7 +448,92 @@ plot(pears6, main = "Pearson - MaxN(stage)~bait + mean relief + Ecklonia")
 sim_res <- simulateResiduals(fittedModel = nb6)
 plot(sim_res)
 
-plot(Scytothalia~Ecklonia, data = sum.stage)
+
+## mean relief & depth
+nb7 <- glmmTMB(maxn~bait + mean.relief +  depth_m + (1|site), 
+               data = sum.stage, 
+               family = "nbinom2")
+summary(nb7)
+deviance(nb7)/df.residual(nb7)
+
+#checking residuals
+nbr7 <- residuals(nb7)
+plot(nbr7, main = "NB: MaxN(stage)~bait + mean relief +  depth", 
+     xlab = "Index", ylab = "Residuals")
+
+pears7 <- residuals(nb7, type = "pearson")
+
+var(pears7)
+
+
+
+#with DHARMa package - check residuals
+sim_res <- simulateResiduals(fittedModel = nb7)
+plot(sim_res)
+
+## depth
+
+## mean relief & depth
+nb8 <- glmmTMB(maxn~bait +   depth_m + (1|site), 
+               data = sum.stage, 
+               family = "nbinom2")
+summary(nb8)
+deviance(nb8)/df.residual(nb8)
+
+
+post8 <- emmeans(nb8, ~bait)
+pairs(post8) #default Tukey
+pairs(post8, adjust = "bonferroni")
+pairs(post8, adjust = "holm")
+pairs(post8, adjust = "sidak")
+
+
+post8_df <- as.data.frame(post8)
+post8_df
+ggplot(post8_df, aes(x = bait, y = emmean)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2) + #throwing error
+  theme_minimal()
+
+plot(post8, main = "Post Hoc - NB:MaxN(stage)~bait + depth")
+
+#checking residuals
+nbr8 <- residuals(nb8)
+plot(nbr8, main = "NB: MaxN(stage)~bait + depth", 
+     xlab = "Index", ylab = "Residuals")
+
+pears8 <- residuals(nb8, type = "pearson")
+
+var(pears8)
+
+#with DHARMa package - check residuals
+sim_res <- simulateResiduals(fittedModel = nb8)
+plot(sim_res)
+
+
+## depth & scytothalia
+
+nb9 <- glmmTMB(maxn~bait + depth_m + Scytothalia + (1|site),
+               data = sum.stage,
+               family = "nbinom2")
+summary(nb9)
+deviance(nb9)/df.residual(nb9)
+
+post9 <- emmeans(nb9, ~bait)
+pairs(post9)
+
+#checking residuals
+nbr9 <- residuals(nb9)
+plot(nbr9, main = "NB: MaxN(stage)~bait + depth + Scytothalia", 
+     xlab = "Index", ylab = "Residuals")
+
+pears9 <- residuals(nb9, type = "pearson")
+
+var(pears9)
+
+#with DHARMa package - check residuals
+sim_res <- simulateResiduals(fittedModel = nb9)
+plot(sim_res)
 ##############################################################################
 ################################################################################
 ##############################################################################
@@ -620,61 +705,7 @@ AIC(poislog)
 BIC(poislog)
 logLik(poislog)
 
-###############################################################################
-###############################################################################
-#### checking other variables
-plot(maxn~location, data = sum.stage)
-plot(maxn~depth_m, 
-     col = c(bait),
-     data = sum.stage)
-
-ggplot(sum.stage, aes(x = depth_m, y = maxn)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "red")+
-  labs(x = "Depth (m)", y = "MaxN", title = "MaxN with Size Class by Depth")+
-  scale_y_continuous(
-    breaks = c(0, 5, 10, 15), 
-    limits = c(0,15)) +
-  theme_cowplot()
-
-## Linear Regression for depth & MaxN
-model <- lm(depth_m ~ maxn, data = sum.stage)
-summary(model)
-
-## location plot
-ggplot(sum.stage, aes(x = location, y = maxn)) +
-  geom_boxplot(outlier.color = "red", outlier.size = 2) +
-  labs(x = "Location", y = "MaxN", title = "MaxN with Size Class by Location")+
-  scale_y_continuous(
-    breaks = c(0, 5, 10, 15), 
-    limits = c(0,15)) +
-  scale_x_discrete(limits = c("mart", "twin", "arid", "middle"),
-                   labels = c("Mart & York Is.", "Twin Peak Is.", "Cape Arid", "Middle Is."))+
-  stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )+
-  theme_cowplot()
 
 
-
-## model maxn by location
-lmod <- lmer(maxn~location + (1|date),
-             data = sum.stage)
-summary(lmod)
-anova(lmod)
-
-lmod2 <- lm(maxn~location, data = sum.stage)
-anova(lmod2)
-
-## MaxN by Date
-ggplot(sum.stage, aes(x = date, y = maxn)) +
-  geom_boxplot(outlier.color = "red", outlier.size = 2) +
-  labs(x = "Date", y = "MaxN", title = "MaxN with Size Class by Date")+
-  scale_y_continuous(
-    breaks = c(0, 5, 10, 15), 
-    limits = c(0,15)) +
-  theme_cowplot()
-
-## modelling Maxn & Date
-dmod <- lm(maxn~date, data = sum.stage)
-summary(dmod)
 
 

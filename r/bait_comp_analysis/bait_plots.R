@@ -392,6 +392,34 @@ bait_col <- c("abalone" = "#27ae60", "octopus" = "#f39c12" , "pilchard" = "#3498
 ## Date
 #scale_fill_paletteer_d("rcartocolor::BluGrn")+
 
+
+##############################
+# bait by depth
+#
+
+ggplot(maxn.stage, aes(x = bait, y = depth_m, colour = bait))+
+  geom_jitter()+
+  geom_boxplot()+
+  stat_summary( geom = "point", fun.y = "mean", 
+                col = "black", size = 3, shape = 24, fill = "red" )
+
+## 
+ggplot(sum.stage, aes(x = depth_m, y = maxn, colour = bait))+
+  geom_jitter()+
+  geom_smooth(method = 'lm')
+
+##
+ggplot(sum.stage, aes(x = bait, y = mean.relief, colour = bait))+
+  geom_jitter()+
+  geom_boxplot()+
+  stat_summary( geom = "point", fun.y = "mean", 
+                col = "black", size = 3, shape = 24, fill = "red" )
+
+ggplot(sum.stage, aes(x = mean.relief, y = maxn, colour = bait))+
+  geom_jitter()+
+  geom_smooth(method = 'lm')
+
+##############
 ######################
 #### MaxN(stage) by bait
 ## Boxplot
@@ -663,9 +691,13 @@ ggplot(data = maxn.stage, aes(x = bait, y = periodtime, colour = bait))+
 
 ############
 
+plot(habitat$rock)
+min(habitat$rock)
+(habitat$sand)
 
-
-
+plot(habitat$sand)
+which(habitat$rock > 0)
+plot(habitat$inverts)
 
 #################
 ## plot saving ##

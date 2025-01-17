@@ -7,10 +7,10 @@ rm(list = ls())
 library(ggplot2)
 library(sf)
 
-habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
-  dplyr::rename(inverts = "Sessile invertebrates", rock = "Consolidated (hard)", 
-                sand = "Unconsolidated (soft)")%>%
-  glimpse()
+# habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
+#   dplyr::rename(inverts = "Sessile invertebrates", rock = "Consolidated (hard)", 
+#                 sand = "Unconsolidated (soft)")%>%
+#   glimpse()
 
 #creating a df for adding more specific site names
 site <- data.frame(
@@ -32,53 +32,49 @@ site <- data.frame(
   dplyr::mutate(opcode = as.character(opcode))%>%
   glimpse()
 
-#read in maxn data and joining
-
-maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
-  dplyr::mutate(species = "gouldii", bait = as.factor(bait), location = as.factor(location))%>%
-  dplyr::mutate(depth_m = as.numeric(depth_m))%>%
-  dplyr::mutate(period = as.factor(period))%>%
-  dplyr::mutate(date = substr(date_time, 1, 10))%>%
-  dplyr::mutate(time = substr(date_time, 12, 19))%>%
-  dplyr::mutate(date = as.factor(date))%>%
-  dplyr::group_by(opcode)%>%
-  dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
-  dplyr::ungroup()%>%
-  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
-  left_join(habitat)%>%
+#read in metadata
+metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")%>%
+  dplyr::select(-c("period", "sample"))%>% # don't need period or sample for this
+  dplyr::distinct(across(everything()))%>% # removing duplicates of opcodes 
   left_join(site)%>%
   dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
                 latitude_dd = as.numeric(latitude_dd))%>%
-  dplyr::mutate(site = as.factor(site))%>%
-  dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
+  dplyr::mutate(site = as.factor(site), location = as.factor(location),
+                bait = as.factor(bait))%>%
+  dplyr::mutate(site = factor(site, 
+                levels = c("ram", "lucky", "miss","mondrain", "finger", "york",
+                           "mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
+  dplyr::mutate(location = factor(location, 
+            levels = c("legrande","mondrain", "mart", "twin", "arid", "middle")))%>%
+  dplyr::mutate(depth_m = as.numeric(depth_m))%>%
   glimpse()
 
+min(metadata$longitude_dd)
+max(metadata$longitude_dd)
+min(metadata$latitude_dd)
+max(metadata$latitude_dd)
 
-max(maxn.all$longitude_dd)
-min(maxn.all$longitude_dd)
-max(maxn.all$latitude_dd)
-min(maxn.all$latitude_dd)
-
-bait_col <- c("abalone" = "#27ae60", 
-              "octopus" = "#f39c12" , 
+bait_col <- c("abalone" = "#27ae60",
+              "octopus" = "#f39c12" ,
               "pilchard" = "#3498db" )
 
 bait_shape <- c("octopus" = 18, "pilchard" = 15, "abalone" = 16)
+
 
 #### Using a shapefile (library(sf))
 
 sf <- st_read("data/spatial/shapefiles/aus-shapefile-w-investigator-stokes.shp")
 
 #changing my data into a shapefile
-sample_sf <- st_as_sf(maxn.all, 
+sample_sf <- st_as_sf(metadata, 
                       coords = c("longitude_dd", "latitude_dd"), crs = 4326)
 
-# Plot the shapefile and sample points
+#### MAP of LOCATIONS WITH SAMPLE POINTS
 mapv1 <- ggplot() +
   geom_sf(data = sf, fill = "lightgray", color = "black") +
-  geom_sf(data = sample_sf, aes(color = bait), size = 2) +
-  scale_color_manual(values = bait_col) +
-  coord_sf(xlim = c(122.64, 123.2), ylim = c(-34.125,-33.95)) +
+  geom_sf(data = sample_sf, aes(color = location), size = 2) +
+  #scale_color_manual(values = bait_col) +
+  coord_sf(xlim = c(122.1, 123.22), ylim = c(-34.16,-33.95)) +
   labs(x = "Longitude", y = "Latitude") +
   theme_minimal()+
   theme(legend.position = "none",
@@ -87,22 +83,39 @@ mapv1 <- ggplot() +
 
 mapv1
 
-## with shapes
-mapv2 <- ggplot() +
+#######################################################
+#### MINIMAPS --
+## getting coordinates for each location
+maptable <- metadata %>%
+  dplyr::group_by(location) %>%
+  dplyr::summarize(
+    min.lat = min(latitude_dd),
+    max.lat = max(latitude_dd),
+    min.long = min(longitude_dd),
+    max.long = max(longitude_dd)
+  )
+
+maptable
+
+## TODO - assign values to each of the sites for a shape
+
+site.shape <- c("middle" = 18)
+
+## MIDDLE ISLAND
+
+ggplot() +
   geom_sf(data = sf, fill = "lightgray", color = "black") +
-  geom_sf(data = sample_sf, aes(shape = bait, color = bait), size = 2) +
-  scale_color_manual(values = bait_col) +
-  scale_shape_manual(values = bait_shape)+
-  coord_sf(xlim = c(122.64, 123.2), ylim = c(-34.125,-33.95)) +
+  geom_sf(data = sample_sf, aes(color = bait), size = 2) +
+  #scale_color_manual(values = bait_col) +
+  coord_sf(xlim = c(123.15, 123.22), ylim = c(-34.13,-34.075)) +
   labs(x = "Longitude", y = "Latitude") +
   theme_minimal()+
   theme(legend.position = "none",
         axis.title.x = element_text(margin = margin(t=10)), #t adds space above label
-        axis.title.y = element_text(margin = margin(r=10))) #r adds space to the right
+        axis.title.y = element_text(margin = margin(r=10)))
 
-mapv2
 
-#?pch #-- for shapes
+
 
 #################
 ## plot saving ##
