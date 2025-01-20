@@ -8,7 +8,7 @@ rm(list=ls())
 #library(devtools)
 library(tidyverse)
 #library(mgcv)
-#library(MuMIn)
+library(MuMIn)
 #library(car)
 #library(doBy)
 #library(doSNOW)
@@ -22,6 +22,7 @@ library(emmeans)
 library(glmmTMB)
 #install.packages("DHARMa")
 library(DHARMa)
+#library(performance)
 
 name <- "2024_Wudjari_bait_comp"
 
@@ -78,7 +79,7 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
   dplyr::mutate(site = as.factor(site))%>%
   glimpse()
 
-summary(sum.stage)
+#summary(sum.stage)
 
 ## summary details for bait type
 aggregate(maxn ~ bait, data = sum.stage, FUN = mean)
@@ -124,10 +125,16 @@ ggplot(sum.stage, aes(x = bait, y = maxn, fill = bait)) +
   theme_cowplot() + 
   stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )
 
+################################################################################
+################################################################################ 
+## BEST MODEl
+
+best <- glmmTMB(maxn~bait + mean.relief +  depth_m + (1|site), 
+               data = sum.stage, 
+               family = "nbinom2")
 
 
-
-
+summary(best)
 
 ################################################################################
 ################################################################################ 
@@ -138,6 +145,7 @@ p1 <- glmer(maxn ~ bait + (1|site), data = sum.stage,
 
 summary(p1)
 anova(p1)
+r2_nakagawa(p1) #r2 using performance package
 
 ## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
 #deviance / residual degrees of freedom
@@ -259,6 +267,7 @@ nb1 <- glmmTMB(maxn~bait + (1|site),
                 family = "nbinom2")  # Negative Binomial with two parameters
 
 summary(nb1)
+r.squaredGLMM(nb1) #mumin package
 
 ## checking for overdispersion
 # dispersion statistic 
@@ -304,6 +313,7 @@ AIC(pois1)
 sim_res <- simulateResiduals(fittedModel = nb1)
 plot(sim_res)
 
+#####################
 ## with Mean Relief
 nb2 <- glmmTMB(maxn~bait + mean.relief + (1|site), 
                data = sum.stage, 
@@ -329,6 +339,7 @@ plot(pears2, main = "Pearson - MaxN(stage)~bait + mean.relief")
 sim_res <- simulateResiduals(fittedModel = nb2)
 plot(sim_res)
 
+################################
 ### Mean Relief & Scytothalia
 nb3 <- glmmTMB(maxn~bait + mean.relief + Scytothalia + (1|site), 
                data = sum.stage, 
@@ -478,6 +489,7 @@ nb8 <- glmmTMB(maxn~bait +   depth_m + (1|site),
                data = sum.stage, 
                family = "nbinom2")
 summary(nb8)
+r.squaredGLMM(nb8)
 deviance(nb8)/df.residual(nb8)
 
 
@@ -704,8 +716,37 @@ summary(poislog)
 AIC(poislog)
 BIC(poislog)
 logLik(poislog)
+####################################################################
+##################################################################
+# Likelihood ratio tests
+
+lrt1.both <- glmmTMB(maxn ~ bait + mean.relief + depth_m + (1|location) + (1|site),
+                   data = sum.stage,
+                   family = "nbinom2")
+
+lrt2.loc <- glmmTMB(maxn ~ bait + mean.relief + depth_m + (1|location),
+                  data = sum.stage,
+                  family = "nbinom2")
 
 
+anova(lrt2.loc, lrt1.both)
 
+lrt3.site <- glmmTMB(maxn ~ bait + mean.relief + depth_m + (1|site),
+                   data = sum.stage,
+                   family = "nbinom2")
 
+anova(lrt3.site, lrt1.both)
 
+lrt4.nest <- glmmTMB(maxn ~ bait + mean.relief + depth_m  + (site|location),
+                   data = sum.stage,
+                   family = "nbinom2")
+r.squaredGLMM(lrt3.site)
+summary(lrt3.site)
+
+anova(lrt2.loc, lrt3.site)
+
+anova(lrt3.site, lrt4.nest)
+
+anova(lrt4.nest, lrt3.site)
+
+citation()

@@ -8,7 +8,7 @@ rm(list=ls())
 #library(devtools)
 library(tidyverse)
 #library(mgcv)
-#library(MuMIn)
+library(MuMIn)
 #library(car)
 #library(doBy)
 #library(doSNOW)
@@ -18,8 +18,10 @@ library(ggplot2)
 library(lme4)
 library(cowplot)
 library(emmeans)
-#install.packages("glmmTMB")
+#install.packages("performance")
 library(glmmTMB)
+#(performance)
+
 
 name <- "2024_Wudjari_bait_comp"
 
@@ -112,6 +114,8 @@ ggplot(maxn.all, aes(x = maxn)) +
   breaks = c(0, 1, 2, 3, 4, 5))+
   theme_cowplot()
 
+sum(maxn.all$maxn == 0)
+
 ##### plot of mean maxns per bait type
 
 ggplot(maxn.all, aes(x = bait, y = maxn, fill = bait)) +
@@ -123,6 +127,25 @@ ggplot(maxn.all, aes(x = bait, y = maxn, fill = bait)) +
   theme_cowplot() +
 stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )
 
+##########################################################################
+### BEST MODEl
+####
+
+best <- glmer(maxn ~ bait + Scytothalia + (1|site),
+              data = maxn.all,
+              family = "poisson")
+
+
+summary(best)
+
+
+
+
+
+
+
+
+
 ################################################################################
 ################################################################################ 
 ## Running with habitat in it
@@ -132,8 +155,7 @@ p1 <- glmer(maxn ~ bait + (1|site), data = maxn.all,
 
 summary(p1)
 anova(p1)
-
-#r.squaredGLMM(p1)
+r.squaredGLMM(p1)
 
 ## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
 #deviance / residual degrees of freedom
@@ -161,6 +183,7 @@ p2 <- glmer(maxn ~ bait + mean.relief + (1|site),
             family = "poisson")
 summary(p2)
 anova(p2)
+r.squaredGLMM(p2)
 
 deviance(p2)/df.residual(p2)
 
@@ -174,6 +197,7 @@ p3 <- glmer(maxn ~ bait + mean.relief + Scytothalia + (1|site),
             data = maxn.all,
             family = "poisson")
 summary(p3)
+r.squaredGLMM(p3)
 
 deviance(r3)/df.residual(r3)
 
@@ -187,7 +211,7 @@ p4 <- glmer(maxn ~ bait +  Scytothalia + (1|site),
             data = maxn.all,
             family = "poisson")
 summary(p4)
-
+r.squaredGLMM(p4)
 deviance(p4)/df.residual(p4)
 
 r4 <- residuals(p4)
@@ -235,6 +259,13 @@ p6 <-glmer(maxn~bait + Scytothalia + (site|location),
 
 summary(p6)
 deviance(p6)/df.residual(p6)
+
+### with depth
+p7 <-glmer(maxn~bait + depth_m + (1|site),
+           data = maxn.all,
+           family = "poisson")
+
+summary(p7)
 
 #############################################################################
 ############################################################################
@@ -420,4 +451,29 @@ var(pearson_residuals)
 # Plot Pearson residuals
 plot(pearson_residuals, main = "Pearson Residuals - Negative Binomial - MaxN no RE")
 
+###########################################
+## Likelihood ratio tests on best model
+
+lrt1.both <- glmer(maxn ~ bait + Scytothalia + (1|location) + (1|site),
+                      data = maxn.all,
+                      family = "poisson")
+lrt2.loc <- glmer(maxn ~ bait + Scytothalia + (1|location),
+                  data = maxn.all,
+                  family = "poisson")
+
+lrt3.site <- glmer(maxn ~ bait + Scytothalia + (1|site),
+                   data = maxn.all,
+                   family = "poisson")
+
+lrt4.nest <- glmer(maxn ~ bait + Scytothalia + (site|location),
+                   data = maxn.all,
+                   family = "poisson")
+
+anova(lrt2.loc, lrt1.both)
+
+anova(lrt3.site, lrt1.both)
+
+anova(lrt2.loc, lrt3.site)
+
+anova(lrt3.site, lrt4.nest)
 

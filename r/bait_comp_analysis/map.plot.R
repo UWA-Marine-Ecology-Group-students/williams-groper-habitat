@@ -69,19 +69,105 @@ sf <- st_read("data/spatial/shapefiles/aus-shapefile-w-investigator-stokes.shp")
 sample_sf <- st_as_sf(metadata, 
                       coords = c("longitude_dd", "latitude_dd"), crs = 4326)
 
-#### MAP of LOCATIONS WITH SAMPLE POINTS
-mapv1 <- ggplot() +
+#### MAP of LOCATIONS with samples as colours by location
+mapv1 <- 
+  ggplot() +
   geom_sf(data = sf, fill = "lightgray", color = "black") +
   geom_sf(data = sample_sf, aes(color = location), size = 2) +
   #scale_color_manual(values = bait_col) +
-  coord_sf(xlim = c(122.1, 123.22), ylim = c(-34.16,-33.95)) +
+  coord_sf(xlim = c(121.89, 123.22), ylim = c(-34.16,-33.83)) +
   labs(x = "Longitude", y = "Latitude") +
   theme_minimal()+
   theme(legend.position = "none",
         axis.title.x = element_text(margin = margin(t=10)), #t adds space above label
-        axis.title.y = element_text(margin = margin(r=10))) #r adds space to the right
-
+        axis.title.y = element_text(margin = margin(r=10)))+ #r adds space to the right
+    annotate("point", x = 121.892, y = -33.862, color = "red", size = 4) + # Add point
+    annotate("text", x = 121.95, y = -33.862, label = "Esperance", color = "black", size = 4)
 mapv1
+
+####################################################################
+#####################################################################
+# map with locations as boxes
+
+  ggplot() +
+  geom_sf(data = sf, fill = "lightgray", color = "black") +
+  coord_sf(xlim = c(121.89, 123.22), ylim = c(-34.16,-33.83)) +
+  labs(x = "Longitude", y = "Latitude") +
+  theme_minimal()+
+  theme(legend.position = "none",
+        axis.title.x = element_text(margin = margin(t=10)), #t adds space above label
+        axis.title.y = element_text(margin = margin(r=10)))+ #r adds space to the right
+  annotate("point", x = 121.892, y = -33.862, color = "black", size = 4) + # Add point
+  annotate("text", x = 121.95, y = -33.862, 
+           label = "Esperance", color = "black", size = 4)+
+  annotate("rect", 
+           xmin = 122.1266, xmax = 122.2849, 
+           ymin = -34.03534, ymax = -33.99424, 
+           alpha = 0.1, color = "black") + #le grande
+  annotate("rect", 
+           xmin = 122.2502, xmax = 122.3480, 
+           ymin = -34.15337, ymax = -34.10002, 
+           alpha = 0.1, color = "black")+ # mondrain
+  annotate("rect", 
+           xmin = 122.5711, xmax = 122.7213, 
+           ymin = -34.00881, ymax = -33.98454, 
+           alpha = 0.1, color = "black")+ #mart & york
+  annotate("rect", 
+           xmin = 122.8111, xmax = 122.9406, 
+           ymin = -34.00384, ymax = -33.96104, 
+           alpha = 0.1, color = "black") + #twin peaks 
+  annotate("rect", 
+           xmin = 123.1103, xmax = 123.1843, 
+           ymin = -34.01794, ymax = -33.95003, 
+           alpha = 0.1, color = "black") + #cape arid
+  annotate("rect", 
+           xmin = 123.1552, xmax = 123.2174, 
+           ymin = -34.12428, ymax = -34.07862, 
+           alpha = 0.1, color = "black")+  #middle
+  annotate("text", x = 122.197, y = -34.025, 
+           label = "a", color = "black", size = 6)+
+  annotate("text", x = 122.282, y = -34.135, 
+           label = "b", color = "black", size = 6)+
+  annotate("text", x = 122.639, y = -33.975, 
+           label = "c", color = "black", size = 6)+
+  annotate("text", x = 122.915, y = -33.991, 
+           label = "d", color = "black", size = 6)+
+  annotate("text", x = 123.127, y = -33.994, 
+           label = "e", color = "black", size = 6)+
+  annotate("text", x = 123.14, y = -34.075, 
+           label = "f", color = "black", size = 6)
+
+
+##############################################################################
+#############################################################################
+## map of aus with WA box to be used as an insert later
+aus.ins <-  
+  ggplot() +
+  geom_sf(data = sf, fill = "#FFF5EE", color = "grey") +
+  theme_cowplot()+
+  theme(legend.position = "none",
+        axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.line.y = element_blank(),
+        axis.line.x = element_blank())+
+  annotate(
+    "rect", xmin = 112.55, xmax = 129.0, ymin = -35.27, ymax = -13.27,
+    alpha = 0.1, color = "black" 
+  )
+
+##############################################################################
+#############################################################################
+## map of south west WA
+
+ggplot() +
+  geom_sf(data = sf, fill = "#FFF5EE", color = "grey") +
+  coord_sf(xlim = c(114, 125), ylim = c(-35.27, -30))
+
+
 
 #######################################################
 #### MINIMAPS --
