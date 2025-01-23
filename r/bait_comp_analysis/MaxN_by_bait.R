@@ -21,7 +21,8 @@ library(emmeans)
 #install.packages("performance")
 library(glmmTMB)
 #(performance)
-
+#citation()
+#RStudio.Version()
 
 name <- "2024_Wudjari_bait_comp"
 
@@ -81,27 +82,9 @@ summary(maxn.all)
 ## summary stas for bait
 
 aggregate(maxn ~ bait, data = maxn.all, FUN = mean)
-aggregate(maxn ~ bait, data = maxn.all, FUN = median)
-aggregate(maxn ~ bait, data = maxn.all, FUN = min)
-aggregate(maxn ~ bait, data = maxn.all, FUN = max)
 
-## summary stas for location
-
-aggregate(maxn ~ location, data = maxn.all, FUN = mean)
-aggregate(maxn ~ location, data = maxn.all, FUN = median)
-aggregate(maxn ~ location, data = maxn.all, FUN = min)
-aggregate(maxn ~ location, data = maxn.all, FUN = max)
-
-## summary stas for date
-
-aggregate(maxn ~ date, data = maxn.all, FUN = mean)
-aggregate(maxn ~ date, data = maxn.all, FUN = median)
-aggregate(maxn ~ date, data = maxn.all, FUN = min)
-aggregate(maxn ~ date, data = maxn.all, FUN = max)
 ## plot Freq. distribution of MaxNs ## plot Frmin()eq. distribution of MaxNs 
-hist(maxn.all$maxn)
-
-#sexier
+#
 ggplot(maxn.all, aes(x = maxn)) +
   geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
   labs(title = "Histogram of Maxn Values",
@@ -114,18 +97,7 @@ ggplot(maxn.all, aes(x = maxn)) +
   breaks = c(0, 1, 2, 3, 4, 5))+
   theme_cowplot()
 
-sum(maxn.all$maxn == 0)
 
-##### plot of mean maxns per bait type
-
-ggplot(maxn.all, aes(x = bait, y = maxn, fill = bait)) +
-  geom_jitter(alpha = 0.5) +
-  labs(x = "Bait", y = "MaxN", title = "MaxN by Bait")+
-  scale_y_continuous(
-    breaks = c(0, 5, 10, 15), 
-    limits = c(0,15)) +
-  theme_cowplot() +
-stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )
 
 ##########################################################################
 ### BEST MODEl
@@ -139,7 +111,7 @@ best <- glmer(maxn ~ bait + Scytothalia + (1|site),
 summary(best)
 
 
-
+emmeans(best, ~ Scytothalia)
 
 
 
