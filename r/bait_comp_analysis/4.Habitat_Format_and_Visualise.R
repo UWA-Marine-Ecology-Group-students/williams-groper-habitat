@@ -9,13 +9,12 @@ options(timeout=9999999)
 # remotes::install_github("GlobalArchiveManual/CheckEM")
 library(CheckEM)
 library(tidyverse)
-library(ggbeeswarm)
+#library(ggbeeswarm)
 library(RColorBrewer)
-library(leaflet)
-library(leaflet.minicharts)
+#library(leaflet)
+#library(leaflet.minicharts)
 library(here)
 library(ggplot2)
-
 
 #set study name
 name <- "2024_Wudjari_bait_comp"

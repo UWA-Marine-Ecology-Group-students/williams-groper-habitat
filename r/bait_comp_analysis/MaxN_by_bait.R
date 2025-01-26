@@ -21,7 +21,7 @@ library(emmeans)
 #install.packages("performance")
 library(glmmTMB)
 #(performance)
-#citation()
+citation("emmeans")
 #RStudio.Version()
 
 name <- "2024_Wudjari_bait_comp"

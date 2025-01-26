@@ -20,6 +20,7 @@ library(cowplot)
 library(RColorBrewer)
 library(paletteer)
 library(sf)
+citation("tidyverse")
 
 name <- "2024_Wudjari_bait_comp"
 
