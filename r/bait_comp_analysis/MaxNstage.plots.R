@@ -92,13 +92,18 @@ bg_col <- c("0300-0499 mm" = "#2ecc71", "0500-0699 mm" = "#52be80",
             "1100-1299mm" = "#2471a3")
 
 ## Bait Types
-bait_col <- c("abalone" = "#27ae60", "octopus" = "#f39c12" , "pilchard" = "#3498db" )
+bait_col <- c("abalone" = "#27ae60", 
+              "octopus" = "#f39c12" , 
+              "pilchard" = "#CC79A7")
 
 ## Locations
 #scale_fill_paletteer_d("MetBrewer::Hokusai2")+
 
 ## Date
 #scale_fill_paletteer_d("rcartocolor::BluGrn")+
+
+### 
+# Maxn by bait, faceted by size class
 
 
 ##############################
@@ -149,7 +154,15 @@ ggplot(sum.stage, aes(x = mean.relief, y = maxn, colour = bait))+
   theme(legend.position = "none")
 
 
-# ggplot(sum.stage, aes(x = mean.relief, y= maxn))
+ggplot(sum.stage, aes(x = mean.relief, y= maxn))+
+  geom_jitter(alpha = 0.5)+
+  geom_smooth(method = 'lm', se = T)+
+  labs(x = "mean Relief", y = "Abundance") + 
+  theme_cowplot()+
+  theme(legend.position = "none")
+
+
+
 
 ##############
 ######################
@@ -160,7 +173,8 @@ ggplot(sum.stage, aes(x = bait, y = maxn, fill = bait)) +
   labs(x = "Bait", y = "MaxN", title = "MaxN(stage) by Bait")+
   scale_fill_manual(values = bait_col)+
   scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
-  stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "grey" )+
+  stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, 
+                shape = 24, fill = "grey" )+
   theme_cowplot()+
   theme(legend.position = "none")
 
@@ -270,7 +284,7 @@ ggplot(sum.stage, aes(x = date, y = maxn, fill = date)) +
 dat <- maxn.stage %>%
   dplyr::filter(maxn != 0)%>% #filtering out zeros
   dplyr::mutate(stage = as.factor(stage))%>%
-  dplyr::filter(!stage %in% c("AD"))%>% #filtering out these
+  dplyr::filter(!stage %in% c("AD", "M", "F"))%>% #filtering out these
   dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
   glimpse()
 
@@ -302,6 +316,41 @@ ggplot(dat, aes(x = stage, y = maxn, fill = stage)) +
   theme_cowplot()+
   theme(legend.position = "none")
 
+
+################
+### MAXN by bait faceted by size class
+maxnstage.bait <-
+ggplot(dat, aes(x = bait, y = maxn, fill = bait)) +
+  stat_summary(fun = mean, geom = "bar", width = 0.6) +  # Bar plot with mean
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5, color = "black") +  # SE as error bars
+  labs(x = "Size Class", y = "mean MaxN +/- se") +
+  facet_wrap(.~stage, ncol = 2)+
+# , nrow = 2, ncol = 2,
+#              labeller = labeller(location = c("mart" = "Mart & York Islands", 
+#                                               "twin" = "Twin Peak Islands", 
+#                                               "arid" = "Cape Arid",
+#                                               "middle" = "Middle Island")))+
+  scale_fill_manual(values = bait_col)+
+  theme_cowplot()+
+  theme(legend.position = "none")
+
+################
+### MAXN by depth faceted by size class
+
+
+ggplot(dat, aes(x = depth_m, y = maxn)) +
+  #stat_summary(fun = mean, geom = "bar", width = 0.6) +  # Bar plot with mean
+  #stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5, color = "black") +  # SE as error bars
+  labs(x = "Size Class", y = "mean MaxN +/- se") +
+  facet_wrap(.~stage, ncol = 2)+
+  # , nrow = 2, ncol = 2,
+  #              labeller = labeller(location = c("mart" = "Mart & York Islands", 
+  #                                               "twin" = "Twin Peak Islands", 
+  #                                               "arid" = "Cape Arid",
+  #                                               "middle" = "Middle Island")))+
+  #scale_fill_manual(values = bait_col)+
+  theme_cowplot()+
+  theme(legend.position = "none")
 
 ################
 ## HAbitat
@@ -374,4 +423,20 @@ ggplot(maxn.all, aes(x = Scytothalia, y = maxn)) +
   theme_cowplot()+
   theme(legend.position = "none")  
 
+
+#################
+## plot saving ##
+#################
+
+folder_path <- "./plots/"
+
+# change title
+png(file.path(folder_path, "maxnstage.bait.png"), width = 600, height = 400)
+
+# plot code
+
+maxnstage.bait
+
+# Close the PNG device
+dev.off()
 

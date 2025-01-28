@@ -20,9 +20,10 @@ library(cowplot)
 library(RColorBrewer)
 library(paletteer)
 library(sf)
-citation("tidyverse")
 
 name <- "2024_Wudjari_bait_comp"
+
+folder_path <- "./plots/baitcomp/"
 
 #######################################
 ######      MaxN by Bait ##############
@@ -94,6 +95,15 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   glimpse()
 
+### Filtering MaxNstage DF
+dat <- maxn.stage %>%
+  dplyr::filter(maxn != 0)%>% #filtering out zeros
+  dplyr::mutate(stage = as.factor(stage))%>%
+  dplyr::filter(!stage %in% c("AD", "M", "F"))%>% #filtering out these
+  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
+  glimpse()
+
+
 ##DF with the MaxN per Stage summed for each opcode
 
 sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
@@ -111,10 +121,24 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
                               levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   glimpse()
 
+############################################################
+####      Colour schemes
+##
+
+bg_col <- c("0300-0499 mm" = "#2ecc71", "0500-0699 mm" = "#52be80", 
+            "0700-0899 mm" = "#45b39d", "0900-1099 mm" = "#148f77",
+            "1100-1299mm" = "#2471a3")
+
+## Bait Types
+bait_col <- c("abalone" = "#27ae60", 
+              "octopus" = "#f39c12" , 
+              "pilchard" = "#CC79A7")
+
+
+
 
 #####################
 ### MEAN MAXN by bait type with double bars
-## TODO - add colours 
 
 # # have to combine data frames (bind rows)
 maxn.all$group <- "Group1" #creating group for maxn
@@ -130,6 +154,7 @@ summary_df <- merge %>% ## getting the means etc.
   )
 
 ## dynamite (bar plot with standard error bars)
+abund <-
 ggplot(summary_df, aes(x= bait, y = mean_abundance, fill = group))+
   geom_bar(stat = "identity", position = position_dodge(width = 0.8))+ 
   geom_errorbar(
@@ -143,18 +168,48 @@ ggplot(summary_df, aes(x= bait, y = mean_abundance, fill = group))+
   theme_cowplot()+
   theme(legend.position = "none")
 
-
+### plot saving
+# png(file.path(folder_path, "abund.png"), width = 600, height = 400)
+# abund # plot code
+# dev.off() # Close the PNG device
 
 ########################################
 #### mean MaxN by bait, facetted by size class
 ## TODO remove AD, F, M & NAs
 
-ggplot(maxn.stage, aes(x= bait, y = maxn, fill = bait))+
-  stat_summary(fun = mean, geom = "bar", color = "black", width = 0.6) +  # Bars
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
-  labs(x = "Bait Type", y = "Mean abundance of WBG")+
-  #scale_fill_manual(values = bait_col)+
+
+maxnstage.bait <-
+  ggplot(dat, aes(x = bait, y = maxn, fill = bait)) +
+  stat_summary(fun = mean, geom = "bar", width = 0.6) +  # Bar plot with mean
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5, color = "black") +  # SE as error bars
+  labs(x = "Bait Type", y = "mean Abundance +/- se") +
   scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
+  scale_fill_manual(values = bait_col)+
+  facet_wrap(.~stage, ncol = 2)+
   theme_cowplot()+
-  theme(legend.position = "none")+
-  facet_wrap(~ stage, ncol = 2)
+  theme(legend.position = "none")
+
+######################
+sum(sum.stage$maxn)
+sum(maxn.all$maxn)
+
+ggplot(maxn.stage, aes(x = stage, y = maxn, fill = bait)) + 
+  geom_jitter()
+
+
+#################
+## plot saving ##
+#################
+# 
+# folder_path <- "./plots/"
+# 
+# # change title
+# png(file.path(folder_path, "poster_pred.png"), width = 600, height = 400)
+# 
+# # plot code
+# 
+# ggmod.pred1
+# 
+# # Close the PNG device
+# dev.off()
+
