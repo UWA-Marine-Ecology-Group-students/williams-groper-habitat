@@ -139,39 +139,82 @@ bait_col <- c("abalone" = "#27ae60",
 
 #####################
 ### MEAN MAXN by bait type with double bars
-
-# # have to combine data frames (bind rows)
-maxn.all$group <- "Group1" #creating group for maxn
-sum.stage$group <- "Group2" #creating group for maxnstage
-merge <- bind_rows(maxn.all, sum.stage) # Combine data frames
-
-summary_df <- merge %>% ## getting the means etc. 
-  group_by(bait, group) %>%
-  summarise(
-    mean_abundance = mean(maxn),
-    se_abundance = sd(maxn) / sqrt(n()),
-    .groups = "drop"
-  )
-
-## dynamite (bar plot with standard error bars)
-abund <-
-ggplot(summary_df, aes(x= bait, y = mean_abundance, fill = group))+
-  geom_bar(stat = "identity", position = position_dodge(width = 0.8))+ 
-  geom_errorbar(
-    aes(ymin = mean_abundance - se_abundance, ymax = mean_abundance + se_abundance),
-    position = position_dodge(width = 0.8),
-    width = 0.2
-  ) +
- labs(x = "Bait Treatment", y = "Mean Abundance of WBG")+
-  #scale_fill_manual(values = )+                          #add colours here
-  scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
-  theme_cowplot()+
-  theme(legend.position = "none")
+# 
+# # # have to combine data frames (bind rows)
+# maxn.all$group <- "Group1" #creating group for maxn
+# sum.stage$group <- "Group2" #creating group for maxnstage
+# merge <- bind_rows(maxn.all, sum.stage) # Combine data frames
+# 
+# summary_df <- merge %>% ## getting the means etc. 
+#   group_by(bait, group) %>%
+#   summarise(
+#     mean_abundance = mean(maxn),
+#     se_abundance = sd(maxn) / sqrt(n()),
+#     .groups = "drop"
+#   )
+# 
+# ## dynamite (bar plot with standard error bars)
+# abund <-
+# ggplot(summary_df, aes(x= bait, y = mean_abundance, fill = group))+
+#   geom_bar(stat = "identity", position = position_dodge(width = 0.8))+ 
+#   geom_errorbar(
+#     aes(ymin = mean_abundance - se_abundance, ymax = mean_abundance + se_abundance),
+#     position = position_dodge(width = 0.8),
+#     width = 0.2
+#   ) +
+#  labs(x = "Bait Treatment", y = "Mean Abundance of WBG")+
+#   #scale_fill_manual(values = )+                          #add colours here
+#   scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
+#   theme_cowplot()+
+#   theme(legend.position = "none")
 
 ### plot saving
 # png(file.path(folder_path, "abund.png"), width = 600, height = 400)
 # abund # plot code
 # dev.off() # Close the PNG device
+#####################################################
+#### Mean MaxN by bait for MaxNall
+
+col <- c("abalone" = "#a9cce3", 
+                    "octopus" = "#a9cce3" , 
+                    "pilchard" = "#a9cce3")
+maxnall <- 
+  ggplot(maxn.all, aes(x = bait, y = maxn, fill = bait))+
+  stat_summary(fun = mean, geom = "bar", width = 0.6) +  # Bar plot with mean
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5, color = "black") +  # SE as error bars
+  labs(x = "Bait Type", y = "Mean Abundance +/- se") +
+  scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
+  scale_fill_manual(values = col)+
+  theme_cowplot()+
+  theme(legend.position = "none")
+
+maxnall
+### plot saving
+png(file.path(folder_path, "maxnall.png"), width = 600, height = 400)
+maxnall # plot code
+dev.off() # Close the PNG device
+
+##########################################
+#### SUM STAGE MAXN BY BAIT
+col2 <- c("abalone" = "#1a5276", 
+         "octopus" = "#1a5276", 
+         "pilchard" = "#1a5276")
+sumall <- 
+  ggplot(sum.stage, aes(x = bait, y = maxn, fill = bait))+
+  stat_summary(fun = mean, geom = "bar", width = 0.6) +  # Bar plot with mean
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5, color = "black") +  # SE as error bars
+  labs(x = "Bait Type", y = "Mean Abundance +/- se") +
+  scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
+  scale_fill_manual(values = col2)+
+  theme_cowplot()+
+  theme(legend.position = "none")
+
+sumall
+### plot saving
+png(file.path(folder_path, "sumall.png"), width = 600, height = 400)
+sumall # plot code
+dev.off() # Close the PNG device
+
 
 ########################################
 #### mean MaxN by bait, facetted by size class
@@ -189,6 +232,17 @@ maxnstage.bait <-
   theme_cowplot()+
   theme(legend.position = "none")
 
+maxnstage.bait
+folder_path <- "./plots/baitcomp/"
+png(file.path(folder_path, "maxnstage.bait.png"), width = 600, height = 600)
+
+# plot code
+
+maxnstage.bait
+
+# Close the PNG device
+dev.off()
+
 ######################
 sum(sum.stage$maxn)
 sum(maxn.all$maxn)
@@ -197,6 +251,26 @@ ggplot(maxn.stage, aes(x = stage, y = maxn, fill = bait)) +
   geom_jitter()
 
 
+########################################
+#### mean MaxN by bait with post-hocs -- see modelling 
+
+
+stage.abund <-
+ggplot(sum.stage, aes(x= bait, y = maxn, fill = bait))+
+  stat_summary(fun = mean, geom = "bar", color = "black", width = 0.6) +  # Bars
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
+  labs(x = "Bait Type", y = "Mean Abundance")+
+  scale_fill_manual(values = bait_col)+
+  scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
+  theme_cowplot()+
+  theme(legend.position = "none")
+
+stage.abund
+
+folder_path <- "./plots/baitcomp/"
+png(file.path(folder_path, "stage.abund.png"), width = 600, height = 400)
+stage.abund
+dev.off()
 #################
 ## plot saving ##
 #################

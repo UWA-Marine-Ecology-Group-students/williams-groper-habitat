@@ -9,7 +9,7 @@ rm(list=ls())
 library(tidyverse)
 #library(mgcv)
 library(MuMIn)
-#library(car)
+library(car)
 #library(doBy)
 #library(doSNOW)
 library(ggplot2)
@@ -82,22 +82,11 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
 #summary(sum.stage)
 
 ## summary details for bait type
-aggregate(maxn ~ bait, data = sum.stage, FUN = mean)
-aggregate(maxn ~ bait, data = sum.stage, FUN = median)
-aggregate(maxn ~ bait, data = sum.stage, FUN = min)
-aggregate(maxn ~ bait, data = sum.stage, FUN = max)
-
-## summary details for location
-aggregate(maxn ~ location, data = sum.stage, FUN = mean)
-aggregate(maxn ~ location, data = sum.stage, FUN = median)
-aggregate(maxn ~ location, data = sum.stage, FUN = min)
-aggregate(maxn ~ location, data = sum.stage, FUN = max)
-
-## summary details for date
-aggregate(maxn ~ date, data = sum.stage, FUN = mean)
-aggregate(maxn ~ date, data = sum.stage, FUN = median)
-aggregate(maxn ~ date, data = sum.stage, FUN = min)
-aggregate(maxn ~ date, data = sum.stage, FUN = max)
+# aggregate(maxn ~ bait, data = sum.stage, FUN = mean)
+# aggregate(maxn ~ bait, data = sum.stage, FUN = median)
+# aggregate(maxn ~ bait, data = sum.stage, FUN = min)
+# aggregate(maxn ~ bait, data = sum.stage, FUN = max)
+# 
 
 ## plot Freq. distribution of MaxNs 
 
@@ -129,12 +118,135 @@ ggplot(sum.stage, aes(x = bait, y = maxn, fill = bait)) +
 ################################################################################ 
 ## BEST MODEl
 
-best <- glmmTMB(maxn~bait + mean.relief +  depth_m + (1|site), 
+best <- glmmTMB(maxn~bait + depth_m + (1|site), 
                data = sum.stage, 
                family = "nbinom2")
 
 
 summary(best)
+Anova(best, type = "III")
+
+b2 <- glmmTMB(maxn~bait + depth_m,
+          data = sum.stage,
+          family = "nbinom2")
+
+Anova(b2, type = "III")
+summary(b2)
+
+b3 <- glmmTMB(maxn~bait + Scytothalia + (1|site),
+              data= sum.stage,
+              family = "nbinom2")
+summary(b3)
+
+
+#### MODEL PLOTS
+
+bait_col <- c("abalone" = "#27ae60", 
+              "octopus" = "#f39c12" , 
+              "pilchard" = "#CC79A7" )
+
+folder_path <- "./plots/baitcomp/" # for saving plots
+
+### MaxN by Depth with the actual model line
+new_data <- expand.grid(
+  depth_m = seq(min(sum.stage$depth_m), max(sum.stage$depth_m), length.out = 100),
+  bait = unique(sum.stage$bait)[1],  # Choose first level if categorical
+  mean.relief = mean(sum.stage$mean.relief, na.rm = TRUE)
+)
+
+# Get predictions (fixed effects only)
+new_data$predicted <- predict(best, newdata = new_data, re.form = NA, type = "response")
+
+# Get predictions and standard errors
+pred <- predict(best, newdata = new_data, re.form = NA, type = "link", se.fit = TRUE)
+
+# Convert to response scale (Poisson uses log link)
+new_data$predicted <- exp(pred$fit)
+new_data$lower <- exp(pred$fit - 1.96 * pred$se.fit)  # 95% CI lower bound
+new_data$upper <- exp(pred$fit + 1.96 * pred$se.fit)  # 95% CI upper bound
+
+# Plot data with model predictions
+depth<-
+  ggplot(sum.stage, aes(x = depth_m, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "Depth (m)", y = "WBG Abundance") +
+  geom_line(data = new_data, aes(x = depth_m, y = predicted), 
+            colour = "darkblue", linewidth = 1, inherit.aes = F) +
+  geom_ribbon(data = new_data, aes(x = depth_m, ymin = lower, ymax = upper), 
+              fill = "darkblue", alpha = 0.2, inherit.aes = F) +  # Shaded confidence band
+  theme_cowplot() +
+  theme(legend.position = "none")
+
+depth
+
+#################
+## plot saving ##
+#################
+
+# change title
+png(file.path(folder_path, "depth.png"), width = 600, height = 400)
+
+# plot code
+
+depth
+
+# Close the PNG device
+dev.off()
+
+###############
+### MaxN by mean relief with the actual model line
+new_data <- expand.grid(
+  mean.relief = seq(min(sum.stage$mean.relief), max(sum.stage$mean.relief), length.out = 100),
+  bait = unique(sum.stage$bait)[1],  # Choose first level if categorical
+  depth_m = mean(sum.stage$depth_m, na.rm = TRUE)
+)
+
+# Get predictions (fixed effects only)
+new_data$predicted <- predict(best, newdata = new_data, re.form = NA, type = "response")
+
+# Get predictions and standard errors
+pred <- predict(best, newdata = new_data, re.form = NA, type = "link", se.fit = TRUE)
+
+# Convert to response scale (Poisson uses log link)
+new_data$predicted <- exp(pred$fit)
+new_data$lower <- exp(pred$fit - 1.96 * pred$se.fit)  # 95% CI lower bound
+new_data$upper <- exp(pred$fit + 1.96 * pred$se.fit)  # 95% CI upper bound
+
+# Plot data with model predictions
+relief<-
+  ggplot(sum.stage, aes(x = mean.relief, y = maxn)) +
+  geom_jitter(alpha = 0.5) +
+  labs(x = "Mean Relief", y = "WBG Abundance") +
+  geom_line(data = new_data, aes(x = mean.relief, y = predicted), 
+            colour = "darkred", linewidth = 1, inherit.aes = F) +
+  geom_ribbon(data = new_data, aes(x = mean.relief, ymin = lower, ymax = upper), 
+              fill = "darkred", alpha = 0.2, inherit.aes = F) +  # Shaded confidence band
+  theme_cowplot() +
+  theme(legend.position = "none")
+
+relief
+
+#################
+## plot saving ##
+#################
+
+# change title
+png(file.path(folder_path, "relief.png"), width = 600, height = 400)
+
+# plot code
+
+relief
+
+# Close the PNG device
+dev.off()
+
+
+
+
+
+
+
+
 
 ################################################################################
 ################################################################################ 

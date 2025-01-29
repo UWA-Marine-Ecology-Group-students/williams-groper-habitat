@@ -74,7 +74,7 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
 
 bait_col <- c("abalone" = "#27ae60", 
               "octopus" = "#f39c12" , 
-              "pilchard" = "#3498db" )
+              "pilchard" = "#CC79A7" )
 
 ## Locations
 

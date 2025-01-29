@@ -58,8 +58,9 @@ bait_col <- c("abalone" = "#27ae60",
               "octopus" = "#f39c12" ,
               "pilchard" = "#CC79A7" )
 
-bait_shape <- c("octopus" = 18, "pilchard" = 15, "abalone" = 16)
+# bait_shape <- c("octopus" = 18, "pilchard" = 15, "abalone" = 16)
 
+folder_path <- "plots/baitcomp/" ## to save plots
 
 #### Using a shapefile (library(sf))
 
@@ -190,7 +191,7 @@ maptable
 
 ## MIDDLE ISLAND (F)
 
-#f <- 
+f <- 
 ggplot() +
   geom_sf(data = sf, fill = "#FFF5EE", color = "darkgrey") +
   geom_sf(data = sample_sf, aes(color = bait), size = 4) +
@@ -200,11 +201,22 @@ ggplot() +
   theme_minimal()+
   theme(legend.position = "none",
         axis.title.x = element_text(margin = margin(t=10)), #t adds space above label
-        axis.title.y = element_text(margin = margin(r=10)))
+        axis.title.y = element_text(margin = margin(r=10)),
+        plot.background = element_rect(colour = "black", fill = NA, linewidth = 2))+
+  annotate("text", x = (123.15 + 123.22) / 2, y = (-34.13 + -34.075) / 2, 
+           label = "13", size = 6)
 
-#f
+f
+
+# save plot
+png(file.path(folder_path, "f.png"), width = 8, height = 6, units = "in", res = 300)
+
+f #plot deets
+
+dev.off() #turn off png device
 
 ## E = Cape Arid
+e <-
 ggplot() +
   geom_sf(data = sf, fill = "#FFF5EE", color = "darkgrey") +
   geom_sf(data = sample_sf, aes(color = bait), size = 4) +
@@ -214,9 +226,25 @@ ggplot() +
   theme_minimal()+
   theme(legend.position = "none",
         axis.title.x = element_text(margin = margin(t=10)), #t adds space above label
-        axis.title.y = element_text(margin = margin(r=10)))
+        axis.title.y = element_text(margin = margin(r=10)),
+        plot.background = element_rect(colour = "black", fill = NA, linewidth = 2))+
+  annotate("text", x = 123.13, y = -33.955, 
+           label = "11", size = 6)+
+  annotate("text", x = 123.15, y = -33.995, 
+           label = "12", size = 6)
+
+e
+# save plot
+png(file.path(folder_path, "e.png"), width = 8, height = 6, units = "in", res = 300)
+
+e #plot deets
+
+dev.off() #turn off png device
+
+
 
 ## D = Twin Peak Islands
+d<- 
 ggplot() +
   geom_sf(data = sf, fill = "#FFF5EE", color = "darkgrey") +
   geom_sf(data = sample_sf, aes(color = bait), size = 4) +
@@ -226,10 +254,23 @@ ggplot() +
   theme_minimal()+
   theme(legend.position = "none",
         axis.title.x = element_text(margin = margin(t=10)), #t adds space above label
-        axis.title.y = element_text(margin = margin(r=10)))
+        axis.title.y = element_text(margin = margin(r=10)),
+        plot.background = element_rect(colour = "black", 
+                                       fill = NA, linewidth = 2))+
+  annotate("text", x = 122.91, y = -33.975, label = "10", size = 6)+
+  annotate("text", x = 122.84, y = -34, label = "9", size = 6)
+
+d
+# save plot
+png(file.path(folder_path, "d.png"), width = 8, height = 6, units = "in", res = 300)
+
+d #plot deets
+
+dev.off() #turn off png device
 
 
 ## C = MArt & York Islands
+c<-
 ggplot() +
   geom_sf(data = sf, fill = "#FFF5EE", color = "darkgrey") +
   geom_sf(data = sample_sf, aes(color = bait), size = 4) +
@@ -239,10 +280,22 @@ ggplot() +
   theme_minimal()+
   theme(legend.position = "none",
         axis.title.x = element_text(margin = margin(t=10)), #t adds space above label
-        axis.title.y = element_text(margin = margin(r=10)))
+        axis.title.y = element_text(margin = margin(r=10)),
+        plot.background = element_rect(colour = "black", 
+                                       fill = NA, linewidth = 2))+
+  annotate("text", x = 122.72, y = -34, label = "8", size = 6)+
+  annotate("text", x = 122.65, y = -33.99, label = "7", size = 6)+
+  annotate("text", x = 122.58, y = -34, label = "6", size = 6)
+c
 
+png(file.path(folder_path, "c.png"), width = 8, height = 6, units = "in", res = 300)
+
+c #plot deets
+
+dev.off() #turn off png device
 
 ## B = Mondrain Island
+b<-
 ggplot() +
   geom_sf(data = sf, fill = "#FFF5EE", color = "darkgrey") +
   geom_sf(data = sample_sf, aes(color = bait), size = 4) +
@@ -252,9 +305,21 @@ ggplot() +
   theme_minimal()+
   theme(legend.position = "none",
         axis.title.x = element_text(margin = margin(t=10)), #t adds space above label
-        axis.title.y = element_text(margin = margin(r=10)))
+        axis.title.y = element_text(margin = margin(r=10)),
+        plot.background = element_rect(colour = "black", 
+                                       fill = NA, linewidth = 2))+
+  annotate("text", x = 122.34, y = -34.105, label = "5", size = 6)+
+  annotate("text", x = 122.265, y = -34.135, label = "4", size = 6)
+
+b
+png(file.path(folder_path, "b.png"), width = 8, height = 6, units = "in", res = 300)
+
+b #plot deets
+
+dev.off() #turn off png device
 
 ## A = Cape Le Grande
+a <-
 ggplot() +
   geom_sf(data = sf, fill = "#FFF5EE", color = "darkgrey") +
   geom_sf(data = sample_sf, aes(color = bait), size = 4) +
@@ -264,19 +329,44 @@ ggplot() +
   theme_minimal()+
   theme(legend.position = "none",
         axis.title.x = element_text(margin = margin(t=10)), #t adds space above label
-        axis.title.y = element_text(margin = margin(r=10)))
+        axis.title.y = element_text(margin = margin(r=10)),
+        plot.background = element_rect(colour = "black", 
+                                       fill = NA, linewidth = 2))+
+  annotate("text", x = 122.14, y = -34.024, label = "1", size = 6)+
+  annotate("text", x = 122.23, y = -34.005, label = "2", size = 6)+
+  annotate("text", x = 122.285, y = -34, label = "3", size = 6)
+
+a
+
+# change title
+png(file.path(folder_path, "a.png"), width = 8, height = 6, units = "in", res = 300)
+
+# plot details
+
+a
+# Close the PNG device
+dev.off()
+
+
+########################################################################
+## putting all my maps together in one plot
+#cowplot
+plot_grid(a, b, c, d, e, f, 
+          # labels = c("A", "B", "C"),
+          ncol = 3, nrow = 2)
+
+# grid.arrange(bxp, dp, bp + rremove("x.text"), 
+             # ncol = 2, nrow = 2)
 
 #################
 ## plot saving ##
 #################
 
-folder_path <- "plots/baitcomp"
-
 # change title
-png(file.path(folder_path, "f.png"), width = 8, height = 6, units = "in", res = 300)
+png(file.path(folder_path, "a.png"), width = 8, height = 6, units = "in", res = 300)
 
 # plot details
 
-f
+a
 # Close the PNG device
 dev.off()
