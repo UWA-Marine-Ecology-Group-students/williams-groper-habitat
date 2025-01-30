@@ -20,6 +20,8 @@ library(cowplot)
 library(RColorBrewer)
 library(paletteer)
 library(sf)
+# install.packages("ggh4x")
+library(ggh4x)
 
 name <- "2024_Wudjari_bait_comp"
 
@@ -218,8 +220,10 @@ dev.off() # Close the PNG device
 
 ########################################
 #### mean MaxN by bait, facetted by size class
-## TODO remove AD, F, M & NAs
 
+bg_col <- c("0300-0499 mm" = "#2ecc71", "0500-0699 mm" = "#52be80", 
+            "0700-0899 mm" = "#45b39d", "0900-1099 mm" = "#148f77",
+            "1100-1299mm" = "#2471a3")
 
 maxnstage.bait <-
   ggplot(dat, aes(x = bait, y = maxn, fill = bait)) +
@@ -228,13 +232,20 @@ maxnstage.bait <-
   labs(x = "Bait Type", y = "mean Abundance +/- se") +
   scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
   scale_fill_manual(values = bait_col)+
-  facet_wrap(.~stage, ncol = 2)+
+  facet_wrap(.~stage, nrow = 2, ncol = 3)+
   theme_cowplot()+
-  theme(legend.position = "none")
+  theme(legend.position = "none")#+
+  # #ggh4x::facet_wrap2(
+  #   facets = ~stage, 
+  #   nrow = 2, ncol = 3, 
+  #   strip = ggh4x::strip_themed(
+  #     background_x = elem_list_rect(fill = c("#2ecc71", "#52be80", "#45b39d", 
+  #                                            "#148f77", "#2471a3"))))
 
 maxnstage.bait
+
 folder_path <- "./plots/baitcomp/"
-png(file.path(folder_path, "maxnstage.bait.png"), width = 600, height = 600)
+png(file.path(folder_path, "maxnstage.bait.png"), width = 800, height = 600)
 
 # plot code
 
