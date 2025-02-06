@@ -67,6 +67,11 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   dplyr::group_by(opcode, stage)%>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>%
   dplyr::ungroup()%>%
+  left_join(habitat)%>%
+  left_join(site)%>%
+  dplyr::mutate(site = as.factor(site))%>%
+  dplyr::mutate(stage = as.factor(stage))%>%
+  dplyr::filter(!stage %in% c("AD", "M", "F"))%>% #filtering out these
   glimpse()
 
 
@@ -103,6 +108,20 @@ ggplot(sum.stage, aes(x = maxn)) +
   theme_cowplot()
 
 
+ggplot(maxn.stage, aes(x = maxn)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Maxn Values",
+       x = "Maxn Value",
+       y = "Count") +
+  # scale_y_continuous(
+  #   breaks = c(0, 5, 10, 15), 
+  #   limits = c(0, 15)) +
+  # scale_x_continuous(
+  #   breaks = c(0:12))+
+  theme_cowplot()+
+  facet_wrap(.~stage)
+
+
 
 #####
 ggplot(sum.stage, aes(x = bait, y = maxn, fill = bait)) +
@@ -114,17 +133,51 @@ ggplot(sum.stage, aes(x = bait, y = maxn, fill = bait)) +
   theme_cowplot() + 
   stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )
 
+#####################################################
+####################################################
+####### shits and giggles - analysing the stages
+##TODOs -- need rows for the zeros for each size class missing from the samples
+
+stmod <- glmmTMB(maxn~bait + stage + (1|site),
+                 data = maxn.stage,
+                 family = "poisson")
+
+summary(stmod)
+
+
+stmod2 <- glmmTMB(maxn~bait*stage + (1|site),
+                  data = maxn.stage,
+                  family = 'poisson')
+summary(stmod2)
+
+unique(maxn.stage$stage)
+
+juvies <- maxn.stage %>%
+  dplyr::filter(stage %in% c("0300-0499 mm"))%>%
+  glimpse()
+
+# ggplot(juvies, aes(x = maxn)) +
+#   geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+#   labs(title = "Histogram of Maxn Values",
+#        x = "Maxn Value",
+#        y = "Count")
+
+j1 <- glmmTMB
 ################################################################################
 ################################################################################ 
 ## BEST MODEl
 
-best <- glmmTMB(maxn~bait + depth_m + (1|site), 
+best <- glmmTMB(maxn~bait  + (1|site), 
                data = sum.stage, 
                family = "nbinom2")
 
 
 summary(best)
 Anova(best, type = "III")
+post <- emmeans(best, ~ bait)
+pairs(post)
+
+
 
 b2 <- glmmTMB(maxn~bait + depth_m,
           data = sum.stage,

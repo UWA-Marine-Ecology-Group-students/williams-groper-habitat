@@ -298,3 +298,4 @@ dev.off()
 # # Close the PNG device
 # dev.off()
 
+aggregate(maxn ~ stage, data = maxn.stage, FUN = sum)

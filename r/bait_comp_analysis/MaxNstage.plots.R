@@ -132,6 +132,13 @@ ggplot(sum.stage, aes(x = depth_m, y = maxn, colour = bait))+
 
 
 
+ggplot(sum.stage, aes(x = depth_m, y = Macroalgae))+
+  geom_jitter(alpha = 0.5)+
+  geom_smooth(method = 'lm', se = T)+
+  # labs(x = "Depth (m)", y = "MaxN (stage)") + 
+  theme_cowplot()+
+  theme(legend.position = "none")
+
 
 ###################################
 #### mean relief

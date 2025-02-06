@@ -143,7 +143,7 @@ mapv2
 ##############################################################################
 #############################################################################
 ## map of aus with WA box to be used as an insert later
-aus.ins <-  
+# aus.ins <-  
   ggplot() +
   geom_sf(data = sf, fill = "#FFF5EE", color = "grey") +
   theme_cowplot()+
@@ -155,12 +155,13 @@ aus.ins <-
         axis.text.x = element_blank(),
         axis.text.y = element_blank(),
         axis.line.y = element_blank(),
-        axis.line.x = element_blank())+
-  annotate(
-    "rect", xmin = 112.55, xmax = 129.0, ymin = -35.27, ymax = -13.27,
-    alpha = 0.1, color = "black" 
-  )
+        axis.line.x = element_blank())#+
+  # annotate(
+  #   "rect", xmin = 122, xmax = 125, ymin = -34.15, ymax = -33.95,
+  #   alpha = 0.1, color = "black"
+  # )
 
+  
 ##############################################################################
 #############################################################################
 ## map of south west WA
