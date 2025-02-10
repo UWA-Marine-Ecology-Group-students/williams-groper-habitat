@@ -49,7 +49,6 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>%
   dplyr::ungroup()%>%
   left_join(habitat)%>%
-  left_join(site)%>%
   dplyr::mutate(site = as.factor(site))%>%
   dplyr::mutate(stage = as.factor(stage))%>%
   dplyr::filter(!stage %in% c("AD", "M", "F"))%>% #filtering out these
