@@ -14,7 +14,6 @@ library(car)
 #library(doSNOW)
 library(ggplot2)
 #library(corrr)
-#library(dplyr)
 library(lme4)
 library(cowplot)
 library(emmeans)
@@ -60,7 +59,6 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
   dplyr::summarise(maxn=sum(maxn))%>%
   dplyr::ungroup()%>%
   left_join(habitat)%>% #joining to habitat 
-  left_join(site)%>%
   dplyr::mutate(site = as.factor(site))%>%
   glimpse()
 
