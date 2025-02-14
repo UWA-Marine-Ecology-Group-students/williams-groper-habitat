@@ -34,6 +34,9 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
                 sand = "Unconsolidated (soft)")%>%
   glimpse()
 
+#ctrl - shift - m is %>% 
+# alt - is <- 
+
 
 ## MaxN by STAGE per OPCODE
 
