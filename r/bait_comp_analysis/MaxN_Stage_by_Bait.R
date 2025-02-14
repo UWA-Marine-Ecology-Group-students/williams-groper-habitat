@@ -41,7 +41,8 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
 ## MaxN by STAGE per OPCODE
 
 maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS") %>%
-  dplyr::mutate(species = "gouldii", bait = as.factor(bait), location = as.factor(location))%>%
+  dplyr::mutate(species = "gouldii", bait = as.factor(bait), 
+                location = as.factor(location))%>%
   dplyr::mutate(depth_m = as.numeric(depth_m))%>%
   dplyr::mutate(period = as.factor(period))%>%
   dplyr::mutate(date = substr(date_time, 1, 10))%>%
