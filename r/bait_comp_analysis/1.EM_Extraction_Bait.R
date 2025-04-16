@@ -55,6 +55,8 @@ site <- data.frame(
   dplyr::mutate(opcode = as.character(opcode))%>%
   glimpse()
 
+# write.csv(site, "site.csv", row.names = FALSE)
+
 #metadata (labsheet)
 metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"), method = "BRUVs") %>%
   dplyr::select(opcode, bait, longitude_dd, latitude_dd, date_time, location,
