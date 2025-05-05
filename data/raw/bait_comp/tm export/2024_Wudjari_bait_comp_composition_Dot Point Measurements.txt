@@ -1,8 +1,8 @@
 Dot Point Measurements
 
-Generated: Monday 05 May 2025 15:38:59
+Generated: Monday 05 May 2025 16:09:15
 
-Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	Latitude	Longitude	Rugosity	Depth	Collector	Fishing status	campaignid	relief_annotated	OpCode	Period	Frame info 3	Frame info 4	Frame info 5	Frame info 6	level_2	level_3	level_4	level_5	scientific	qualifiers			Radius %
+Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	Latitude	Longitude	Rugosity	Depth	Collector	Fishing status	campaignid	relief_annotated	OpCode	Period	Frame info 3	Frame info 4	Frame info 5	Frame info 6	level_2	level_3	level_4	level_5	scientific	qualifiers	check		Radius %
 001_A_01_GX013128.MP4_0023958.jpg	      0		767	1731											2024_Wudjari_bait_comp	No	001	A					Macroalgae	Filamentous / filiform							100.0
 001_A_01_GX013128.MP4_0023958.jpg	      0		1004	1370											2024_Wudjari_bait_comp	No	001	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				60.8
 001_A_01_GX013128.MP4_0023958.jpg	      0		948	156											2024_Wudjari_bait_comp	No	001	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				83.4
@@ -683,28 +683,26 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 037_A_01_L_GX012833.MP4_0004671.jpg	      0		543	1752											2024_Wudjari_bait_comp	No	037	A					Unscorable								94.9
 037_A_01_L_GX012833.MP4_0004671.jpg	      0		550	491											2024_Wudjari_bait_comp	No	037	A					Sponges								84.7
 037_A_01_L_GX012833.MP4_0004671.jpg	      0		1009	839											2024_Wudjari_bait_comp	No	037	A					Sessile invertebrates								40.1
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		988	1306											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Sheet-like / membraneous							67.4
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		911	244											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				61.2
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		1017	183											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				70.7
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		829	152											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				71.8
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		702	605											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				25.5
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		848	971											2024_Wudjari_bait_comp	No	038	A					Sponges								25.6
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		570	553											2024_Wudjari_bait_comp	No	038	A					Macroalgae								41.6
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		944	1016											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Articulated calcareous							32.8
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		1063	1318											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				71.4
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		723	1183											2024_Wudjari_bait_comp	No	038	A					Unscorable								53.3
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		1068	410											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				48.2
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		785	853											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				14.4
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		661	1120											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Globose / saccate							49.2
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		728	340											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				51.7
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		1042	568											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				31.4
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		874	837											2024_Wudjari_bait_comp	No	038	A					Sponges								10.0
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		814	1215											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Sheet-like / membraneous							55.0
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		1064	1467											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Sheet-like / membraneous							88.2
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		883	26											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				86.9
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		922	1593											2024_Wudjari_bait_comp	No	038	A					Unscorable								100.0
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		675	398											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				47.6
-038_A_01_L_GX012833.MP4_0006409.jpg	      0		702	255											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				62.2
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		792	331											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				53.7
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		557	1907											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Erect coarse branching							100.0
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		1071	1828											2024_Wudjari_bait_comp	No	038	A					Unscorable								96.0
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		781	502											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				37.1
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		906	1792											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Erect coarse branching							88.7
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		795	457											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Filamentous / filiform							41.6
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		597	1265											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Erect coarse branching							39.2
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		577	335											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				55.4
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		632	1186											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Encrusting							30.9
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		1008	1301											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				47.4
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		847	1881											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Erect coarse branching							96.4
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		712	1069											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Erect coarse branching							17.9
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		550	763											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Articulated calcareous							22.2
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		544	443											2024_Wudjari_bait_comp	No	038	A					Unscorable								46.8
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		972	15											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				86.8
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		594	270											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				61.1
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		951	648											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				30.4
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		578	88											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				78.6
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		597	451											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Filamentous / filiform							44.3
+038_A_01_L_GX012833.MP4_0006409.jpg	      0		821	1187											2024_Wudjari_bait_comp	No	038	A					Macroalgae	Sheet-like / membraneous							29.9
 039_A_01_L_GX010099.MP4_0004323.jpg	      0		786	916											2024_Wudjari_bait_comp	No	039	A					Sponges								20.3
 039_A_01_L_GX010099.MP4_0004323.jpg	      0		1003	13											2024_Wudjari_bait_comp	No	039	A					Macroalgae	Erect fine branching							89.8
 039_A_01_L_GX010099.MP4_0004323.jpg	      0		862	661											2024_Wudjari_bait_comp	No	039	A					Macroalgae	Articulated calcareous							11.3
@@ -985,27 +983,26 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 053_A_01_L_GX010103.MP4_0007755.jpg	      0		729	1653											2024_Wudjari_bait_comp	No	053	A					Macroalgae	Erect fine branching							80.7
 053_A_01_L_GX010103.MP4_0007755.jpg	      0		1071	1558											2024_Wudjari_bait_comp	No	053	A					Macroalgae	Erect fine branching							76.5
 053_A_01_L_GX010103.MP4_0007755.jpg	      0		869	392											2024_Wudjari_bait_comp	No	053	A					Macroalgae	Filamentous / filiform							71.0
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		935	793											2024_Wudjari_bait_comp	No	054	A					Unscorable								26.7
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		677	1806											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						96.5
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		938	1215											2024_Wudjari_bait_comp	No	054	A					Unscorable								31.5
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		682	1143											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						23.3
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		907	1465											2024_Wudjari_bait_comp	No	054	A					Unscorable								57.4
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		820	673											2024_Wudjari_bait_comp	No	054	A					Unscorable								35.6
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		744	1250											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						31.8
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		737	333											2024_Wudjari_bait_comp	No	054	A					Unscorable								75.3
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		906	123											2024_Wudjari_bait_comp	No	054	A					Unscorable								100.0
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		883	1077											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						14.7
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		962	1821											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						99.0
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		945	455											2024_Wudjari_bait_comp	No	054	A					Unscorable								63.1
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		594	1692											2024_Wudjari_bait_comp	No	054	A					Unscorable								85.7
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		914	335											2024_Wudjari_bait_comp	No	054	A					Unscorable								75.9
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		836	1221											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						28.1
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		615	541											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						55.2
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		958	997											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						18.4
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		692	942											2024_Wudjari_bait_comp	No	054	A					Unscorable								13.4
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		576	818											2024_Wudjari_bait_comp	No	054	A					Unscorable								32.1
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		881	1038											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						11.4
-054_A_01_L_GX012835.MP4_0012491.jpg	      0		610	860											2024_Wudjari_bait_comp	No	054	A					Unscorable								26.2
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		637	906											2024_Wudjari_bait_comp	No	054	A					Unscorable								17.7
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		774	484											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						48.0
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		930	429											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						56.5
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		820	885											2024_Wudjari_bait_comp	No	054	A					Unscorable								4.0
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		866	30											2024_Wudjari_bait_comp	No	054	A					Unscorable								100.0
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		585	1579											2024_Wudjari_bait_comp	No	054	A					Unscorable								80.1
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		840	686											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						25.6
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		575	1590											2024_Wudjari_bait_comp	No	054	A					Unscorable								81.6
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		544	1308											2024_Wudjari_bait_comp	No	054	A					Unscorable								53.8
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		875	1083											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						22.3
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		788	1428											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						59.4
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		544	1214											2024_Wudjari_bait_comp	No	054	A					Unscorable								45.1
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		836	317											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						67.2
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		1057	424											2024_Wudjari_bait_comp	No	054	A					Unscorable								62.5
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		641	453											2024_Wudjari_bait_comp	No	054	A					Unscorable								54.3
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		842	1346											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						50.4
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		1027	1328											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						54.9
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		856	1375											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						53.9
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		1055	1075											2024_Wudjari_bait_comp	No	054	A					Cnidaria	Corals	Stony corals						35.5
+054_A_01_L_GX012835.MP4_0012491.jpg	      0		757	177											2024_Wudjari_bait_comp	No	054	A					Unscorable								83.0
 055_A_01_L_GX012836.MP4_0003574.jpg	      0		734	1649											2024_Wudjari_bait_comp	No	055	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				53.3
 055_A_01_L_GX012836.MP4_0003574.jpg	      0		682	1037											2024_Wudjari_bait_comp	No	055	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				13.4
 055_A_01_L_GX012836.MP4_0003574.jpg	      0		895	1647											2024_Wudjari_bait_comp	No	055	A					Macroalgae	Large canopy-forming	Brown		Ecklonia radiata				53.3
