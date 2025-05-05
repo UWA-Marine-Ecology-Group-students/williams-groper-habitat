@@ -15,6 +15,7 @@ library(ggforce)
 library(scatterpie)
 library(cowplot)
 library(RColorBrewer)
+#install.packages("paletteer")
 library(paletteer)
 library(sf)
 
@@ -28,6 +29,26 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
                 sand = "Unconsolidated (soft)")%>%
   glimpse()
 
+
+## adding sites to METADATA
+site <- data.frame(
+  opcode = sprintf("%03d", 001:108),
+  stringsAsFactors = FALSE) %>%
+  dplyr::mutate(site= case_when(
+    between(as.numeric(opcode), 1, 18)  ~ "middle",
+    between(as.numeric(opcode), 19, 30) ~ "arid",
+    between(as.numeric(opcode), 31, 36) ~ "ruby",
+    between(as.numeric(opcode), 37, 48 ) ~ "ct",
+    between(as.numeric(opcode), 49,54 ) ~ "twin",
+    between(as.numeric(opcode), 55,66 ) ~ "mart",
+    between(as.numeric(opcode), 67,72 ) ~ "york",
+    between(as.numeric(opcode), 73,78 ) ~ "finger",
+    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
+    between(as.numeric(opcode), 91, 93 ) ~ "miss",
+    between(as.numeric(opcode), 94,102 ) ~ "lucky",
+    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
+  dplyr::mutate(opcode = as.character(opcode))%>%
+  glimpse()
   
 #read in maxn data and joining
 
@@ -41,13 +62,13 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::group_by(opcode)%>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
   dplyr::ungroup()%>%
-  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
+  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle", "mondrain", "legrande")))%>% #reordering
   left_join(habitat)%>%
   left_join(site)%>%
   dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
                 latitude_dd = as.numeric(latitude_dd))%>%
   dplyr::mutate(site = as.factor(site))%>%
-  dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
+  #dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   glimpse()
 
 ##### COLOUR SCHEMES
@@ -65,6 +86,24 @@ bait_col <- c("abalone" = "#27ae60",
 ## Date
 
 #scale_fill_paletteer_d("rcartocolor::BluGrn")+
+
+
+## plot Freq. distribution of MaxNs 
+## plot Frmin()eq. distribution of MaxNs 
+#
+ggplot(maxn.all, aes(x = maxn)) +
+   geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+   labs(title = "Histogram of Maxn Values",
+        x = "Maxn Value",
+        y = "Count") +
+   #scale_y_continuous(
+    # breaks = c(0, 10, 20, 30), 
+     #limits = c(0, 30)) +
+   scale_x_continuous(
+   breaks = c(0, 1, 2, 3, 4, 5, 6, 7))+
+   theme_cowplot()
+
+
 
 ##############
 ## habitat plots
@@ -137,7 +176,7 @@ ggplot(maxn.all, aes(x = bait, y = maxn, fill = bait)) +
   theme_cowplot()+
   theme(legend.position = "none")
 
-# Jitter Plot
+## Jitter Plot
 ggplot(maxn.all, aes(x = bait, y = maxn, colour = bait)) +
   geom_jitter(alpha = 0.5) +
   labs(x = "Bait", y = "MaxN", title = "MaxN by Bait")+
@@ -195,8 +234,9 @@ ggplot(maxn.all, aes(x = location, y = maxn)) +
   #   breaks = c(0, 5, 10, 15), 
   #   limits = c(0,15)) +
   stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )+
-  theme_cowplot()+
+  theme_cowplot()
 
+unique(maxn.all$location)
 
 #Dynamite Plot
 
@@ -206,7 +246,7 @@ ggplot(maxn.all, aes(x= location, y = maxn, fill = location))+
   labs(x = "Location", y = "Mean MaxN", title = "Dynamite Plot MaxN by Location")+
   scale_fill_paletteer_d("MetBrewer::Hokusai2")+
   scale_x_discrete(labels = c(
-    "Mart & York Is.", "Twin Peak Is.", "Cape Arid", "Middle Is."))+
+    "Mart & York Is.", "Twin Peak Is.", "Cape Arid", "Middle Is.", "Mondrain Is.", "Cape Le Grande)"))+
   theme_cowplot()+
   theme(legend.position = "none")
 
@@ -218,8 +258,8 @@ ggplot(maxn.all, aes(x= site, y = maxn, fill = location))+
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
   labs(x = "Site", y = "Mean MaxN", title = "Dynamite Plot MaxN by Site")+
   #scale_fill_paletteer_d("MetBrewer::Hokusai2")+
-  scale_x_discrete(labels = c(
-    "Mart Is.", "Twin Peak Is.", "CT Group", "Ruby Is.", "Cape Arid", "Middle Is."))+
+  #scale_x_discrete(labels = c(
+  #  "Mart Is.", "Twin Peak Is.", "CT Group", "Ruby Is.", "Cape Arid", "Middle Is."))+
   theme_cowplot()+
   labs(fill = "Location")
   #theme(legend.position = "none")
@@ -234,7 +274,7 @@ ggplot(maxn.all, aes(x = date, y = maxn, fill = date)) +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
   labs(x = "Date", y = "Mean MaxN", title = "Dynamite Plot MaxN by Date")+
   scale_x_discrete(labels = c(
-    "3rd Nov", "4th Nov", "5th Nov"))+
+    "3rd Nov", "4th Nov", "5th Nov", "6th Nov", "7th Nov"))+
   scale_fill_paletteer_d("rcartocolor::BluGrn")+
   theme_cowplot()+
   theme(legend.position = "none")

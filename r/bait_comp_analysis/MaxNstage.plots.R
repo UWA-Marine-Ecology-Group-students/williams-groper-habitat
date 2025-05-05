@@ -26,6 +26,25 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
   glimpse()
 
 
+## adding sites to METADATA
+site <- data.frame(
+  opcode = sprintf("%03d", 001:108),
+  stringsAsFactors = FALSE) %>%
+  dplyr::mutate(site= case_when(
+    between(as.numeric(opcode), 1, 18)  ~ "middle",
+    between(as.numeric(opcode), 19, 30) ~ "arid",
+    between(as.numeric(opcode), 31, 36) ~ "ruby",
+    between(as.numeric(opcode), 37, 48 ) ~ "ct",
+    between(as.numeric(opcode), 49,54 ) ~ "twin",
+    between(as.numeric(opcode), 55,66 ) ~ "mart",
+    between(as.numeric(opcode), 67,72 ) ~ "york",
+    between(as.numeric(opcode), 73,78 ) ~ "finger",
+    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
+    between(as.numeric(opcode), 91, 93 ) ~ "miss",
+    between(as.numeric(opcode), 94,102 ) ~ "lucky",
+    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
+  dplyr::mutate(opcode = as.character(opcode))%>%
+  glimpse()
 
 ## MaxN(stage) dataframe
 
@@ -39,13 +58,13 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   dplyr::group_by(opcode, stage)%>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>%
   dplyr::ungroup()%>%
-  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
+  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle", "mondrain", "legrande")))%>% #reordering
   left_join(habitat)%>%
   left_join(site)%>%
   dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
                 latitude_dd = as.numeric(latitude_dd))%>%
   dplyr::mutate(site = as.factor(site))%>%
-  dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
+  #dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   glimpse()
 
 ##DF with the MaxN per Stage summed for each opcode
@@ -61,8 +80,8 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
   dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
                 latitude_dd = as.numeric(latitude_dd))%>%
   dplyr::mutate(site = as.factor(site))%>%
-  dplyr::mutate(site = factor(site, 
-                              levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
+  #dplyr::mutate(site = factor(site, 
+  #                            levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   glimpse()
 
 ############################# 
@@ -220,8 +239,8 @@ ggplot(sum.stage, aes(x = location, y = maxn)) +
   scale_y_continuous(
     breaks = c(0, 5, 10, 15), 
     limits = c(0,15)) +
-  scale_x_discrete(limits = c("mart", "twin", "arid", "middle"),
-                   labels = c("Mart & York Is.", "Twin Peak Is.", "Cape Arid", "Middle Is."))+
+  #scale_x_discrete(limits = c("mart", "twin", "arid", "middle"),
+  #                 labels = c("Mart & York Is.", "Twin Peak Is.", "Cape Arid", "Middle Is."))+
   stat_summary( geom = "point", fun.y = "mean", col = "black", size = 3, shape = 24, fill = "red" )+
   theme_cowplot()
 
@@ -233,8 +252,8 @@ ggplot(sum.stage, aes(x= location, y = maxn, fill = location))+
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
   labs(x = "Location", y = "Mean MaxN", title = "Dynamite Plot MaxN(stage) by Location")+
   scale_fill_paletteer_d("MetBrewer::Hokusai2")+
-  scale_x_discrete(labels = c(
-    "Mart & York Is.", "Twin Peak Is.", "Cape Arid", "Middle Is."))+
+  #scale_x_discrete(labels = c(
+  #  "Mart & York Is.", "Twin Peak Is.", "Cape Arid", "Middle Is."))+
   theme_cowplot()+
   theme(legend.position = "none")
 
@@ -246,8 +265,8 @@ ggplot(sum.stage, aes(x= site, y = maxn, fill = location))+
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
   labs(x = "Site", y = "Mean MaxN", title = "Dynamite Plot MaxN(stage) by Site")+
   #scale_fill_paletteer_d("MetBrewer::Hokusai2")+
-  scale_x_discrete(labels = c(
-    "Mart Is.", "Twin Peak Is.", "CT Group", "Ruby Is.", "Cape Arid", "Middle Is."))+
+  #scale_x_discrete(labels = c(
+  #  "Mart Is.", "Twin Peak Is.", "CT Group", "Ruby Is.", "Cape Arid", "Middle Is."))+
   theme_cowplot()+
   labs(fill = "Location")
 #theme(legend.position = "none")
@@ -273,7 +292,7 @@ dat <- maxn.stage %>%
   dplyr::filter(maxn != 0)%>% #filtering out zeros
   dplyr::mutate(stage = as.factor(stage))%>%
   dplyr::filter(!stage %in% c("AD", "M", "F"))%>% #filtering out these
-  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
+  #dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
   glimpse()
 
 summary(dat$maxn)
@@ -295,19 +314,19 @@ ggplot(dat, aes(x = stage, y = maxn, fill = stage)) +
   stat_summary(fun = mean, geom = "bar", width = 0.6) +  # Bar plot with mean
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5, color = "black") +  # SE as error bars
   labs(x = "Size Class", y = "mean MaxN +/- se") +
-  facet_wrap(.~location, nrow = 2, ncol = 2,
+  facet_wrap(.~location, nrow = 3, ncol = 3,
              labeller = labeller(location = c("mart" = "Mart & York Islands", 
                                               "twin" = "Twin Peak Islands", 
                                               "arid" = "Cape Arid",
                                               "middle" = "Middle Island")))+
-  scale_fill_manual(values = color_palette)+
+  #scale_fill_manual(values = color_palette)+
   theme_cowplot()+
   theme(legend.position = "none")
 
 
 ################
 ### MAXN by bait faceted by size class
-maxnstage.bait <-
+#maxnstage.bait <-
 ggplot(dat, aes(x = bait, y = maxn, fill = bait)) +
   stat_summary(fun = mean, geom = "bar", width = 0.6) +  # Bar plot with mean
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5, color = "black") +  # SE as error bars

@@ -36,24 +36,24 @@ unique(period$opcode)
 which(is.na(period$period))
 
 ## adding sites to METADATA
-site <- data.frame(
-  opcode = sprintf("%03d", 001:108),
-  stringsAsFactors = FALSE) %>%
-  dplyr::mutate(site= case_when(
-    between(as.numeric(opcode), 1, 18)  ~ "middle",
-    between(as.numeric(opcode), 19, 30) ~ "arid",
-    between(as.numeric(opcode), 31, 36) ~ "ruby",
-    between(as.numeric(opcode), 37, 48 ) ~ "ct",
-    between(as.numeric(opcode), 49,54 ) ~ "twin",
-    between(as.numeric(opcode), 55,66 ) ~ "mart",
-    between(as.numeric(opcode), 67,72 ) ~ "york",
-    between(as.numeric(opcode), 73,78 ) ~ "finger",
-    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
-    between(as.numeric(opcode), 91, 93 ) ~ "miss",
-    between(as.numeric(opcode), 94,102 ) ~ "lucky",
-    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
-  dplyr::mutate(opcode = as.character(opcode))%>%
-  glimpse()
+#site <- data.frame(
+#  opcode = sprintf("%03d", 001:108),
+#  stringsAsFactors = FALSE) %>%
+#  dplyr::mutate(site= case_when(
+#    between(as.numeric(opcode), 1, 18)  ~ "middle",
+#    between(as.numeric(opcode), 19, 30) ~ "arid",
+#    between(as.numeric(opcode), 31, 36) ~ "ruby",
+#    between(as.numeric(opcode), 37, 48 ) ~ "ct",
+#    between(as.numeric(opcode), 49,54 ) ~ "twin",
+#    between(as.numeric(opcode), 55,66 ) ~ "mart",
+#    between(as.numeric(opcode), 67,72 ) ~ "york",
+#    between(as.numeric(opcode), 73,78 ) ~ "finger",
+#    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
+#    between(as.numeric(opcode), 91, 93 ) ~ "miss",
+#    between(as.numeric(opcode), 94,102 ) ~ "lucky",
+#    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
+#  dplyr::mutate(opcode = as.character(opcode))%>%
+#  glimpse()
 
 # write.csv(site, "site.csv", row.names = FALSE)
 
@@ -65,7 +65,7 @@ metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"), method =
   dplyr::mutate(date_time = mdy_hm(date_time, tz = "GMT")) %>% 
   dplyr::mutate(date_time = with_tz(date_time, tzone = "Asia/Singapore"))%>%
   dplyr::mutate(date_time = format(date_time, "%Y/%m/%dT%H:%M:%S")) %>%
-  left_join(site)%>%
+#  left_join(site)%>%
   glimpse()
 
 

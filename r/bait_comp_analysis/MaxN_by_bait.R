@@ -54,8 +54,7 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
   dplyr::ungroup()%>%
   left_join(habitat)%>% #joining to habitat 
-  left_join(site)%>%
-  dplyr::mutate(site = as.factor(site))%>%
+  #dplyr::mutate(site = as.factor(site))%>%
   glimpse()
 
 # summary(maxn.all)
