@@ -1,8 +1,8 @@
 Dot Point Measurements
 
-Generated: Monday 05 May 2025 15:39:00
+Generated: Monday 05 May 2025 16:09:15
 
-Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	Latitude	Longitude	Rugosity	Depth	Collector	Fishing status	campaignid	relief_annotated	OpCode	Period	Frame info 3	Frame info 4	Frame info 5	Frame info 6	level_2	level_3	level_4	level_5	scientific	qualifiers			Radius %
+Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	Latitude	Longitude	Rugosity	Depth	Collector	Fishing status	campaignid	relief_annotated	OpCode	Period	Frame info 3	Frame info 4	Frame info 5	Frame info 6	level_2	level_3	level_4	level_5	scientific	qualifiers	check		Radius %
 001_A_01_GX013128.MP4_0023958.jpg	      0		139	196											2024_Wudjari_bait_comp	Yes	001	A													100.0
 001_A_01_GX013128.MP4_0023958.jpg	      0		406	196											2024_Wudjari_bait_comp	Yes	001	A													89.9
 001_A_01_GX013128.MP4_0023958.jpg	      0		674	196											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					89.9
