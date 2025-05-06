@@ -58,6 +58,21 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   glimpse()
 
 
+### adding in zeros where sizeclass wasn't seen
+
+all_size_classes <- c("0300-0499 mm", "0500-0699 mm", "0700-0899 mm", "0900-1099 mm", "1100-1299mm")
+
+# Fill in missing combinations
+maxn.stage <- maxn.stage %>%
+  complete(opcode, stage = all_size_classes, fill = list(maxn = 0))%>%
+  dplyr::mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
+  dplyr::mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
+  dplyr::mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
+  glimpse()
+
+### 
+
+
 sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
   dplyr::group_by(opcode, family, genus, species, bait, longitude_dd, latitude_dd,date_time, location, depth_m, date, time) %>%
   dplyr::summarise(maxn=sum(maxn))%>%
