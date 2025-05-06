@@ -57,11 +57,11 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   #dplyr::mutate(site = as.factor(site))%>%
   glimpse()
 
-# summary(maxn.all)
+ #summary(maxn.all)
 
 ## summary stas for bait
 
-# aggregate(maxn ~ bait, data = maxn.all, FUN = mean)
+aggregate(maxn ~ bait, data = maxn.all, FUN = mean)
 
 ## plot Freq. distribution of MaxNs ## plot Frmin()eq. distribution of MaxNs 
 #

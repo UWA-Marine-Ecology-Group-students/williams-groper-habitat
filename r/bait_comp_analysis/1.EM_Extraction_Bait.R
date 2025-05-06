@@ -61,7 +61,7 @@ which(is.na(period$period))
 metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"), method = "BRUVs") %>%
   dplyr::select(opcode, bait, longitude_dd, latitude_dd, date_time, location,
                 depth_m, successful_count, successful_habitat_forward, 
-                maxn_by_size, behaviour_success, approach_success) %>%
+                maxn_by_size, behaviour_success, approach_success, site) %>%
   dplyr::mutate(date_time = mdy_hm(date_time, tz = "GMT")) %>% 
   dplyr::mutate(date_time = with_tz(date_time, tzone = "Asia/Singapore"))%>%
   dplyr::mutate(date_time = format(date_time, "%Y/%m/%dT%H:%M:%S")) %>%

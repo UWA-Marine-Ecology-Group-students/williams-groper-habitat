@@ -37,7 +37,7 @@ metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")%>%
 #Load the habitat data and format it into ‘broad’ classes for modelling. 
 
 habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_habitat.rds")%>%
-  dplyr::mutate(
+    dplyr::mutate(
     habitat = case_when(level_2 %in% "Macroalgae" & !level_3 %in% "Large canopy-forming" ~ level_2, 
                         level_2 %in% "Macroalgae" & genus %in% "Scytothalia" ~ "Scytothalia",
                         level_2 %in% "Macroalgae" & genus %in% "Ecklonia" ~ "Ecklonia",
@@ -47,7 +47,9 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_habitat.rds")%>%
                         level_2 %in% "Sponges" ~ "Sessile invertebrates", 
                         level_2 %in% "Sessile invertebrates" ~ level_2, 
                         level_2 %in% "Ascidians" ~ "Sessile invertebrates", 
-                        level_2 %in% "Cnidaria" ~ "Sessile invertebrates")) %>% 
+                        level_2 %in% "Cnidaria" ~ "Sessile invertebrates",
+                        level_2 %in% "Fishes" ~ level_2,
+                        level_2 %in% "Seagrasses" & genus %in% "Posidonia" ~ "Posidonia")) %>% 
   dplyr::mutate(habitat = ifelse(level_2 == "Macroalgae" & 
                                  level_3 == "Large canopy-forming" &
                                  is.na(habitat), "Canopy", habitat))%>%
@@ -55,7 +57,7 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_habitat.rds")%>%
   group_by(campaignid, opcode, habitat) %>% 
   dplyr::tally(number, name = "number") %>% 
   dplyr::mutate(total_points_annotated = sum(number)) %>% 
-  ungroup() %>% 
+  ungroup()%>% 
   pivot_wider(names_from = "habitat", values_from = "number", values_fill = 0) %>%
   dplyr::mutate(reef = Macroalgae + `Sessile invertebrates` + 
                   `Consolidated (hard)` + Canopy + 
@@ -68,7 +70,9 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_habitat.rds")%>%
                         "Sessile invertebrates", 
                         "Consolidated (hard)", 
                         "Unconsolidated (soft)", 
-                        "reef"), 
+                        "reef",
+                        "Fishes",
+                        "Posidonia"), 
                names_to = "habitat", values_to = "number") %>%
   glimpse()
 
@@ -87,15 +91,17 @@ tidy.relief <- readRDS("./data/tidy/2024_Wudjari_bait_comp_relief.rds") %>%
 
 # Join the habitat data with relief, & metadata
 tidy.habitat <- metadata %>%
-  left_join(habitat) %>%
+  left_join(habitat) %>% 
   left_join(tidy.relief) %>%
   dplyr::mutate(longitude_dd = as.numeric(longitude_dd),
                 latitude_dd = as.numeric(latitude_dd)) %>%
   clean_names() %>%
   dplyr::select(-c(campaignid))%>%
-  dplyr::filter(successful_habitat_forward == "Yes")%>%
+  dplyr::filter(successful_habitat_forward == "Yes")%>% #046 all unscorable = NAs here
   glimpse()
 
+
+unique(tidy.habitat$habitat)
 # Plot the occurence data per habitat class. Each data point represents a unique sample.
 
 plot.habitat<- tidy.habitat %>%
