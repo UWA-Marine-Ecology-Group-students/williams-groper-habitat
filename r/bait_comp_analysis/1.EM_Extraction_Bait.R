@@ -35,27 +35,6 @@ unique(period$opcode)
 
 which(is.na(period$period))
 
-## adding sites to METADATA
-#site <- data.frame(
-#  opcode = sprintf("%03d", 001:108),
-#  stringsAsFactors = FALSE) %>%
-#  dplyr::mutate(site= case_when(
-#    between(as.numeric(opcode), 1, 18)  ~ "middle",
-#    between(as.numeric(opcode), 19, 30) ~ "arid",
-#    between(as.numeric(opcode), 31, 36) ~ "ruby",
-#    between(as.numeric(opcode), 37, 48 ) ~ "ct",
-#    between(as.numeric(opcode), 49,54 ) ~ "twin",
-#    between(as.numeric(opcode), 55,66 ) ~ "mart",
-#    between(as.numeric(opcode), 67,72 ) ~ "york",
-#    between(as.numeric(opcode), 73,78 ) ~ "finger",
-#    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
-#    between(as.numeric(opcode), 91, 93 ) ~ "miss",
-#    between(as.numeric(opcode), 94,102 ) ~ "lucky",
-#    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
-#  dplyr::mutate(opcode = as.character(opcode))%>%
-#  glimpse()
-
-# write.csv(site, "site.csv", row.names = FALSE)
 
 #metadata (labsheet)
 metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"), method = "BRUVs") %>%
@@ -108,11 +87,17 @@ maxn.all <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
   dplyr::mutate(maxn=as.numeric(maxn))%>%
   glimpse()
 
+unique(maxn.all$species)
 
 maxn.all <- maxn.all%>%
   mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
   mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
   mutate(species = ifelse(is.na(species), 'gouldii', species))
+
+unique(maxn.all$species)
+
+
+### 
  
 
 count.maxn.all <- maxn.all%>%
@@ -153,13 +138,30 @@ maxn.stage <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
   dplyr::mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
   glimpse()
 
+unique(maxn.stage$stage)
+unique(maxn.stage$species)
 
+### adding in zeros where sizeclass wasn't seen
+
+all_size_classes <- c("0300-0499 mm", "0500-0699 mm", "0700-0899 mm", "0900-1099 mm", "1100-1299mm")
+
+# Fill in missing combinations
+test <- maxn.stage %>%
+  tidyr::complete(nesting(opcode, sample, period), stage = all_size_classes, fill = list(maxn = 0))%>% #remove this row
+  #tidyr::complete(nesting(opcode), stage = all_size_classes, fill = list(maxn = 0))%>%
+  dplyr::mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
+  dplyr::mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
+  dplyr::mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
+  glimpse()
+
+##
 count.maxn.stage <- maxn.stage%>%
   full_join(metadata)%>%
   dplyr::filter(successful_count == "Yes")%>%
   glimpse()
 
 unique(count.maxn.stage$opcode)
+unique(count.maxn.stage$stage)
 
 saveRDS(count.maxn.stage, file = here::here(paste0("./data/tidy/",
                                                  name, "_count.maxn.stage.rds")))
