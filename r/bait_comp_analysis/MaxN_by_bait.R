@@ -54,29 +54,51 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
   dplyr::ungroup()%>%
   left_join(habitat)%>% #joining to habitat 
-  #dplyr::mutate(site = as.factor(site))%>%
+  dplyr::mutate(site = as.factor(site))%>%
   glimpse()
 
- #summary(maxn.all)
+########
+## SUMMARY STATS
 
-## summary stas for bait
+aggregate(maxn ~ bait, data = maxn.all, FUN = mean) #means per type
+aggregate(maxn ~ bait, data = maxn.all, FUN = median)
+aggregate(maxn ~ bait, data = maxn.all, FUN = min)
+aggregate(maxn ~ bait, data = maxn.all, FUN = max)
+aggregate(maxn ~ bait, data = maxn.all, FUN = sd)
 
-aggregate(maxn ~ bait, data = maxn.all, FUN = mean)
+summary(maxn.all$bait) #number of drops per bamin()summary(maxn.all$bait) #number of drops per bait type
+
+# dataframe of depth distributions across drops
+df_summary <- maxn.all %>%
+  group_by(bait) %>%
+  summarise(
+    mean_depth = mean(depth_m, na.rm = TRUE),
+    median_depth = median(depth_m, na.rm = TRUE),
+    min_depth = min(depth_m, na.rm = TRUE),
+    max_depth = max(depth_m, na.rm = TRUE),
+    range_depth = max_depth - min_depth
+  )
+
+df_summary
+
+#check No samples per location
+summary(maxn.all$location)
 
 ## plot Freq. distribution of MaxNs ## plot Frmin()eq. distribution of MaxNs 
 #
-# ggplot(maxn.all, aes(x = maxn)) +
-#   geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
-#   labs(title = "Histogram of Maxn Values",
-#        x = "Maxn Value",
-#        y = "Count") +
-#   scale_y_continuous(
-#     breaks = c(0, 10, 20, 30), 
-#     limits = c(0, 30)) +
-#   scale_x_continuous(
-#   breaks = c(0, 1, 2, 3, 4, 5))+
-#   theme_cowplot()
+ggplot(maxn.all, aes(x = maxn)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Maxn Values",
+       x = "Maxn Value",
+       y = "Count") +
+  # scale_y_continuous(
+  #   breaks = c(0, 10, 20, 30),
+  #   limits = c(0, 30)) +
+  # scale_x_continuous(
+  # breaks = c(0, 1, 2, 3, 4, 5))+
+  theme_cowplot()
 # 
+
 
 
 ##########################################################################

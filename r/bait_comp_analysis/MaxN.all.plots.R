@@ -30,25 +30,7 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
   glimpse()
 
 
-## adding sites to METADATA
-site <- data.frame(
-  opcode = sprintf("%03d", 001:108),
-  stringsAsFactors = FALSE) %>%
-  dplyr::mutate(site= case_when(
-    between(as.numeric(opcode), 1, 18)  ~ "middle",
-    between(as.numeric(opcode), 19, 30) ~ "arid",
-    between(as.numeric(opcode), 31, 36) ~ "ruby",
-    between(as.numeric(opcode), 37, 48 ) ~ "ct",
-    between(as.numeric(opcode), 49,54 ) ~ "twin",
-    between(as.numeric(opcode), 55,66 ) ~ "mart",
-    between(as.numeric(opcode), 67,72 ) ~ "york",
-    between(as.numeric(opcode), 73,78 ) ~ "finger",
-    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
-    between(as.numeric(opcode), 91, 93 ) ~ "miss",
-    between(as.numeric(opcode), 94,102 ) ~ "lucky",
-    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
-  dplyr::mutate(opcode = as.character(opcode))%>%
-  glimpse()
+
   
 #read in maxn data and joining
 
@@ -62,9 +44,8 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::group_by(opcode)%>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>% # sliced the highest maxN by opcode 
   dplyr::ungroup()%>%
-  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle", "mondrain", "legrande")))%>% #reordering
+  dplyr::mutate(location = factor(location, levels = c("legrande", "mondrain", "mart", "twin", "arid", "middle")))%>% #reordering
   left_join(habitat)%>%
-  left_join(site)%>%
   dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
                 latitude_dd = as.numeric(latitude_dd))%>%
   dplyr::mutate(site = as.factor(site))%>%
@@ -194,8 +175,8 @@ ggplot(maxn.all, aes(x= bait, y = maxn, fill = bait))+
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
   labs(x = "Bait Type", y = "Mean MaxN", title = "Dynamite Plot MaxN by Bait Type")+
   scale_fill_manual(values = bait_col)+
-  # scale_y_continuous(
-  #     breaks = c(0, 0.5, 1.0, 1.5, 2.0), 
+  # scale_y_discrete(
+  #     breaks = c(0, 0.5, 1.0, 1.5, 2.0),
   #     limits = c(0,2)) +
   scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
   theme_cowplot()+
