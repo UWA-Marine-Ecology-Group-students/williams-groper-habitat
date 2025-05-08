@@ -102,6 +102,7 @@ tidy.habitat <- metadata %>%
 
 
 unique(tidy.habitat$habitat)
+
 # Plot the occurence data per habitat class. Each data point represents a unique sample.
 
 plot.habitat<- tidy.habitat %>%

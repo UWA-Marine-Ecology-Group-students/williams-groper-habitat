@@ -23,38 +23,17 @@ library(lubridate)
 #set study name
 name <- "2024_Wudjari_bait_comp"
 
-## periods -- 
-
-period <- read_periods(here::here("./data/raw/bait_comp/em export")) %>%
-  dplyr::mutate(sample = paste(opcode, period, sep = "_"))%>%
-  dplyr::select(opcode, period, sample)%>%
-  glimpse()
-
-unique(period$period)
-unique(period$opcode)
-
-which(is.na(period$period))
-
 
 #metadata (labsheet)
-metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"), method = "BRUVs") %>%
+metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"), 
+                          method = "BRUVs") %>%
   dplyr::select(opcode, bait, longitude_dd, latitude_dd, date_time, location,
                 depth_m, successful_count, successful_habitat_forward, 
                 maxn_by_size, behaviour_success, approach_success, site) %>%
   dplyr::mutate(date_time = mdy_hm(date_time, tz = "GMT")) %>% 
   dplyr::mutate(date_time = with_tz(date_time, tzone = "Asia/Singapore"))%>%
   dplyr::mutate(date_time = format(date_time, "%Y/%m/%dT%H:%M:%S")) %>%
-#  left_join(site)%>%
   glimpse()
-
-
-
-##create 'samples' in metadata
-# metadata <- period %>%
-#   dplyr::full_join(metadata, by="opcode")%>%
-#   glimpse()
-
-unique(metadata$opcode)
 
 #saving metadata as RDS
 saveRDS(metadata, file = here::here(paste0("./data/tidy/",
@@ -64,117 +43,77 @@ saveRDS(metadata, file = here::here(paste0("./data/tidy/",
 ######### COUNT DATA ###########
 ################################
 
-###############################
-## points -- maxn for all classes per period ##########
-#################################
+############################
+## points -- MaxN ##########
+############################
 
 metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")
 
 maxn.all <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
-  #dplyr::mutate(sample = paste(opcode, period, sep = "_"))%>%
   dplyr::filter(genus %in% "Achoerodus") %>%
-  dplyr::group_by(sample,filename,opcode,period,frame,family,genus,species, periodtime)%>%
+  dplyr::group_by(filename,opcode,frame,family,genus,species, periodtime)%>%
   ## frame is very important
   dplyr::mutate(number=as.numeric(number))%>%
   dplyr::summarise(maxn=sum(number))%>%
-  dplyr::group_by(sample,opcode, period, family,genus,species)%>%
-  # don't care about frame here anymore, just want to group by period and opcode
+  dplyr::group_by(opcode,family,genus,species)%>%
   dplyr::slice(which.max(maxn))%>%
   dplyr::ungroup()%>%#we don't care about grouping anymore
-  dplyr::full_join(period)%>%
   dplyr::select(-c(frame, filename))%>% #remove frame wth -
-  tidyr::replace_na(list(maxn=0))%>% #change any NAs to 0
-  dplyr::mutate(maxn=as.numeric(maxn))%>%
-  glimpse()
-
-unique(maxn.all$species)
-
-maxn.all <- maxn.all%>%
+  full_join(metadata)%>%
   mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
   mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
-  mutate(species = ifelse(is.na(species), 'gouldii', species))
-
-unique(maxn.all$species)
-
-
-### 
- 
-
-count.maxn.all <- maxn.all%>%
-  full_join(metadata)%>%
-  dplyr::filter(successful_count == "Yes")%>%
+  mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
+  tidyr::replace_na(list(maxn=0))%>%
   glimpse()
 
-unique(count.maxn.all$opcode)
+
+count.maxn.all <- maxn.all%>%
+  dplyr::filter(successful_count == "Yes")%>%
+  glimpse()
 
 saveRDS(count.maxn.all, file = here::here(paste0("./data/tidy/",
                                            name, "_count.maxn.all.rds")))
 
 
-################################################
-## points -- maxn by stage per period ##########
-################################################
+###############################################
+## points -- maxn by stage BY OPCODE ##########
+###############################################
 
 #by stage
 metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds") ##remove sample & period here?
 
 maxn.stage <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
-  #dplyr::mutate(sample = paste(opcode, period, sep = "_"))%>%
   dplyr::filter(genus %in% "Achoerodus") %>%
-  dplyr::group_by(filename,opcode,period,frame,family,genus,species,stage, periodtime)%>% #took sample out
+  dplyr::group_by(filename,opcode,frame,family,genus,species,stage,periodtime)%>% 
   ## frame is very important
   dplyr::mutate(number=as.numeric(number))%>%
   dplyr::summarise(maxn=sum(number))%>%
-  dplyr::group_by(opcode, family, genus,species, stage)%>% #removed sample & period
-  # don't care about frame here anymore, just want to group by opcode  
+  dplyr::group_by(opcode, family, genus,species, stage)%>% 
   dplyr::slice(which.max(maxn))%>%
   dplyr::ungroup()%>%#we don't care about grouping anymore
-  #dplyr::full_join(period)%>%
   dplyr::select(-c(frame, filename))%>% #remove frame wth - 
-#######  ### everything below here might be redundant -- check tomorrow #######################
-  tidyr::replace_na(list(maxn=0))%>% #change any NAs to 0
-  dplyr::mutate(maxn=as.numeric(maxn))%>%
-  dplyr::mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
-  dplyr::mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
-  dplyr::mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
   glimpse()
 
-unique(maxn.stage$stage)
-unique(maxn.stage$species)
-length(unique(maxn.stage$opcode)) # above has only give me the 83 that had bluegroper
-##
+#adding zeros for all size classes
+
+all_size_classes <- c("0300-0499 mm", "0500-0699 mm", "0700-0899 mm", 
+                      "0900-1099 mm", "1100-1299mm", "M", "F", "AD")
 
 count.maxn.stage <- maxn.stage%>%
   full_join(metadata)%>%
+  mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
+  mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
+  mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
+  mutate(stage = ifelse(is.na(stage), "AD", stage))%>%
+  tidyr::replace_na(list(maxn=0))%>%
   dplyr::filter(successful_count == "Yes")%>%
-  glimpse()
-
-length(unique(count.maxn.stage$opcode)) #101 opcodes - correct
-unique(count.maxn.stage$stage) #NAs in stage
-stage.na <- count.maxn.stage %>% filter(is.na(stage))%>%
-  glimpse()
-
-
-################# TO DOOOOOOO -- add in zeros - 
-### adding in zeros where sizeclass wasn't seen
-
-all_size_classes <- c("0300-0499 mm", "0500-0699 mm", "0700-0899 mm", "0900-1099 mm", "1100-1299mm", "M", "F", "AD")
-
-# Fill in missing combinations
-test <- count.maxn.stage %>%
-  #tidyr::complete(nesting(opcode, sample, period), stage = all_size_classes, fill = list(maxn = 0))%>% #remove this row
   tidyr::complete(nesting(opcode), stage = all_size_classes, fill = list(maxn = 0))%>%
-  dplyr::mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
-  dplyr::mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
-  dplyr::mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
+  mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
+  mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
+  mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
+  #left_join(metadata)%>% ######## FIGURE OUT THE JOIN
   glimpse()
 
-unique(test$opcode)
-length(unique(test$opcode))
-unique(test$stage)
-which(test$stage == "NA")
-test %>% filter(is.na(stage))
-unique(test$species)
 
 saveRDS(count.maxn.stage, file = here::here(paste0("./data/tidy/",
                                                  name, "_count.maxn.stage.rds")))
