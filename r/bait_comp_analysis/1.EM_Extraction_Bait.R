@@ -72,32 +72,6 @@ maxn.all <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
   tidyr::replace_na(list(maxn=0))%>%
   glimpse()
 
-### TODO
-#making sure maxn is first occurrence and editing the periodtime cols
-
-test <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
-  dplyr::mutate(periodtime = as.numeric(periodtime),
-                periodtime = case_when(
-                  period == "B" ~ periodtime + 15,
-                  period == "C" ~ periodtime + 30,
-                  period == "D" ~ periodtime + 45,
-                  TRUE ~ periodtime))%>%
-  dplyr::filter(genus %in% "Achoerodus") %>%
-  dplyr::group_by(filename,opcode,frame,family,genus,species, periodtime)%>%
-  ## frame is very important
-  dplyr::mutate(number=as.numeric(number))%>%
-  dplyr::summarise(maxn=sum(number))%>%
-  dplyr::group_by(opcode,family,genus,species)%>%
-  dplyr::slice(which.max(maxn))%>%
-  dplyr::ungroup()%>%#we don't care about grouping anymore
-  dplyr::select(-c(frame, filename))%>% #remove frame wth -
-  full_join(metadata)%>%
-  mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
-  mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
-  mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
-  tidyr::replace_na(list(maxn=0))%>%
-  glimpse()
-
 
 count.maxn.all <- maxn.all%>%
   dplyr::filter(successful_count == "Yes")%>%
@@ -115,6 +89,12 @@ saveRDS(count.maxn.all, file = here::here(paste0("./data/tidy/",
 metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds") 
 
 maxn.stage <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
+  dplyr::mutate(periodtime = as.numeric(periodtime),
+                periodtime = case_when(
+                  period == "B" ~ periodtime + 15,
+                  period == "C" ~ periodtime + 30,
+                  period == "D" ~ periodtime + 45,
+                  TRUE ~ periodtime))%>%
   dplyr::filter(genus %in% "Achoerodus") %>%
   dplyr::group_by(filename,opcode,frame,family,genus,species,stage,periodtime)%>% 
   ## frame is very important

@@ -29,7 +29,7 @@ metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")
 points <- read_TM(here::here("./data/raw/bait_comp/tm export"),
                   sample = "opcode")
 
-unique(points$relief_annotated)
+summary(points)
 #Filter the data to only include habitat annotations.
 
 habitat <- points %>%
@@ -37,6 +37,8 @@ habitat <- points %>%
   dplyr::select(campaignid, sample, starts_with("level"), scientific) %>%
   dplyr::rename(opcode = sample)%>%
   glimpse()
+
+length(unique(habitat$opcode)) #should be 102 as 6 nos in metadata
 
 #Filter the data to only include relief annotations.
 
@@ -46,6 +48,7 @@ relief <- points %>%
   dplyr::rename(opcode = sample)%>%
   glimpse()
 
+length(unique(relief$opcode)) #should be 102
 
 ### CHECKING FOR ERRORS
 num.points <- 20
@@ -56,11 +59,6 @@ wrong.points.habitat <- habitat %>%
   group_by(opcode) %>%
   summarise(points.annotated = n()) %>%
   left_join(metadata) %>%
-  # dplyr::mutate(expected = case_when(
-  #   successful_habitat_forward %in% "Yes" & successful_habitat_backward %in% "Yes" ~ num.points * 2, 
-  #   successful_habitat_forward %in% "Yes" & successful_habitat_backward %in% "No" ~ num.points * 1, 
-  #   successful_habitat_forward %in% "No" & successful_habitat_backward %in% "Yes" ~ num.points * 1, 
-  #   successful_habitat_forward %in% "No" & successful_habitat_backward %in% "No" ~ num.points * 0)) %>%
   dplyr::mutate(expected = case_when(
     successful_habitat_forward %in% "Yes" ~ num.points * 1,
     successful_habitat_forward %in% "No" ~  num.points * 0))%>%                               
@@ -73,7 +71,6 @@ wrong.points.relief <- relief %>%
   group_by(opcode) %>%
   summarise(points.annotated = n()) %>%
   left_join(metadata) %>%
-  #dplyr::mutate(expected = case_when(successful_habitat_forward %in% "Yes" & successful_habitat_backward %in% "Yes" ~ num.points * 2, successful_habitat_forward %in% "Yes" & successful_habitat_backward %in% "No" ~ num.points * 1, successful_habitat_forward %in% "No" & successful_habitat_backward %in% "Yes" ~ num.points * 1, successful_habitat_forward %in% "No" & successful_habitat_backward %in% "No" ~ num.points * 0)) %>%
   dplyr::mutate(expected = case_when(
     successful_habitat_forward %in% "Yes" ~ num.points * 1,
     successful_habitat_forward %in% "No" ~  num.points * 0))%>%
@@ -87,10 +84,7 @@ habitat.missing.metadata <- anti_join(habitat, metadata, by = c("opcode")) %>%
 
 ## checking which samples in metadata are missing habitat
 metadata.missing.habitat <- anti_join(metadata, habitat, by = c("opcode")) %>%
-  glimpse()
-
-unique(metadata.missing.habitat$successful_habitat_forward)
-unique(metadata.missing.habitat$successful_count)
+  glimpse() #should be 6
 
 ######
 ## checking same as above for relief
@@ -101,12 +95,9 @@ relief.missing.metadata <- anti_join(relief, metadata, by = c("opcode")) %>%
 metadata.missing.relief<- anti_join(metadata, habitat, by = c("opcode")) %>%
   glimpse()
 
-unique(metadata.missing.relief$successful_habitat_forward)
-unique(metadata.missing.relief$successful_count)
-
 ##########################
 ## FORMAT & TIDY FINAL DATASET
-catami <- catami
+#catami <- catami
 
 tidy.habitat <- habitat %>%
   dplyr::mutate(number = 1) %>%  

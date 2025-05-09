@@ -30,25 +30,23 @@ name <- "2024_Wudjari_bait_comp"
 
 #read in metadata -- with period and sample removed
 metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")%>%
-  dplyr::select(-c("period", "sample"))%>% # don't need period or sample for this
-  dplyr::distinct(across(everything()))%>% # removing duplicates of opcodes 
   glimpse()
 
 #Load the habitat data and format it into ‘broad’ classes for modelling. 
 
 habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_habitat.rds")%>%
-    dplyr::mutate(
-    habitat = case_when(level_2 %in% "Macroalgae" & !level_3 %in% "Large canopy-forming" ~ level_2, 
+  dplyr::mutate(
+    habitat = case_when(level_2 %in% "Macroalgae" & !level_3 %in% "Large canopy-forming" ~ "Macroalgae", 
                         level_2 %in% "Macroalgae" & genus %in% "Scytothalia" ~ "Scytothalia",
                         level_2 %in% "Macroalgae" & genus %in% "Ecklonia" ~ "Ecklonia",
                         level_2 %in% "Macroalgae" & genus %in% "Sargassum"  ~ "Sargassum",
-                        level_2 %in% "Substrate" & level_3 %in% "Consolidated (hard)" ~ level_3, 
-                        level_2 %in% "Substrate" & level_3 %in% "Unconsolidated (soft)" ~ level_3, 
-                        level_2 %in% "Sponges" ~ "Sessile invertebrates", 
-                        level_2 %in% "Sessile invertebrates" ~ level_2, 
-                        level_2 %in% "Ascidians" ~ "Sessile invertebrates", 
-                        level_2 %in% "Cnidaria" ~ "Sessile invertebrates",
-                        level_2 %in% "Fishes" ~ level_2,
+                        level_2 %in% "Substrate" & level_3 %in% "Consolidated (hard)" ~ "Substrate_hard", 
+                        level_2 %in% "Substrate" & level_3 %in% "Unconsolidated (soft)" ~ "Sand", 
+                        level_2 %in% "Sponges" ~ "Sessile_inverts", 
+                        level_2 %in% "Sessile invertebrates" ~ "Sessile_inverts", 
+                        level_2 %in% "Ascidians" ~ "Sessile_inverts", 
+                        level_2 %in% "Cnidaria" & level_3 %in% "Corals" ~ "Corals",
+                        level_2 %in% "Fishes" ~ "Fishes",
                         level_2 %in% "Seagrasses" & genus %in% "Posidonia" ~ "Posidonia")) %>% 
   dplyr::mutate(habitat = ifelse(level_2 == "Macroalgae" & 
                                  level_3 == "Large canopy-forming" &
@@ -59,20 +57,21 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_habitat.rds")%>%
   dplyr::mutate(total_points_annotated = sum(number)) %>% 
   ungroup()%>% 
   pivot_wider(names_from = "habitat", values_from = "number", values_fill = 0) %>%
-  dplyr::mutate(reef = Macroalgae + `Sessile invertebrates` + 
-                  `Consolidated (hard)` + Canopy + 
+  dplyr::mutate(reef = Macroalgae + Sessile_inverts + 
+                  Substrate_hard + Canopy + 
                   Scytothalia + Ecklonia + Sargassum) %>%
   pivot_longer(cols = c("Macroalgae", 
                         "Scytothalia",
                         "Ecklonia",
                         "Sargassum",
                         "Canopy", 
-                        "Sessile invertebrates", 
-                        "Consolidated (hard)", 
-                        "Unconsolidated (soft)", 
+                        "Sessile_inverts", 
+                        "Substrate_hard", 
+                        "Sand", 
                         "reef",
                         "Fishes",
-                        "Posidonia"), 
+                        "Posidonia",
+                        "Corals"), 
                names_to = "habitat", values_to = "number") %>%
   glimpse()
 
@@ -97,11 +96,16 @@ tidy.habitat <- metadata %>%
                 latitude_dd = as.numeric(latitude_dd)) %>%
   clean_names() %>%
   dplyr::select(-c(campaignid))%>%
-  dplyr::filter(successful_habitat_forward == "Yes")%>% #046 all unscorable = NAs here
+  dplyr::filter(successful_habitat_forward == "Yes")%>% 
+  filter(opcode != "046")%>% #removing 046 as no habitat
   glimpse()
 
 
-unique(tidy.habitat$habitat)
+which(is.na(tidy.habitat$habitat))
+length(unique(tidy.habitat$opcode)) 
+
+#NAs include 046 which has no habitat data 
+
 
 # Plot the occurence data per habitat class. Each data point represents a unique sample.
 
@@ -109,7 +113,6 @@ plot.habitat<- tidy.habitat %>%
   group_by(opcode, habitat) %>%
   dplyr::summarise(number = sum(number)) %>%
   ungroup() %>%
-  #dplyr::mutate(class.relief = as.factor(level_5)) %>%
   glimpse()
 
 
@@ -146,36 +149,35 @@ ggplot() +
 ###### FANCY CLAUDE PLOTS
 # create colour palette for plotting
 
-#cols <- colorRampPalette(brewer.pal(12, "Paired"))(length(unique(tidy.habitat$habitat))) 
+cols <- colorRampPalette(brewer.pal(12, "Paired"))(length(unique(tidy.habitat$habitat))) 
 
 #format habitat into wide format suitable for plotting
 
-# plot.habitat <- tidy.habitat %>%
-#   pivot_wider(names_from = "habitat", values_from = "number", names_prefix = "broad.") %>%
-#   glimpse()
-# 
+plot.habitat <- tidy.habitat %>%
+  pivot_wider(names_from = "habitat", 
+              values_from = "number", 
+              names_prefix = "broad.") %>%
+  glimpse()
 
-
-#Visualise the habitat classes as spatial pie charts.
-# leaflet() %>%                                          
-#   addTiles(group = "Open Street Map") %>%                           
-#   addProviderTiles('Esri.WorldImagery', group = "World Imagery") %>%
-#   addLayersControl(baseGroups = c("World Imagery", "Open Street Map"),
-#                    options = layersControlOptions(collapsed = FALSE)) %>%
-#   addMinicharts(plot.habitat$longitude_dd, plot.habitat$latitude_dd, 
-#                 type = "pie", colorPalette = cols, 
-#                 chartdata = plot.habitat[grep("broad", names(plot.habitat))], 
-#                 width = 20, transitionTime = 0) %>%                 
-#   setView(mean(as.numeric(plot.habitat$longitude_dd)), 
-#           mean(as.numeric(plot.habitat$latitude_dd)), zoom = 12)
-
-
+# Visualise the habitat classes as spatial pie charts.
+leaflet() %>%
+  addTiles(group = "Open Street Map") %>%
+  addProviderTiles('Esri.WorldImagery', group = "World Imagery") %>%
+  addLayersControl(baseGroups = c("World Imagery", "Open Street Map"),
+                   options = layersControlOptions(collapsed = FALSE)) %>%
+  addMinicharts(plot.habitat$longitude_dd, plot.habitat$latitude_dd,
+                type = "pie", colorPalette = cols,
+                chartdata = plot.habitat[grep("broad", names(plot.habitat))],
+                width = 20, transitionTime = 0) %>%
+  setView(mean(as.numeric(plot.habitat$longitude_dd)),
+          mean(as.numeric(plot.habitat$latitude_dd)), zoom = 12)
 
 
 saveRDS(tidy.habitat, file = here::here(paste0("./data/tidy/", name, "_tidier.habitat.rds")))
 
 ###################################################
 # adding percentage cover for each habitat class
+
 
 habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_tidier.habitat.rds")%>%
   dplyr::select(opcode, total_points_annotated, habitat, number, 
