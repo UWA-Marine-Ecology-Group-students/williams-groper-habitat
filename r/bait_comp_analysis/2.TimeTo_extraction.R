@@ -21,12 +21,3 @@ library(dplyr)
 library(GlobalArchive)
 library(lubridate)
 
-em_length3dpoints <- read_em_length(here::here("./data/raw/bait_comp/em export")) %>%
-  dplyr::mutate(sample = paste(opcode, period, sep = "_"))%>%
-  dplyr::filter(comment != "sync"| is.na (comment))%>%
-  dplyr::select(-c(comment))%>% # there is a comment column in metadata, so you will need to remove this column from EM data
-  dplyr::inner_join(metadata, by = join_by(sample)) %>%
-  dplyr::filter(successful_length %in% "Yes") %>%
-  glimpse() 
-
-unique(em_length3dpoints$period)
