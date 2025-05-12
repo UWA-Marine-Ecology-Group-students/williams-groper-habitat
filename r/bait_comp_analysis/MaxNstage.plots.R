@@ -26,26 +26,6 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
   glimpse()
 
 
-## adding sites to METADATA
-site <- data.frame(
-  opcode = sprintf("%03d", 001:108),
-  stringsAsFactors = FALSE) %>%
-  dplyr::mutate(site= case_when(
-    between(as.numeric(opcode), 1, 18)  ~ "middle",
-    between(as.numeric(opcode), 19, 30) ~ "arid",
-    between(as.numeric(opcode), 31, 36) ~ "ruby",
-    between(as.numeric(opcode), 37, 48 ) ~ "ct",
-    between(as.numeric(opcode), 49,54 ) ~ "twin",
-    between(as.numeric(opcode), 55,66 ) ~ "mart",
-    between(as.numeric(opcode), 67,72 ) ~ "york",
-    between(as.numeric(opcode), 73,78 ) ~ "finger",
-    between(as.numeric(opcode), 79, 90 ) ~ "mondrain",
-    between(as.numeric(opcode), 91, 93 ) ~ "miss",
-    between(as.numeric(opcode), 94,102 ) ~ "lucky",
-    between(as.numeric(opcode), 103, 108) ~ "ram"))%>%
-  dplyr::mutate(opcode = as.character(opcode))%>%
-  glimpse()
-
 ## MaxN(stage) dataframe
 
 maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS") %>%
@@ -60,7 +40,6 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   dplyr::ungroup()%>%
   dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle", "mondrain", "legrande")))%>% #reordering
   left_join(habitat)%>%
-  left_join(site)%>%
   dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
                 latitude_dd = as.numeric(latitude_dd))%>%
   dplyr::mutate(site = as.factor(site))%>%
