@@ -51,6 +51,25 @@ sum.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.sum.stage.rds")%>
   clean_names()%>%
   glimpse()
 
+
+##TODO
+## sussing Time of day -- move up when done
+
+sum.stage$time_of_day <- as.POSIXct(sum.stage$time, format = "%H:%M:%S")
+# Convert to seconds since midnight
+
+sum.stage$time_sec <- as.numeric(format(sum.stage$time_of_day, "%H")) * 3600 +
+  as.numeric(format(sum.stage$time_of_day, "%M")) * 60 +
+  as.numeric(format(sum.stage$time_of_day, "%S"))
+sum.stage$time_hr <- sum.stage$time_sec / 3600
+
+#with time as factor
+sum.stage$time_block <- cut(sum.stage$time_hr,
+                             breaks = c(0, 6, 12, 18, 24),
+                             labels = c("Night", "Morning", "Afternoon", "Evening"),
+                             right = FALSE)
+
+
 ################################################################################
 ################################################################################ 
 ## BEST MODEl
@@ -166,56 +185,28 @@ depth
 dev.off()
 
 
+#######################################################
+date <- glmer(maxn_sum ~ bait + depth_m + date + (1|location), data = sum.stage,
+      family = "poisson")
 
-# ###############
-# ### MaxN by mean relief with the actual model line
-# new_data <- expand.grid(
-#   mean.relief = seq(min(sum.stage$mean.relief), max(sum.stage$mean.relief), length.out = 100),
-#   bait = unique(sum.stage$bait)[1],  # Choose first level if categorical
-#   depth_m = mean(sum.stage$depth_m, na.rm = TRUE)
-# )
-# 
-# # Get predictions (fixed effects only)
-# new_data$predicted <- predict(best, newdata = new_data, re.form = NA, type = "response")
-# 
-# # Get predictions and standard errors
-# pred <- predict(best, newdata = new_data, re.form = NA, type = "link", se.fit = TRUE)
-# 
-# # Convert to response scale (Poisson uses log link)
-# new_data$predicted <- exp(pred$fit)
-# new_data$lower <- exp(pred$fit - 1.96 * pred$se.fit)  # 95% CI lower bound
-# new_data$upper <- exp(pred$fit + 1.96 * pred$se.fit)  # 95% CI upper bound
-# 
-# # Plot data with model predictions
-# relief<-
-#   ggplot(sum.stage, aes(x = mean.relief, y = maxn)) +
-#   geom_jitter(alpha = 0.5) +
-#   labs(x = "Mean Relief", y = "WBG Abundance") +
-#   geom_line(data = new_data, aes(x = mean.relief, y = predicted), 
-#             colour = "darkred", linewidth = 1, inherit.aes = F) +
-#   geom_ribbon(data = new_data, aes(x = mean.relief, ymin = lower, ymax = upper), 
-#               fill = "darkred", alpha = 0.2, inherit.aes = F) +  # Shaded confidence band
-#   theme_cowplot() +
-#   theme(legend.position = "none")
-# 
-# relief
-# 
-# #################
-# ## plot saving ##
-# #################
-# 
-# # change title
-# png(file.path(folder_path, "relief.png"), width = 600, height = 400)
-# 
-# # plot code
-# 
-# relief
-# 
-# # Close the PNG device
-# dev.off()
-# 
-# 
-# 
-# 
-# 
-# 
+summary(date)
+
+date_nest <- glmer(maxn_sum ~ bait + depth_m + (1|date) + (1|location), data = sum.stage,
+              family = "poisson")
+
+summary(date_nest)
+
+tod <- glmer(maxn_sum ~ bait + depth_m + time_hr + (1|location), data = sum.stage,
+             family = "poisson")
+summary(tod)
+AIC(best, tod)
+
+tod2 <- glmer(maxn_sum ~ bait + time_hr + (1|location), data = sum.stage,
+             family = "poisson")
+summary(tod2)
+AIC(best, tod2)
+
+tod_fact <- glmer(maxn_sum ~ bait + depth_m + time_block + (1|location), data = sum.stage,
+             family = "poisson")
+summary(tod_fact)
+AIC(best, tod_fact)

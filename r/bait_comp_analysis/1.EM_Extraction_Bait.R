@@ -123,7 +123,7 @@ count.maxn.stage <- maxn.stage%>%
   mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
   mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
   mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
-  dplyr::select(opcode, family, genus,species, stage, maxn)%>% 
+  dplyr::select(opcode, family, genus,species, stage, maxn, periodtime)%>% 
   left_join(metadata)%>% ######## FIGURE OUT THE JOIN
   dplyr::filter(maxn_by_size == "Yes")%>%
   glimpse()
@@ -154,7 +154,33 @@ saveRDS(count.sum.stage, file = here::here(paste0("./data/tidy/",
 
 
 
+#########################################################################
+######## TIME OF ARRIVAL
 
+metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")
 
+time.of.arrival <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
+    dplyr::mutate(periodtime = as.numeric(periodtime),
+                  periodtime = case_when(
+                    period == "B" ~ periodtime + 15,
+                    period == "C" ~ periodtime + 30,
+                    period == "D" ~ periodtime + 45,
+                    TRUE ~ periodtime))%>%
+    dplyr::filter(genus %in% "Achoerodus") %>%
+    dplyr::group_by(opcode, stage)%>%
+    dplyr::slice_min(periodtime, with_ties = F)%>%
+  dplyr::ungroup()%>%
+  dplyr::select(opcode, periodtime, family, genus, species, stage, number, 
+                frame)%>%
+  left_join(metadata)%>%
+  dplyr::filter(successful_count == "Yes")%>%
+  glimpse()
 
+length(unique(time.of.arrival$opcode)) #83 - no. of successful that had wbg? double check
+anyNA(time.of.arrival)
+sum(is.na(time.of.arrival))
+time.of.arrival[!complete.cases(time.of.arrival), ] #must've accidentally removed no?
+
+saveRDS(time.of.arrival, file = here::here(paste0("./data/tidy/",
+                                                  name, "_time.of.arrival.rds")))
 

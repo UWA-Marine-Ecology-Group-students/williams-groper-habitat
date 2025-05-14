@@ -48,9 +48,12 @@ sum.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.sum.stage.rds")%>
   dplyr::mutate(time = substr(date_time, 12, 19))%>%
   left_join(habitat)%>%
   dplyr::filter(opcode != "046")%>% #no habitat data for 046
+  dplyr::mutate(presence = ifelse(maxn_sum > 0, 1, 0))%>%
   clean_names()%>%
   glimpse()
-  
+
+# summary(sum.stage$presence) 
+#   
 ## SUMMARY STATS
 # MaxN summary per bait type
 sum.stage %>%
@@ -416,27 +419,56 @@ summary(p10)
 ggplot() +
   geom_point(data = sum.stage, aes(x = maxn_sum, y = canopy))
 
+#############################################################################
+### Running as presence/absence
 
-### 
-## Post - hoc 
+
+
+mod <- glmer(presence ~ bait +  depth_m + (1 | location),
+             family = binomial, #if overdispersed use family = quasibinomial
+             data = sum.stage)
+
+summary(mod)
+Anova(mod)
+
+#testing for overdispersion
+# Assuming your model is called 'mod'
+overdispersion_test <- function(model) {
+  # Calculate Pearson residuals
+  res <- residuals(model, type = "pearson")
+  
+  # Degrees of freedom = number of observations - number of parameters
+  df_resid <- df.residual(model)
+  
+  # Dispersion ratio
+  dispersion <- sum(res^2) / df_resid
+  
+  cat("Dispersion ratio:", round(dispersion, 3), "\n")
+  cat("Degrees of freedom:", df_resid, "\n")
+  
+  # Optional: test if dispersion is significantly greater than 1 (chi-squared test)
+  p_val <- pchisq(sum(res^2), df = df_resid, lower.tail = FALSE)
+  cat("Chi-squared p-value:", round(p_val, 4), "\n")
+  
+  invisible(dispersion)
+}
+
+# Run the test
+overdispersion_test(mod)
+# Dispersion ratio ≈ 1: No overdispersion — your model fits well under binomial assumptions.
 # 
-# post4 <- emmeans(p4, ~ bait)  # Specify the fixed factor of interest
+# Dispersion ratio > 1.2 (rule of thumb): Overdispersion may be present.
 # 
-# # Perform pairwise comparisons
-# pairs(post4)
-# 
-# ## visualising post-hoc tests
-# 
-# pairwise_results <- contrast(post4, method = "pairwise")
-# 
-# # Convert pairwise results to a data frame
-# pairwise_df <- as.data.frame(pairwise_results)
-# 
-# #plot
-# ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
-#   geom_point(size = 3) +
-#   geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
-#   labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + Scytothalia") +
-#   theme_minimal() +
-#   coord_flip()
+# p-value < 0.05: Evidence that overdispersion is significant.
+
+#posthoc on stage
+
+# Run the pairwise comparisons for the 'stage' variable
+emm_stage <- emmeans(mod, ~ stage, type = "response")
+pairwise_stage <- pairs(emm_stage, adjust = "tukey")
+pairwise_stage
+
+# Convert to data frame
+pairwise_df <- as.data.frame(pairwise_stage)
+pairwise_df
 
