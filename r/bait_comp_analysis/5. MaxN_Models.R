@@ -159,6 +159,52 @@ cor(maxn.all$depth_m, maxn.all$macroalgae)
 
 #### Stepwise model approach
 
+t1 <- glmer(maxn ~ (1|location/site),
+            data = maxn.all,
+            family = poisson)
+
+summary(t1)
+
+# t2 <- glmer(maxn ~ (1|location/site),
+#             data = maxn.all,
+#             family = tweedie) #glmer() doesn't like tweedie
+
+
+# t3 <- glmmTMB(
+#   maxn ~ bait + (1 | location/site),
+#   family = tweedie(link = "log"),
+#   data = maxn.all) 
+# 
+# summary(t3) ## doesn't like
+
+t4 <- glmer(maxn ~ bait + (1|location/site),
+            data = maxn.all,
+            family = poisson)
+
+summary(t4)
+AIC(t1, t4)
+
+## Post - hoc for location
+
+post <- emmeans(t4, ~ bait)  # Specify the fixed factor of interest
+
+# Perform pairwise comparisons
+pairs(post)
+
+#plotting residuals
+
+r <- residuals(t4)
+
+# Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
+# also look for large residuals not explained by the model
+plot(r, main = "Residuals from Poisson MaxN no RE", 
+     xlab = "Index", ylab = "Residuals")
+
+
+
+#######################################################
+
+
 p1 <- glmer(maxn ~ bait + (1|site), data = maxn.all,
             family = "poisson")
 

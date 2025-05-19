@@ -86,7 +86,7 @@ ggplot(toa.wo.stage, aes(x = toa_s)) +
 #library(glmmTMB) because glmer() in lme4 package doesn't support
 #gamma distribution
 
-model <- glmmTMB(toa_s ~ bait + (1 | location),
+model <- glmmTMB(toa_s ~ bait + (1 | location/site),
                  data = toa.wo.stage,
                  family = Gamma(link = "log"))
 
@@ -105,7 +105,7 @@ model3 <- glmmTMB(toa_s ~ bait + date + (1 | location),
 
 AIC(model, model3)
 
-model4 <- glmmTMB(toa_s ~ bait + depth_m + (1 | location),
+model4 <- glmmTMB(toa_s ~ bait + depth_m + (1 | location/site),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
 
@@ -114,34 +114,47 @@ AIC(model, model4)
 model5 <- glmmTMB(toa_s ~ bait + ecklonia + (1 | location),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
-AIC(model, model5)
+AIC(model4, model5)
 
 model6 <- glmmTMB(toa_s ~ bait + location + (1 | date),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
-AIC(model, model6)
+AIC(model4, model6)
 
 model7 <- glmmTMB(toa_s ~ bait +  (1 | site),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
-AIC(model, model7)
+AIC(model4, model7)
 
-model8 <- glmmTMB(toa_s ~ bait +  (1 | site/location),
+model8 <- glmmTMB(toa_s ~ bait +  (1 | location/site),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
-AIC(model, model8)
+AIC(model4, model8)
 
 model9 <- glmmTMB(toa_s ~ bait + mean_relief +  (1 | location),
                  data = toa.wo.stage,
                  family = Gamma(link = "log"))
 
-AIC(model, model9)
+AIC(model4, model9)
 
 model10 <- glmmTMB(toa_s ~ bait + macroalgae +  (1 | location),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
 
-AIC(model, model10)
+AIC(model4, model10)
+
+#best model posthocs
+post <- emmeans(model4, ~ bait)
+pairs(post)
+
+
+ggplot(toa.wo.stage, aes(x = bait, y = toa_s)) +
+  geom_boxplot(fill = "lightgreen") +
+  theme_minimal() +
+  labs(title = "Time of Arrival by Bait Type",
+       x = "Bait", y = "Time (seconds)")
+
+
 
 #### modelling earliest time of arrival with stage
 # distribution family checking

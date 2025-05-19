@@ -317,9 +317,10 @@ elders <- maxn.stage%>%
   filter(stage == "1100-1299mm") %>%
   glimpse()
 
-eld1 <- glmer(maxn ~ bait + (1|location), data = elders,
+eld1 <- glmer(maxn ~ bait + (1|location/site), data = elders,
               family = "poisson")
 summary(eld1)
+
 deviance(eld1)/df.residual(eld1)
 pears <- residuals(eld1, type = "pearson")
 var(pears) 
@@ -354,7 +355,7 @@ juvies <- maxn.stage%>%
   filter(stage == "0300-0499 mm") %>%
   glimpse()
 
-jv1 <- glmer(maxn ~ bait + depth_m + (1|location),
+jv1 <- glmer(maxn ~ bait + depth_m + (1|location/site),
              data = juvies,
              family = "poisson")
 summary(jv1)
