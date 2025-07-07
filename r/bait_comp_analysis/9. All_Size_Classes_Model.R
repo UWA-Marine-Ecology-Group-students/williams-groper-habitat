@@ -129,7 +129,7 @@ ggplot(maxn.stage, aes(x = maxn)) +
 ##################################
 ## Stepwise modelling approach
 
-sc1 <- glmer(maxn ~ bait + stage + (1|location), data = maxn.stage,
+sc1 <- glmer(maxn ~ bait + stage + (1|location/site), data = maxn.stage,
             family = "poisson")
 
 summary(sc1)
@@ -201,32 +201,15 @@ ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
   coord_flip()
 
 
-## comparing with site
-sc2 <- glmer(maxn ~ bait + stage + (1|site), data = maxn.stage,
-             family = "poisson")
-summary(sc2)
-Anova(sc2)
-
-deviance(sc2)/df.residual(sc2)
-
-#plotting residuals
-
-r <- residuals(sc2)
-plot(r, main = "Residuals from Poisson MaxN(stage)", 
-     xlab = "Index", ylab = "Residuals")
-#same residual patterns 
-
-pears.sc2 <- residuals(sc2, type = "pearson")
-var(pears.sc2) #looks like there are some patterns
 
 ## interaction between bait and stage
-sc3 <- glmer(maxn ~ bait*stage + (1|location), data = maxn.stage,
+sc3 <- glmer(maxn ~ bait*stage + (1|location/site), data = maxn.stage,
              family = "poisson")
 summary(sc3)
-Anova(sc3) #no interaction effect
+Anova(sc3) #no interaction effect - moving on to next model
 
 ## depth
-sc4 <- glmer(maxn ~ bait +stage + depth_m +(1|location), data = maxn.stage,
+sc4 <- glmer(maxn ~ bait + stage + depth_m +(1|location/stage), data = maxn.stage,
              family = "poisson")
 summary(sc4)
 Anova(sc4)
@@ -243,7 +226,7 @@ pears.sc4 <- residuals(sc4, type = "pearson")
 var(pears.sc4) 
 
 ## mean relief
-sc5 <- glmer(maxn ~ bait + stage + mean_relief +(1|location), data = maxn.stage,
+sc5 <- glmer(maxn ~ bait + stage + mean_relief +(1|location/site), data = maxn.stage,
              family = "poisson")
 summary(sc5)
 Anova(sc5)
@@ -260,52 +243,60 @@ pears <- residuals(sc5, type = "pearson")
 var(pears) 
 
 ## ecklonia
-sc6 <- glmer(maxn ~ bait + stage + ecklonia +(1|location), data = maxn.stage,
+sc6 <- glmer(maxn ~ bait + stage + ecklonia +(1|location/site), data = maxn.stage,
              family = "poisson")
 summary(sc6)
 Anova(sc6)
 
 ## scytothalia
-sc7 <- glmer(maxn ~ bait + stage + scytothalia +(1|location), data = maxn.stage,
+sc7 <- glmer(maxn ~ bait + stage + scytothalia +(1|location/site), data = maxn.stage,
              family = "poisson")
 summary(sc7)
 Anova(sc7)
 
 ## macroalgae
-sc8 <- glmer(maxn ~ bait + stage + macroalgae +(1|location), data = maxn.stage,
+sc8 <- glmer(maxn ~ bait + stage + macroalgae +(1|location/site
+                                                ), data = maxn.stage,
              family = "poisson")
 summary(sc8)
 Anova(sc8)
 
 ## depth_m no bait
-sc9 <- glmer(maxn ~ stage + depth_m + (1|location), data = maxn.stage,
+sc9 <- glmer(maxn ~ stage + depth_m + (1|location/site), data = maxn.stage,
              family = "poisson")
 summary(sc9)
 Anova(sc9)
 
 ##### -- comparing best model with inclusion of date as random effect
-best <- glmer(maxn ~ bait + stage + depth_m + (1|location), 
+best <- glmer(maxn ~ bait + stage + depth_m + (1|location/site), 
               data = maxn.stage,
                   family = "poisson")
 summary(best)
 
-date.mod <- glmer(maxn ~ bait + stage + depth_m + (1|location) + (1|date), 
-                  data = maxn.stage,
-                  family = "poisson")
 
-summary(date.mod)
-
-tod <- glmer(maxn ~ bait + stage + depth_m + time_hr + (1|location), 
+tod <- glmer(maxn ~ bait + stage + depth_m + time_hr + (1|location/site), 
              data = maxn.stage,
              family = "poisson")
 summary(tod)
 
-tod_fact <- glmer(maxn ~ bait + stage + depth_m + time_block + (1|location), 
+tod_fact <- glmer(maxn ~ bait + stage + depth_m + time_block + (1|location/site), 
              data = maxn.stage,
              family = "poisson")
 
 summary(tod_fact)
 
+
+tod_nodepth <- glmer(maxn ~ bait + stage +  time_hr + (1|location/site), 
+                     data = maxn.stage,
+                     family = "poisson")
+
+summary(tod_nodepth)
+
+tod_nodepth_secs <- glmer(maxn ~ bait + stage +  time_sec + (1|location/site), 
+                     data = maxn.stage,
+                     family = "poisson")
+
+summary(tod_nodepth_secs)
 ############################################################################
 ############################################################################
 ## SUBSETTING SIZE CLASSES

@@ -18,7 +18,7 @@ library(here)
 library(dplyr)
 #install_github("UWAMEGFisheries/GlobalArchive") 
 library(GlobalArchive) #do I need this?
-library(lubridate) #for adapting time stuff
+# library(lubridate) #in tidyverse
 
 #set study name
 name <- "2024_Wudjari_bait_comp"
@@ -29,7 +29,7 @@ metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"),
                           method = "BRUVs") %>%
   dplyr::select(opcode, bait, longitude_dd, latitude_dd, date_time, location,
                 depth_m, successful_count, successful_habitat_forward, 
-                maxn_by_size, behaviour_success, approach_success, site) %>%
+                maxn_by_size, behaviour_success, approach_success, site, successful_length) %>%
   dplyr::mutate(date_time = mdy_hm(date_time, tz = "GMT")) %>% 
   dplyr::mutate(date_time = with_tz(date_time, tzone = "Asia/Singapore"))%>%
   dplyr::mutate(date_time = format(date_time, "%Y/%m/%dT%H:%M:%S")) %>%

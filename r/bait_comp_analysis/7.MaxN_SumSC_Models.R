@@ -115,15 +115,23 @@ ggplot() +
 
 cor(sum.stage$macroalgae, sum.stage$ecklonia)
 
+##############################
+## visualising relationships between covariates and response
+
+ggplot() +
+  geom_point(data = sum.stage, aes(x = canopy, y = maxn_sum))
+
+#doesn't look like there's much of a relationship between any
 
 ##################################
 ## Stepwise modelling approach
 
-p1 <- glmer(maxn_sum ~ bait + (1|site), data = sum.stage,
+p1 <- glmer(maxn_sum ~ bait + (1|location/site), data = sum.stage,
             family = "poisson")
 
 summary(p1)
 Anova(p1)
+
 #r2_nakagawa(p1) #r2 using performance package
 
 ## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
@@ -148,18 +156,11 @@ pears.p1 <- residuals(p1, type = "pearson")
 var(pears.p1)
 
 
-## Overdispersed so giving a go with negative binomial using pscl package
-## CANT COZ OF RANDOM EFFECTS
-# library(pscl)
-# 
-# mod <- zeroinfl(maxn_sum ~ bait + (1|site), data = sum.stage,
-#                 dist = "poisson")
-# AIC(mod)
-# summary(mod)
+## Not Overdispersed but checking with Negative Binomial just in case 
 
 ## NEGATIVE BINOMIAL MODEl
 
-nb1 <- glmmTMB(maxn_sum~bait + (1|site), 
+nb1 <- glmmTMB(maxn_sum~bait + (1|location/site), 
                data = sum.stage, 
                family = "nbinom2")  # Negative Binomial with two parameters
 
@@ -200,79 +201,10 @@ plot(pears1, main = "Pearson - MaxN(stage)~bait")
 sim_res <- simulateResiduals(fittedModel = nb1)
 plot(sim_res)
 
-## Fit poisson model using glmmTMB package
-pois1 <- glmmTMB(maxn_sum~bait + (1|site), data = sum.stage, family = "poisson")
 
-summary(pois1)
-Anova(pois1)
+#bait + depth_m 
 
-deviance(pois1)/df.residual(pois1) #checking overdispersion
-
-pears <- residuals(pois1, type = "pearson")
-
-#Calculate variance of the pearson residuals - 
-#if around 1 indicates that poisson assumption
-# of constant variance is actually reasonable 
-var(pears)
-
-#with DHARMa package - check residuals
-sim_res <- simulateResiduals(fittedModel = pois1)
-plot(sim_res)
-
-## continuining with glmmTMB package for poisson distribution
-
-pois2 <- glmmTMB(maxn_sum~bait + (1|location), 
-                 data = sum.stage, family = "poisson")
-
-summary(pois2)
-Anova(pois2)
-#r.squaredGLMM(nb1) #mumin package
-
-## checking for overdispersion
-# dispersion statistic 
-
-deviance(pois2)/df.residual(pois2)
-
-#plotting residuals
-
-nbr1 <- residuals(pois2)
-
-# Plot residuals - if systematic patterns (ie funnel shape) 
-# indicates heteroscedasticity
-# also look for large residuals not explained by the model
-plot(nbr1, xlab = "Index", ylab = "Residuals")
-
-## Pearson residuals - 
-# checking to see if variance of residuals is larger than expected
-
-pears <- residuals(pois2, type = "pearson")
-var(pears)
-
-# Plot Pearson residuals
-plot(pears)
-
-#with DHARMa package - check residuals
-sim_res <- simulateResiduals(fittedModel = pois2)
-plot(sim_res)
-
-### nesting
-pois3 <- glmmTMB(maxn_sum~bait + (site|location), 
-                 data = sum.stage, family = "poisson")
-
-summary(pois3)
-Anova(pois3)
-AIC(pois3) # doesn't like glmmTMB package maybe
-
-### back to glmer()
-
-nest <- glmer(maxn_sum ~ bait + (site|location), data = sum.stage,
-      family = "poisson")
-
-summary(nest)
-
-#depth_m ---- best
-
-p2 <- glmer(maxn_sum ~ bait + depth_m + (1|location), data = sum.stage,
+p2 <- glmer(maxn_sum ~ bait + depth_m + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p2)
 Anova(p2)
@@ -301,117 +233,118 @@ var(pears)
 plot(pears)
 
 #with DHARMa package - check residuals
-sim_res <- simulateResiduals(fittedModel = p2)
-plot(sim_res)
-
-##refit with NB
-nb2 <- glmmTMB(maxn_sum~bait + depth_m + (1|location), 
-        data = sum.stage, 
-        family = "nbinom2")
-
-summary(nb2)
-Anova(nb2)
+# sim_res <- simulateResiduals(fittedModel = p2)
+# plot(sim_res)
+# 
+# ##refit with NB
+# nb2 <- glmmTMB(maxn_sum~bait + depth_m + (1|location), 
+#         data = sum.stage, 
+#         family = "nbinom2")
+# 
+# summary(nb2)
+# Anova(nb2)
 
 ## checking for overdispersion
 # dispersion statistic 
 
-deviance(nb2)/df.residual(nb2)
-
-#plotting residuals
-
-nbr1 <- residuals(nb2)
-
-# Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
-# also look for large residuals not explained by the model
-plot(nbr1, xlab = "Index", ylab = "Residuals")
-
-## Pearson residuals - 
-# checking to see if variance of residuals is larger than expected
-
-pears1 <- residuals(nb2, type = "pearson")
-
-#Calculate variance of the pearson residuals - 
-#if around 1 indicates that poisson assumption
-# of constant variance is actually reasonable - 
-# but as this is a negative binomial would expect
-# it to be larger than 1
-var(pears1)
-
-# Plot Pearson residuals
-plot(pears1, main = "Pearson - MaxN(stage)~bait")
-
-#with DHARMa package - check residuals
-sim_res <- simulateResiduals(fittedModel = nb2)
-plot(sim_res)
-
-# Post - hoc for best model
-
-post <- emmeans(p2, ~ bait)  # Specify the fixed factor of interest
-
-# Perform pairwise comparisons
-pairs(post)
-
-## visualising post-hoc tests
-
-pairwise_results <- contrast(post, method = "pairwise")
-
-# Convert pairwise results to a data frame
-pairwise_df <- as.data.frame(pairwise_results)
-
-#plot
-ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
-  geom_point(size = 3) +
-  geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
-  labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + depth_m") +
-  theme_minimal() +
-  coord_flip()
-
+# deviance(nb2)/df.residual(nb2)
+# 
+# #plotting residuals
+# 
+# nbr1 <- residuals(nb2)
+# 
+# # Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
+# # also look for large residuals not explained by the model
+# plot(nbr1, xlab = "Index", ylab = "Residuals")
+# 
+# ## Pearson residuals - 
+# # checking to see if variance of residuals is larger than expected
+# 
+# pears1 <- residuals(nb2, type = "pearson")
+# 
+# #Calculate variance of the pearson residuals - 
+# #if around 1 indicates that poisson assumption
+# # of constant variance is actually reasonable - 
+# # but as this is a negative binomial would expect
+# # it to be larger than 1
+# var(pears1)
+# 
+# # Plot Pearson residuals
+# plot(pears1, main = "Pearson - MaxN(stage)~bait")
+# 
+# #with DHARMa package - check residuals
+# sim_res <- simulateResiduals(fittedModel = nb2)
+# plot(sim_res)
+# 
+# # Post - hoc for best model
+# 
+# post <- emmeans(p2, ~ bait)  # Specify the fixed factor of interest
+# 
+# # Perform pairwise comparisons
+# pairs(post)
+# 
+# ## visualising post-hoc tests
+# 
+# pairwise_results <- contrast(post, method = "pairwise")
+# 
+# # Convert pairwise results to a data frame
+# pairwise_df <- as.data.frame(pairwise_results)
+# 
+# #plot
+# ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
+#   geom_point(size = 3) +
+#   geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
+#   labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + depth_m") +
+#   theme_minimal() +
+#   coord_flip()
+# 
 
 
 ###########################################################################
 #depth + reef
-p3 <- glmer(maxn_sum ~ bait + depth_m + reef + (1|location), data = sum.stage,
+
+p3 <- glmer(maxn_sum ~ bait + depth_m + reef + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p3)
 Anova(p3)
 
 #depth + ecklonia
-p4 <- glmer(maxn_sum ~ bait + depth_m + ecklonia + (1|location), data = sum.stage,
+p4 <- glmer(maxn_sum ~ bait + depth_m + ecklonia + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p4)
 Anova(p4)
 
 #ecklonia
-p5 <- glmer(maxn_sum ~ bait + ecklonia + (1|location), data = sum.stage,
+p5 <- glmer(maxn_sum ~ bait + ecklonia + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p5)
 Anova(p5)
 
 #scyto
-p6 <- glmer(maxn_sum ~ bait + scytothalia + (1|location), data = sum.stage,
+p6 <- glmer(maxn_sum ~ bait + scytothalia + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p6)
 Anova(p6)
 
 #reef
-p7 <- glmer(maxn_sum ~ bait + reef + (1|location), data = sum.stage,
+p7 <- glmer(maxn_sum ~ bait + reef + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p7)
 
 
 #mean_relief
-p8 <- glmer(maxn_sum ~ bait + mean_relief + (1|location), data = sum.stage,
+p8 <- glmer(maxn_sum ~ bait + mean_relief + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p8)
 
 
 #macroalgae
-p9 <- glmer(maxn_sum ~ bait + macroalgae + (1|location), data = sum.stage,
+p9 <- glmer(maxn_sum ~ bait + macroalgae + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p9)
 
 #canopy
-p10 <- glmer(maxn_sum ~ bait + canopy + (1|location), data = sum.stage,
+p10 <- glmer(maxn_sum ~ bait + canopy + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p10)
 
@@ -422,9 +355,7 @@ ggplot() +
 #############################################################################
 ### Running as presence/absence
 
-
-
-mod <- glmer(presence ~ bait +  depth_m + (1 | location),
+mod <- glmer(presence ~ bait + (1 | location/site),
              family = binomial, #if overdispersed use family = quasibinomial
              data = sum.stage)
 
@@ -432,7 +363,7 @@ summary(mod)
 Anova(mod)
 
 #testing for overdispersion
-# Assuming your model is called 'mod'
+#
 overdispersion_test <- function(model) {
   # Calculate Pearson residuals
   res <- residuals(model, type = "pearson")
