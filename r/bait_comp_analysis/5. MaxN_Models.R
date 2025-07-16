@@ -66,7 +66,7 @@ which(is.na(maxn.all$macroalgae))
 unique(maxn.all$site)
 
 which(is.na(maxn.all$titomaxn_s)) #nas coerced from drops with 0 BG
-
+#remove from dataset or keep in as 60 mins?
 
 
 ########

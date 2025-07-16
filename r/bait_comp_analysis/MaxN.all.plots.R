@@ -1,52 +1,64 @@
-##############################################################################
-#####         PLOTTING        ####################
-####################################################
+###########################################################
+####    5.0 -- MaxN exploration & visualisation      ######
+###########################################################
 
 rm(list=ls())
 
 # libraries----
-
+#library(devtools)
 library(tidyverse)
 library(ggplot2)
+library(cowplot)
+#RStudio.Version()
+library(leaflet)
 #install.packages("ggforce")
 library(ggforce)
-
 #install.packages('scatterpie')
 library(scatterpie)
-library(cowplot)
 library(RColorBrewer)
-#install.packages("paletteer")
 library(paletteer)
 library(sf)
 
 name <- "2024_Wudjari_bait_comp"
 
-#######################################
-######      MaxN by Bait ##############
-#######################################
+# Read in the formatted data
+
+############################################################
+######        HYPOTHESIS 1 = MaxN will be higher with abalone
+####################
+
 # read in habitat data
 habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
   glimpse()
 
 
-#read in maxn data and joining
-##TODO - reorder location & site if wanting to plot from far to near
+### MaxN (all) 
+
 maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
-                site = as.factor(site))%>% 
+                site = as.factor(site))%>% #removed mutate(species = 'gouldii')
   dplyr::mutate(depth_m = as.numeric(depth_m), 
                 longitude_dd = as.numeric(longitude_dd),
                 latitude_dd = as.numeric(latitude_dd))%>%
   dplyr::mutate(date = substr(date_time, 1, 10))%>%
   dplyr::mutate(time = substr(date_time, 12, 19))%>%
   dplyr::mutate(date = as.factor(date))%>%
-  left_join(habitat)%>% 
+  left_join(habitat)%>% #joining to habitat 
   dplyr::filter(opcode != "046")%>% #no habitat data for 046
-  #dplyr::mutate(site = factor(site, 
-  #             levels = c("mart", "twin", "ct", "ruby", "arid", 
-  # "middle")))%>% 
+  dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
+  dplyr::mutate(titomaxn_s = periodtime * 60)%>% #creating covariate of time to maxn in seconds only
+  dplyr::mutate(titomaxn_m = periodtime)%>% #creating covariate of titomaxn in mins (same as periodtime)
   clean_names()%>%
   glimpse()
+
+sum(maxn.all$maxn)
+unique(maxn.all$species)
+unique(maxn.all$opcode)
+which(is.na(maxn.all$macroalgae))
+unique(maxn.all$site)
+
+which(is.na(maxn.all$titomaxn_s)) #nas coerced from drops with 0 BG
+#remove from dataset or keep in as 60 mins?
 
 
 
@@ -87,11 +99,45 @@ ggplot(maxn.all, aes(x = maxn)) +
 ##############
 ## habitat plots
 
+# visualise the habitat distributions without maxn
+
+#density plot of ecklonia facetted by bait type
+ggplot(maxn.all, aes(x = ecklonia)) +
+  geom_density(fill = "darkgreen", alpha = 0.5) +
+  theme_minimal() +
+  labs(x = "% Cover Ecklonia", y = "Density")+
+  facet_wrap(.~bait, ncol = 3)
 
 
+ggplot(maxn.all, aes(x= bait, y = ecklonia, fill = bait))+
+  stat_summary(fun = mean, geom = "bar", color = "black", width = 0.6) +  # Bars
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
+  labs(x = "Bait Type", y = "% cover Ecklonia ")+
+  scale_fill_manual(values = bait_col)+
+  # scale_y_discrete(
+  #     breaks = c(0, 0.5, 1.0, 1.5, 2.0),
+  #     limits = c(0,2)) +
+  scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
+  theme_cowplot()+
+  theme(legend.position = "none")
+
+ggplot(maxn.all, aes(x= bait, y = scytothalia, fill = bait))+
+  stat_summary(fun = mean, geom = "bar", color = "black", width = 0.6) +  # Bars
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +  # Error bars with standard error
+  labs(x = "Bait Type", y = "% cover scytothalia ")+
+  scale_fill_manual(values = bait_col)+
+  # scale_y_discrete(
+  #     breaks = c(0, 0.5, 1.0, 1.5, 2.0),
+  #     limits = c(0,2)) +
+  scale_x_discrete(labels = c("Abalone", "Octopus", "Pilchard"))+
+  theme_cowplot()+
+  theme(legend.position = "none")
+
+
+#########################################################################
 ########## MaxN by habitat types
 ## ECKLONIA
-ggplot(maxn.all, aes(x = Ecklonia, y = maxn)) +
+ggplot(maxn.all, aes(x = ecklonia, y = maxn)) +
   geom_jitter(alpha = 0.5) +
   labs(x = "%Ecklonia", y = "MaxN", title = "MaxN by %Ecklonia Cover")+
   geom_smooth(method = "lm", colour = "darkgreen", se = TRUE)+
