@@ -157,6 +157,8 @@ saveRDS(count.sum.stage, file = here::here(paste0("./data/tidy/",
 #########################################################################
 ######## TIME OF ARRIVAL
 
+## TODO -- Tidy this section & double check it
+
 metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")
 
 time.of.arrival <- read_points(here::here("./data/raw/bait_comp/em export")) %>%

@@ -126,6 +126,27 @@ ggplot(maxn.stage, aes(x = maxn)) +
   facet_wrap(.~stage, ncol = 2)+
   theme_cowplot()
 
+
+##occurrence of each size class 
+stage_sums <- maxn.stage %>%
+  group_by(stage) %>%
+  summarise(total_maxn = sum(maxn, na.rm = TRUE)) %>%
+  arrange(stage)%>%
+  glimpse()
+
+#plot
+ggplot(stage_sums, aes(x = stage, y = total_maxn)) +
+  geom_col(fill = "darkgreen") +
+  labs(
+    x = "Size class (mm)",
+    y = "Total MaxN",
+    title = "Total MaxN per Size Class"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
 ##################################
 ## Stepwise modelling approach
 

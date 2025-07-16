@@ -28,8 +28,6 @@ library(patchwork)
 name <- "bc"
 
 habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
-  dplyr::rename(inverts = "Sessile invertebrates", rock = "Consolidated (hard)", 
-                sand = "Unconsolidated (soft)")%>%
   glimpse()
 
 
@@ -38,14 +36,13 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
 maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS") %>%
   dplyr::mutate(species = "gouldii", bait = as.factor(bait), location = as.factor(location))%>%
   dplyr::mutate(depth_m = as.numeric(depth_m))%>%
-  dplyr::mutate(period = as.factor(period))%>%
   dplyr::mutate(date = substr(date_time, 1, 10))%>%
   dplyr::mutate(time = substr(date_time, 12, 19))%>%
   dplyr::mutate(date = as.factor(date))%>%
   dplyr::group_by(opcode, stage)%>%
   dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>%
   dplyr::ungroup()%>%
-  dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
+  # dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
   #left_join(habitat)%>%
   #left_join(site)%>%
   #dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
@@ -63,12 +60,12 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
   dplyr::summarise(maxn=sum(maxn))%>%
   dplyr::ungroup()%>%
   left_join(habitat)%>%
-  left_join(site)%>%
+  # left_join(site)%>%
   dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
                 latitude_dd = as.numeric(latitude_dd))%>%
-  dplyr::mutate(site = as.factor(site))%>%
-  dplyr::mutate(site = factor(site, 
-                              levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
+  # dplyr::mutate(site = as.factor(site))%>%
+  # dplyr::mutate(site = factor(site, 
+  #                             levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
   dplyr::mutate(Canopy = Scytothalia + Ecklonia + Canopy)%>%
   glimpse()
 
@@ -76,8 +73,8 @@ sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
 
 # Set the predictors for modeling - don't include factors - just continuous var 
 pred.vars <- c("depth_m", "Macroalgae", "Scytothalia", "Ecklonia", "Sargassum",
-               "Canopy", "inverts", "rock",
-               "sand", "reef", "mean.relief")
+               "Canopy", "Sessile_inverts", 
+               "Sand", "reef", "mean.relief")
 
 
 # Check the correlations between predictor variables - looking for NAs

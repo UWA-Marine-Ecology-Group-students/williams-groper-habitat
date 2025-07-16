@@ -1,8 +1,8 @@
 Dot Point Measurements
 
-Generated: Monday 05 May 2025 16:09:15
+Generated: Wednesday 16 July 2025 15:00:01
 
-Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	Latitude	Longitude	Rugosity	Depth	Collector	Fishing status	campaignid	relief_annotated	OpCode	Period	Frame info 3	Frame info 4	Frame info 5	Frame info 6	level_2	level_3	level_4	level_5	scientific	qualifiers	check		Radius %
+Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	Latitude	Longitude	Rugosity	Depth	Collector	Fishing status	campaignid	relief_annotated	OpCode	Period	Frame info 3	Frame info 4	Frame info 5	Frame info 6	level_2	level_3	level_4	level_5	scientific	qualifiers			Radius %
 001_A_01_GX013128.MP4_0023958.jpg	      0		767	1731											2024_Wudjari_bait_comp	No	001	A					Macroalgae	Filamentous / filiform							100.0
 001_A_01_GX013128.MP4_0023958.jpg	      0		1004	1370											2024_Wudjari_bait_comp	No	001	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				60.8
 001_A_01_GX013128.MP4_0023958.jpg	      0		948	156											2024_Wudjari_bait_comp	No	001	A					Macroalgae	Large canopy-forming	Brown		Scytothalia dorycarpa				83.4

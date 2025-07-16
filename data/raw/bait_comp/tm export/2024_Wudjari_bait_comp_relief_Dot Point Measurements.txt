@@ -1,26 +1,26 @@
 Dot Point Measurements
 
-Generated: Monday 05 May 2025 16:09:15
+Generated: Wednesday 16 July 2025 15:00:02
 
-Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	Latitude	Longitude	Rugosity	Depth	Collector	Fishing status	campaignid	relief_annotated	OpCode	Period	Frame info 3	Frame info 4	Frame info 5	Frame info 6	level_2	level_3	level_4	level_5	scientific	qualifiers	check		Radius %
+Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	Latitude	Longitude	Rugosity	Depth	Collector	Fishing status	campaignid	relief_annotated	OpCode	Period	Frame info 3	Frame info 4	Frame info 5	Frame info 6	level_2	level_3	level_4	level_5	scientific	qualifiers			Radius %
 001_A_01_GX013128.MP4_0023958.jpg	      0		139	196											2024_Wudjari_bait_comp	Yes	001	A													100.0
 001_A_01_GX013128.MP4_0023958.jpg	      0		406	196											2024_Wudjari_bait_comp	Yes	001	A													89.9
 001_A_01_GX013128.MP4_0023958.jpg	      0		674	196											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					89.9
 001_A_01_GX013128.MP4_0023958.jpg	      0		941	196											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					100.0
 001_A_01_GX013128.MP4_0023958.jpg	      0		139	578											2024_Wudjari_bait_comp	Yes	001	A													64.2
-001_A_01_GX013128.MP4_0023958.jpg	      0		406	578											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	Wall	4					46.9
+001_A_01_GX013128.MP4_0023958.jpg	      0		406	578											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					46.9
 001_A_01_GX013128.MP4_0023958.jpg	      0		674	578											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					46.9
 001_A_01_GX013128.MP4_0023958.jpg	      0		941	578											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					64.2
 001_A_01_GX013128.MP4_0023958.jpg	      0		139	960											2024_Wudjari_bait_comp	Yes	001	A													46.5
-001_A_01_GX013128.MP4_0023958.jpg	      0		406	960											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	Wall	4					15.5
+001_A_01_GX013128.MP4_0023958.jpg	      0		406	960											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					15.5
 001_A_01_GX013128.MP4_0023958.jpg	      0		674	960											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					15.5
 001_A_01_GX013128.MP4_0023958.jpg	      0		941	960											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					46.5
 001_A_01_GX013128.MP4_0023958.jpg	      0		139	1342											2024_Wudjari_bait_comp	Yes	001	A													64.2
-001_A_01_GX013128.MP4_0023958.jpg	      0		406	1342											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	Wall	4					46.9
+001_A_01_GX013128.MP4_0023958.jpg	      0		406	1342											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					46.9
 001_A_01_GX013128.MP4_0023958.jpg	      0		674	1342											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					46.9
 001_A_01_GX013128.MP4_0023958.jpg	      0		941	1342											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					64.2
 001_A_01_GX013128.MP4_0023958.jpg	      0		139	1724											2024_Wudjari_bait_comp	Yes	001	A													100.0
-001_A_01_GX013128.MP4_0023958.jpg	      0		406	1724											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	Wall	4					89.9
+001_A_01_GX013128.MP4_0023958.jpg	      0		406	1724											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					89.9
 001_A_01_GX013128.MP4_0023958.jpg	      0		674	1724											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					89.9
 001_A_01_GX013128.MP4_0023958.jpg	      0		941	1724											2024_Wudjari_bait_comp	Yes	001	A					Relief	High	High (>3m)	3					100.0
 003_A_01_L_GX010079.MP4_0001609.jpg	      0		139	196											2024_Wudjari_bait_comp	Yes	003	A					Relief	High	Wall	4					100.0
@@ -49,20 +49,20 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 005_A_01_GX010093.MP4_0005050.jpg	      0		941	196											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					100.0
 005_A_01_GX010093.MP4_0005050.jpg	      0		139	578											2024_Wudjari_bait_comp	Yes	005	A													64.2
 005_A_01_GX010093.MP4_0005050.jpg	      0		406	578											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					46.9
-005_A_01_GX010093.MP4_0005050.jpg	      0		674	578											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					46.9
+005_A_01_GX010093.MP4_0005050.jpg	      0		674	578											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	High (>3m)	3					46.9
 005_A_01_GX010093.MP4_0005050.jpg	      0		941	578											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					64.2
-005_A_01_GX010093.MP4_0005050.jpg	      0		139	960											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					46.5
-005_A_01_GX010093.MP4_0005050.jpg	      0		406	960											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					15.5
+005_A_01_GX010093.MP4_0005050.jpg	      0		139	960											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	High (>3m)	3					46.5
+005_A_01_GX010093.MP4_0005050.jpg	      0		406	960											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	High (>3m)	3					15.5
 005_A_01_GX010093.MP4_0005050.jpg	      0		674	960											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					15.5
 005_A_01_GX010093.MP4_0005050.jpg	      0		941	960											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					46.5
-005_A_01_GX010093.MP4_0005050.jpg	      0		139	1342											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					64.2
-005_A_01_GX010093.MP4_0005050.jpg	      0		406	1342											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					46.9
+005_A_01_GX010093.MP4_0005050.jpg	      0		139	1342											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	High (>3m)	3					64.2
+005_A_01_GX010093.MP4_0005050.jpg	      0		406	1342											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	High (>3m)	3					46.9
 005_A_01_GX010093.MP4_0005050.jpg	      0		674	1342											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					46.9
 005_A_01_GX010093.MP4_0005050.jpg	      0		941	1342											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					64.2
 005_A_01_GX010093.MP4_0005050.jpg	      0		139	1724											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					100.0
-005_A_01_GX010093.MP4_0005050.jpg	      0		406	1724											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					89.9
-005_A_01_GX010093.MP4_0005050.jpg	      0		674	1724											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					89.9
-005_A_01_GX010093.MP4_0005050.jpg	      0		941	1724											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	Wall	4					100.0
+005_A_01_GX010093.MP4_0005050.jpg	      0		406	1724											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	High (>3m)	3					89.9
+005_A_01_GX010093.MP4_0005050.jpg	      0		674	1724											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	High (>3m)	3					89.9
+005_A_01_GX010093.MP4_0005050.jpg	      0		941	1724											2024_Wudjari_bait_comp	Yes	005	A					Relief	High	High (>3m)	3					100.0
 006_A_01_GX012828.MP4_0013075.jpg	      0		139	196											2024_Wudjari_bait_comp	Yes	006	A					Relief	High	High (>3m)	3					100.0
 006_A_01_GX012828.MP4_0013075.jpg	      0		406	196											2024_Wudjari_bait_comp	Yes	006	A					Relief	Low / moderate	Moderate (1-3m)	2					89.9
 006_A_01_GX012828.MP4_0013075.jpg	      0		674	196											2024_Wudjari_bait_comp	Yes	006	A					Relief	Low / moderate	Moderate (1-3m)	2					89.9
@@ -72,7 +72,7 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 006_A_01_GX012828.MP4_0013075.jpg	      0		674	578											2024_Wudjari_bait_comp	Yes	006	A					Relief	High	High (>3m)	3					46.9
 006_A_01_GX012828.MP4_0013075.jpg	      0		941	578											2024_Wudjari_bait_comp	Yes	006	A					Relief	High	High (>3m)	3					64.2
 006_A_01_GX012828.MP4_0013075.jpg	      0		139	960											2024_Wudjari_bait_comp	Yes	006	A					Relief	High	High (>3m)	3					46.5
-006_A_01_GX012828.MP4_0013075.jpg	      0		406	960											2024_Wudjari_bait_comp	Yes	006	A					Relief	Low / moderate	Moderate (1-3m)	2					15.5
+006_A_01_GX012828.MP4_0013075.jpg	      0		406	960											2024_Wudjari_bait_comp	Yes	006	A					Relief	High	High (>3m)	3					15.5
 006_A_01_GX012828.MP4_0013075.jpg	      0		674	960											2024_Wudjari_bait_comp	Yes	006	A					Relief	High	High (>3m)	3					15.5
 006_A_01_GX012828.MP4_0013075.jpg	      0		941	960											2024_Wudjari_bait_comp	Yes	006	A					Relief	High	High (>3m)	3					46.5
 006_A_01_GX012828.MP4_0013075.jpg	      0		139	1342											2024_Wudjari_bait_comp	Yes	006	A													64.2
@@ -131,7 +131,7 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 009_A_01_GX010095.MP4_0006135.jpg	      0		406	578											2024_Wudjari_bait_comp	Yes	009	A					Relief	High	High (>3m)	3					46.9
 009_A_01_GX010095.MP4_0006135.jpg	      0		674	578											2024_Wudjari_bait_comp	Yes	009	A					Relief	High	High (>3m)	3					46.9
 009_A_01_GX010095.MP4_0006135.jpg	      0		941	578											2024_Wudjari_bait_comp	Yes	009	A					Relief	High	High (>3m)	3					64.2
-009_A_01_GX010095.MP4_0006135.jpg	      0		139	960											2024_Wudjari_bait_comp	Yes	009	A													46.5
+009_A_01_GX010095.MP4_0006135.jpg	      0		139	960											2024_Wudjari_bait_comp	Yes	009	A					Relief	High	High (>3m)	3					46.5
 009_A_01_GX010095.MP4_0006135.jpg	      0		406	960											2024_Wudjari_bait_comp	Yes	009	A					Relief	High	High (>3m)	3					15.5
 009_A_01_GX010095.MP4_0006135.jpg	      0		674	960											2024_Wudjari_bait_comp	Yes	009	A					Relief	High	High (>3m)	3					15.5
 009_A_01_GX010095.MP4_0006135.jpg	      0		941	960											2024_Wudjari_bait_comp	Yes	009	A					Relief	High	High (>3m)	3					46.5
@@ -152,15 +152,15 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		674	578											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					46.9
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		941	578											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					64.2
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		139	960											2024_Wudjari_bait_comp	Yes	010	A													46.5
-010_A_01_L_GX010096.MP4_0007987.jpg	      0		406	960											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	Wall	4					15.5
+010_A_01_L_GX010096.MP4_0007987.jpg	      0		406	960											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					15.5
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		674	960											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					15.5
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		941	960											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					46.5
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		139	1342											2024_Wudjari_bait_comp	Yes	010	A													64.2
-010_A_01_L_GX010096.MP4_0007987.jpg	      0		406	1342											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	Wall	4					46.9
+010_A_01_L_GX010096.MP4_0007987.jpg	      0		406	1342											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					46.9
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		674	1342											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					46.9
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		941	1342											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					64.2
-010_A_01_L_GX010096.MP4_0007987.jpg	      0		139	1724											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	Wall	4					100.0
-010_A_01_L_GX010096.MP4_0007987.jpg	      0		406	1724											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	Wall	4					89.9
+010_A_01_L_GX010096.MP4_0007987.jpg	      0		139	1724											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					100.0
+010_A_01_L_GX010096.MP4_0007987.jpg	      0		406	1724											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					89.9
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		674	1724											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					89.9
 010_A_01_L_GX010096.MP4_0007987.jpg	      0		941	1724											2024_Wudjari_bait_comp	Yes	010	A					Relief	High	High (>3m)	3					100.0
 011_A_01_GX012829.MP4_0010534.jpg	      0		139	196											2024_Wudjari_bait_comp	Yes	011	A					Relief	High	High (>3m)	3					100.0
@@ -319,7 +319,7 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 019__01_GX010086.MP4_0004504.jpg	      0		406	1342											2024_Wudjari_bait_comp	Yes	019	A					Relief	High	High (>3m)	3					46.9
 019__01_GX010086.MP4_0004504.jpg	      0		674	1342											2024_Wudjari_bait_comp	Yes	019	A					Relief	High	High (>3m)	3					46.9
 019__01_GX010086.MP4_0004504.jpg	      0		941	1342											2024_Wudjari_bait_comp	Yes	019	A					Relief	High	High (>3m)	3					64.2
-019__01_GX010086.MP4_0004504.jpg	      0		139	1724											2024_Wudjari_bait_comp	Yes	019	A													100.0
+019__01_GX010086.MP4_0004504.jpg	      0		139	1724											2024_Wudjari_bait_comp	Yes	019	A					Relief	High	High (>3m)	3					100.0
 019__01_GX010086.MP4_0004504.jpg	      0		406	1724											2024_Wudjari_bait_comp	Yes	019	A					Relief	High	High (>3m)	3					89.9
 019__01_GX010086.MP4_0004504.jpg	      0		674	1724											2024_Wudjari_bait_comp	Yes	019	A					Relief	High	High (>3m)	3					89.9
 019__01_GX010086.MP4_0004504.jpg	      0		941	1724											2024_Wudjari_bait_comp	Yes	019	A					Relief	High	High (>3m)	3					100.0
@@ -340,7 +340,7 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 020_A_01_L_GX010096.MP4_0006006.jpg	      0		673	1341											2024_Wudjari_bait_comp	Yes	020	A					Relief	Low / moderate	Low (<1m)	1					46.9
 020_A_01_L_GX010096.MP4_0006006.jpg	      0		942	1341											2024_Wudjari_bait_comp	Yes	020	A					Relief	Low / moderate	Low (<1m)	1					64.3
 020_A_01_L_GX010096.MP4_0006006.jpg	      0		135	1724											2024_Wudjari_bait_comp	Yes	020	A													100.0
-020_A_01_L_GX010096.MP4_0006006.jpg	      0		404	1724											2024_Wudjari_bait_comp	Yes	020	A													89.8
+020_A_01_L_GX010096.MP4_0006006.jpg	      0		404	1724											2024_Wudjari_bait_comp	Yes	020	A					Relief	Low / moderate	Moderate (1-3m)	2					89.8
 020_A_01_L_GX010096.MP4_0006006.jpg	      0		673	1724											2024_Wudjari_bait_comp	Yes	020	A					Relief	Low / moderate	Low (<1m)	1					89.8
 020_A_01_L_GX010096.MP4_0006006.jpg	      0		942	1724											2024_Wudjari_bait_comp	Yes	020	A					Relief	Low / moderate	Low (<1m)	1					100.0
 021_A_01_GX010099.MP4_0006859.jpg	      0		139	196											2024_Wudjari_bait_comp	Yes	021	A					Relief	High	High (>3m)	3					100.0
@@ -948,7 +948,7 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 052_A_01_L_GX012836.MP4_0001906.jpg	      0		674	196											2024_Wudjari_bait_comp	Yes	052	A					Relief	High	Wall	4					89.9
 052_A_01_L_GX012836.MP4_0001906.jpg	      0		941	196											2024_Wudjari_bait_comp	Yes	052	A					Relief	Low / moderate	Moderate (1-3m)	2					100.0
 052_A_01_L_GX012836.MP4_0001906.jpg	      0		139	578											2024_Wudjari_bait_comp	Yes	052	A					Relief	High	Wall	4					64.2
-052_A_01_L_GX012836.MP4_0001906.jpg	      0		406	578											2024_Wudjari_bait_comp	Yes	052	A													46.9
+052_A_01_L_GX012836.MP4_0001906.jpg	      0		406	578											2024_Wudjari_bait_comp	Yes	052	A					Relief	High	High (>3m)	3					46.9
 052_A_01_L_GX012836.MP4_0001906.jpg	      0		674	578											2024_Wudjari_bait_comp	Yes	052	A					Relief	High	High (>3m)	3					46.9
 052_A_01_L_GX012836.MP4_0001906.jpg	      0		941	578											2024_Wudjari_bait_comp	Yes	052	A					Relief	Low / moderate	Moderate (1-3m)	2					64.2
 052_A_01_L_GX012836.MP4_0001906.jpg	      0		139	960											2024_Wudjari_bait_comp	Yes	052	A													46.5
@@ -1611,7 +1611,7 @@ Filename	Frame	Time (mins)	Image row	Image col	Date	Location	Site #	Transect #	L
 087_A_01_L_GX010107.MP4_0002378.jpg	      0		404	575											2024_Wudjari_bait_comp	Yes	087	A					Relief	High	Caves	5					46.9
 087_A_01_L_GX010107.MP4_0002378.jpg	      0		673	575											2024_Wudjari_bait_comp	Yes	087	A					Relief	Low / moderate	Moderate (1-3m)	2					46.9
 087_A_01_L_GX010107.MP4_0002378.jpg	      0		942	575											2024_Wudjari_bait_comp	Yes	087	A					Relief	Low / moderate	Moderate (1-3m)	2					64.3
-087_A_01_L_GX010107.MP4_0002378.jpg	      0		135	958											2024_Wudjari_bait_comp	Yes	087	A													46.6
+087_A_01_L_GX010107.MP4_0002378.jpg	      0		135	958											2024_Wudjari_bait_comp	Yes	087	A					Relief	High	Wall	4					46.6
 087_A_01_L_GX010107.MP4_0002378.jpg	      0		404	958											2024_Wudjari_bait_comp	Yes	087	A					Relief	High	Caves	5					15.5
 087_A_01_L_GX010107.MP4_0002378.jpg	      0		673	958											2024_Wudjari_bait_comp	Yes	087	A					Relief	High	High (>3m)	3					15.5
 087_A_01_L_GX010107.MP4_0002378.jpg	      0		942	958											2024_Wudjari_bait_comp	Yes	087	A					Relief	Low / moderate	Moderate (1-3m)	2					46.6

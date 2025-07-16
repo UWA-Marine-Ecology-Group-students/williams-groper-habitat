@@ -59,6 +59,7 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   clean_names()%>%
   glimpse()
 
+sum(maxn.all$maxn)
 unique(maxn.all$species)
 unique(maxn.all$opcode)
 which(is.na(maxn.all$macroalgae))

@@ -61,6 +61,7 @@ length(unique(maxn.stage$opcode))
 length(unique(maxn.stage$stage))
 #96*8 = 768
 #96*5 = 480 #after removing AD, F, M
+sum(maxn.stage$maxn)
 
 ##############################
 ## best model
@@ -109,6 +110,8 @@ post2 <- emmeans(sc4, ~ stage)  # Specify the fixed factor of interest
 
 # Perform pairwise comparisons
 pairs(post2)
+
+
 
 ## visualising post-hoc tests
 

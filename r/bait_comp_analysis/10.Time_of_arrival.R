@@ -8,6 +8,7 @@ rm(list=ls())
 
 # libraries----
 #library(devtools)
+library(CheckEM)
 library(tidyverse)
 #library(mgcv)
 library(MuMIn)
@@ -62,6 +63,7 @@ time.of.arrival <- readRDS("./data/tidy/2024_Wudjari_bait_comp_time.of.arrival.r
   glimpse()
 
 
+
 toa.wo.stage <- time.of.arrival %>%
   dplyr::group_by(opcode) %>%
   dplyr::slice_min(periodtime, with_ties = FALSE) %>%
@@ -93,13 +95,13 @@ model <- glmmTMB(toa_s ~ bait + (1 | location/site),
 summary(model)
 Anova(model)
 
-model2 <- glmmTMB(toa_s ~ bait + time_hr + (1 | location),
+model2 <- glmmTMB(toa_s ~ bait + time_hr + (1 | location/site),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
 
 AIC(model, model2)
 
-model3 <- glmmTMB(toa_s ~ bait + date + (1 | location),
+model3 <- glmmTMB(toa_s ~ bait + date + (1 | location/site),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
 
@@ -111,40 +113,33 @@ model4 <- glmmTMB(toa_s ~ bait + depth_m + (1 | location/site),
 
 AIC(model, model4)
 
-model5 <- glmmTMB(toa_s ~ bait + ecklonia + (1 | location),
+model5 <- glmmTMB(toa_s ~ bait + ecklonia + (1 | location/site),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
-AIC(model4, model5)
+AIC(model, model5)
 
-model6 <- glmmTMB(toa_s ~ bait + location + (1 | date),
-                  data = toa.wo.stage,
-                  family = Gamma(link = "log"))
-AIC(model4, model6)
 
-model7 <- glmmTMB(toa_s ~ bait +  (1 | site),
-                  data = toa.wo.stage,
-                  family = Gamma(link = "log"))
-AIC(model4, model7)
-
-model8 <- glmmTMB(toa_s ~ bait +  (1 | location/site),
-                  data = toa.wo.stage,
-                  family = Gamma(link = "log"))
-AIC(model4, model8)
-
-model9 <- glmmTMB(toa_s ~ bait + mean_relief +  (1 | location),
+model9 <- glmmTMB(toa_s ~ bait + mean_relief +  (1 | location/site),
                  data = toa.wo.stage,
                  family = Gamma(link = "log"))
 
-AIC(model4, model9)
+AIC(model, model9)
 
-model10 <- glmmTMB(toa_s ~ bait + macroalgae +  (1 | location),
+model10 <- glmmTMB(toa_s ~ bait + macroalgae +  (1 | location/site),
                   data = toa.wo.stage,
                   family = Gamma(link = "log"))
 
-AIC(model4, model10)
+AIC(model, model10)
+
+model10 <- glmmTMB(toa_s ~ bait + time_block +  (1 | location/site),
+                   data = toa.wo.stage,
+                   family = Gamma(link = "log"))
+
+AIC(model, model10)
+
 
 #best model posthocs
-post <- emmeans(model4, ~ bait)
+post <- emmeans(model, ~ bait)
 pairs(post)
 
 
@@ -154,37 +149,39 @@ ggplot(toa.wo.stage, aes(x = bait, y = toa_s)) +
   labs(title = "Time of Arrival by Bait Type",
        x = "Bait", y = "Time (seconds)")
 
-
+# pretty much indicating that they are already in the area where we are dropping because we are biasing towards their habitat 
 
 #### modelling earliest time of arrival with stage
 # distribution family checking
 #visualsing to select family
 
 #density plot
-ggplot(time.of.arrival, aes(x = toa_s)) +
-  geom_density(fill = "skyblue", alpha = 0.5) +
+ggplot(time.of.arrival, aes(x = toa_s, color = bait)) +
+  # geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_density(alpha = 0.5) + 
   theme_minimal() +
   labs(title = "Density Plot of Time of arrival in seconds",
        x = "Time (seconds)", y = "Density") +
-  facet_wrap(.~bait, ncol = 3)
+  facet_wrap(.~stage, ncol = 3)
 
 
 #modelling
 #library(glmmTMB) because glmer() in lme4 package doesn't support
 #gamma distribution
 
-model <- glmmTMB(toa_s ~ bait + stage + (1 | opcode/location),
-                 data = time.of.arrival,
-                 family = Gamma(link = "log"))
-
-summary(model)
-Anova(model)
+# model <- glmmTMB(toa_s ~ bait + stage + 
+#                 (1 | opcode) + (1 |location/site), ## I don't think it makes sense to have both
+#                  data = time.of.arrival,
+#                  family = Gamma(link = "log"))
+# 
+# summary(model)
+# Anova(model)
 
 model2 <- glmmTMB(toa_s ~ bait + stage + (1 | opcode),
                  data = time.of.arrival,
                  family = Gamma(link = "log"))
  
-AIC(model, model2) #model2 better
+summary(model2)
 
 model3 <- glmmTMB(toa_s ~ bait + stage + depth_m + (1 | opcode),
                   data = time.of.arrival,
@@ -192,11 +189,11 @@ model3 <- glmmTMB(toa_s ~ bait + stage + depth_m + (1 | opcode),
 
 AIC(model2, model3)
 
-model4 <- glmmTMB(toa_s ~ bait + stage + date + (1 | opcode),
-                  data = time.of.arrival,
-                  family = Gamma(link = "log"))
+# model4 <- glmmTMB(toa_s ~ bait + stage + date + (1 | opcode),
+#                   data = time.of.arrival,
+#                   family = Gamma(link = "log"))
 
-AIC(model2, model4)
+# AIC(model2, model4)
 
 model5 <- glmmTMB(toa_s ~ bait + stage + time_hr + (1 | opcode),
                   data = time.of.arrival,
@@ -205,12 +202,13 @@ AIC(model2, model5)
 
 # model6 <- glmmTMB(toa_s ~ bait + stage + time_secs + (1 | opcode),
 #                   data = time.of.arrival,
-#                   family = Gamma(link = "log")) -- didn't converge
+#                   family = Gamma(link = "log")) #-- didn't converge
 
-model6 <- glmmTMB(toa_s ~ bait + stage + site + (1 | opcode),
-                  data = time.of.arrival,
-                  family = Gamma(link = "log"))
-AIC(model2, model6)
+
+# model6 <- glmmTMB(toa_s ~ bait + stage + site + (1 | opcode),
+#                   data = time.of.arrival,
+#                   family = Gamma(link = "log"))
+# AIC(model2, model6)
 
 #actual best model is model7 but I need to include stage somewhere otherwise not good
 model7 <- glmmTMB(toa_s ~ bait + (1 | opcode),
@@ -224,13 +222,30 @@ model8  <- glmmTMB(toa_s ~ bait + (1 | opcode) + (1|stage),
                          family = Gamma(link = "log"))
 AIC(model2, model8)
 AIC(model7, model8)
+
+model9  <- glmmTMB(toa_s ~ bait  + (1|stage) + (1 | opcode),
+                   data = time.of.arrival,
+                   family = Gamma(link = "log"))
+
+AIC(model8, model9) # no difference
+
 ########
 # BEST MDOEL
 
-best <- glmmTMB(toa_s ~ bait + stage + (1 | opcode),
-                  data = time.of.arrival,
-                  family = Gamma(link = "log"))
+best <- glmmTMB(toa_s ~ bait + (1 | opcode) + (1|stage),
+                data = time.of.arrival,
+                family = Gamma(link = "log"))
 
-summary(best) #model2 better
+summary(best) 
 
 
+#best model posthocs
+post <- emmeans(best, ~ bait)
+pairs(post)
+
+
+ggplot(time.of.arrival, aes(x = bait, y = toa_s)) +
+  geom_boxplot(fill = "lightgreen") +
+  theme_minimal() +
+  labs(title = "Time of Arrival by Bait Type",
+       x = "Bait", y = "Time (seconds)")
