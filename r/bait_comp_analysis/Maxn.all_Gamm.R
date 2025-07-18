@@ -38,6 +38,7 @@ maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   # dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
   # dplyr::mutate(titomaxn_s = ifelse(is.na(titomaxn_s), 60.00, titomaxn_s))%>% 
   # dplyr::mutate(titomaxn_m = ifelse(is.na(titomaxn_m), 60.00, titomaxn_m))%>%
+  clean_names()%>%
   glimpse()
 
 unique(maxn.all$species)
@@ -47,7 +48,7 @@ unique(maxn.all$species)
 
 # Set the predictors for modeling - don't include factors - just continuous var 
 pred.vars <- c("depth_m", "macroalgae", "scytothalia", "ecklonia",
-               "sessile_inverts", "mean_relief", "time_hr")
+                "sessile_inverts", "mean_relief", "time_hr")
 
 
 # Check the correlations between predictor variables - looking for NAs
@@ -60,9 +61,11 @@ round(cor(maxn.all[ , pred.vars]), 2)
 # check individual predictors to see if any need transformed
 CheckEM::plot_transformations(pred.vars = pred.vars, dat = maxn.all)
 
-#Reset the predictor variables to remove any highly correlated variables and include any transformed variables.
-# pred.vars <- c("depth_m", "Macroalgae", "Scytothalia", "Ecklonia", "Canopy", 
-                # "mean.relief") 
+# Reset the predictor variables to remove any highly correlated variables 
+# and include any transformed variables.
+# removed sessile inverts & scytothalia as looked fairly zero inflated
+pred.vars <- c("depth_m", "macroalgae", "ecklonia",
+               "mean_relief", "time_hr") 
 
 
 #Check to make sure response variables have less than 80% zeroes. 
