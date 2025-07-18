@@ -171,7 +171,16 @@ saveRDS(count.maxn.stage,
 #########################################################################
 ######## SUM MaxN by Stage (removing the individual stages and summing them)
 
-## TODO -- tidy from here 
+rm(list=ls()) # Clear memory
+
+name <- "2024_Wudjari_bait_comp" #set study name
+
+metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds") %>%
+  glimpse()
+
+count.maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.rds") %>%
+  glimpse()
+
 maxn.sum.stage <- count.maxn.stage %>%
   dplyr::group_by(opcode, family, genus, species)%>%
   dplyr::summarise(maxn_sum = sum(maxn))%>%
@@ -191,9 +200,12 @@ saveRDS(count.sum.stage, file = here::here(paste0("./data/tidy/",
 #########################################################################
 ######## TIME OF ARRIVAL
 
-## TODO -- Tidy this section & double check it
+rm(list=ls()) # Clear memory
 
-metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")
+name <- "2024_Wudjari_bait_comp" #set study name
+
+metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds") %>%
+  glimpse()
 
 time.of.arrival <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
     dplyr::mutate(periodtime = as.numeric(periodtime),
@@ -205,17 +217,29 @@ time.of.arrival <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
     dplyr::filter(genus %in% "Achoerodus") %>%
     dplyr::group_by(opcode, stage)%>%
     dplyr::slice_min(periodtime, with_ties = F)%>%
-  dplyr::ungroup()%>%
-  dplyr::select(opcode, periodtime, family, genus, species, stage, number, 
+    dplyr::ungroup()%>%
+    dplyr::select(opcode, periodtime, family, genus, species, stage, number, 
                 frame)%>%
-  left_join(metadata)%>%
-  dplyr::filter(successful_count == "Yes")%>%
+    dplyr::rename(time_of_arrival = periodtime)%>%
+    left_join(metadata)%>%
+    dplyr::filter(successful_count == "Yes")%>%
+  dplyr::select(-c(behaviour_success, approach_success))%>%
+  dplyr::mutate(number = ifelse(is.na(number), 1, number))%>% #one emob with no. missing from point - manually resetting
+  dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
+                site = as.factor(site), stage = as.factor(stage), date = as.factor(date))%>%
+  dplyr::mutate(depth_m = as.numeric(depth_m), 
+                longitude_dd = as.numeric(longitude_dd),
+                latitude_dd = as.numeric(latitude_dd))%>%  
   glimpse()
 
-length(unique(time.of.arrival$opcode)) #83 - no. of successful that had wbg? double check
+length(unique(time.of.arrival$opcode)) #83 - no. opcodes w. blue groper - see below
+
+# maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS")
+# sum(maxn.all$presence)
+
 anyNA(time.of.arrival)
 sum(is.na(time.of.arrival))
-time.of.arrival[!complete.cases(time.of.arrival), ] #must've accidentally removed no?
+time.of.arrival[!complete.cases(time.of.arrival), ] #accidentally removed number in emob
 
 saveRDS(time.of.arrival, file = here::here(paste0("./data/tidy/",
                                                   name, "_time.of.arrival.rds")))
