@@ -33,38 +33,21 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
 ### MaxN (all) 
 
 maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
-  dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
-                site = as.factor(site))%>% #removed mutate(species = 'gouldii')
-  dplyr::mutate(depth_m = as.numeric(depth_m), 
-                longitude_dd = as.numeric(longitude_dd),
-                latitude_dd = as.numeric(latitude_dd))%>%
-  dplyr::mutate(date = substr(date_time, 1, 10))%>%
-  dplyr::mutate(time = substr(date_time, 12, 19))%>%
-  dplyr::mutate(date = as.factor(date))%>%
   left_join(habitat)%>% #joining to habitat 
   dplyr::filter(opcode != "046")%>% #no habitat data for 046
-  dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
-  dplyr::mutate(titomaxn_s = periodtime * 60)%>% #creating covariate of time to maxn in seconds only
-  dplyr::mutate(titomaxn_m = periodtime)%>% #creating covariate of titomaxn in mins (same as periodtime)
-  dplyr::mutate(titomaxn_s = ifelse(is.na(titomaxn_s), 60.00, titomaxn_s))%>%
-  dplyr::mutate(titomaxn_m = ifelse(is.na(titomaxn_m), 60.00, titomaxn_m))%>%
-  dplyr::mutate(time_of_day = as.POSIXct(time, format = "%H:%M:%S"))%>%
-  dplyr::mutate(time_sec = as.numeric(format(time_of_day, "%H")) * 3600 +
-                  as.numeric(format(time_of_day, "%M")) * 60 +
-                  as.numeric(format(time_of_day, "%S")))%>%
-  dplyr::mutate(time_hr = as.numeric(time_sec/3600))%>%
-  clean_names()%>%
+  # dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
+  # dplyr::mutate(titomaxn_s = ifelse(is.na(titomaxn_s), 60.00, titomaxn_s))%>% 
+  # dplyr::mutate(titomaxn_m = ifelse(is.na(titomaxn_m), 60.00, titomaxn_m))%>%
   glimpse()
 
-## might need to remove the NAs but will try first with them at 60 mins
+unique(maxn.all$species)
 
 
   
 
 # Set the predictors for modeling - don't include factors - just continuous var 
-pred.vars <- c("depth_m", "macroalgae", "scytothalia", "ecklonia", "sargassum",
-               "canopy", "sessile_inverts", "substrate_hard",
-               "sand", "reef", "mean_relief", "titomaxn_m", "corals", "posidonia")
+pred.vars <- c("depth_m", "macroalgae", "scytothalia", "ecklonia",
+               "sessile_inverts", "mean_relief", "time_hr")
 
 
 # Check the correlations between predictor variables - looking for NAs
@@ -111,18 +94,18 @@ for(i in 1:length(resp.vars)){
   use.dat = as.data.frame(maxn.all[which(maxn.all$species == resp.vars[i]),])
   print(resp.vars[i])
   
-  Model1  <- gam(maxn ~ bait + s(mean.relief, k = 3, bs = 'cr') +
-                   s(location, bs = 're'), #random effect
-                 family = gaussian(link = "identity"),  data = use.dat)
+  Model1  <- gam(maxn ~ s(ecklonia, k = 5, bs = 'cr') +
+                   s(location, site, bs = 're'), #random effect
+                 family = tw(),  data = use.dat) #check family
   
   model.set <- generate.model.set(use.dat = use.dat,
                                   test.fit = Model1,
                                   pred.vars.cont = pred.vars,
                                   pred.vars.fact = factor.vars, 
                                   factor.smooth.interactions = NA,
-                                  #cyclic.vars = "aspect",
-                                  null.terms = "s(location, bs ='re')", #repeat R.E. here -- check
-                                  k = 3)
+                                  cyclic.vars = cyclic.vars,
+                                  null.terms = "s(location, site, bs ='re')", #repeat R.E. here -- check
+                                  k = 5)
   
   out.list <- fit.model.set(model.set,
                             max.models = 600,
@@ -133,7 +116,7 @@ for(i in 1:length(resp.vars)){
   mod.table = out.list$mod.data.out 
   mod.table = mod.table[order(mod.table$AICc),]
   mod.table$cumsum.wi = cumsum(mod.table$wi.AICc)
-  out.i = mod.table[which(mod.table$delta.AICc <= 2),]
+  out.i = mod.table[which(mod.table$delta.AICc <= 20),]
   out.all = c(out.all,list(out.i))
   var.imp = c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw))
   

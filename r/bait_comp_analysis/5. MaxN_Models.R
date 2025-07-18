@@ -44,18 +44,12 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
 
 maxn.all <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.all.RDS") %>%
   dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
-                site = as.factor(site))%>% #removed mutate(species = 'gouldii')
+                site = as.factor(site), date = as.factor(date))%>% #removed mutate(species = 'gouldii')
   dplyr::mutate(depth_m = as.numeric(depth_m), 
                 longitude_dd = as.numeric(longitude_dd),
                 latitude_dd = as.numeric(latitude_dd))%>%
-  dplyr::mutate(date = substr(date_time, 1, 10))%>%
-  dplyr::mutate(time = substr(date_time, 12, 19))%>%
-  dplyr::mutate(date = as.factor(date))%>%
   left_join(habitat)%>% #joining to habitat 
   dplyr::filter(opcode != "046")%>% #no habitat data for 046
-  dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
-  dplyr::mutate(titomaxn_s = periodtime * 60)%>% #creating covariate of time to maxn in seconds only
-  dplyr::mutate(titomaxn_m = periodtime)%>% #creating covariate of titomaxn in mins (same as periodtime)
   clean_names()%>%
   glimpse()
 
@@ -65,8 +59,7 @@ unique(maxn.all$opcode)
 which(is.na(maxn.all$macroalgae))
 unique(maxn.all$site)
 
-which(is.na(maxn.all$titomaxn_s)) #nas coerced from drops with 0 BG
-#remove from dataset or keep in as 60 mins?
+which(is.na(maxn.all$titomaxn_s)) #time to maxns have NAs -- keep and potentially due hurdle model
 
 
 ########
@@ -166,18 +159,12 @@ t1 <- glmer(maxn ~ (1|location/site),
 
 summary(t1)
 
-# t2 <- glmer(maxn ~ (1|location/site),
-#             data = maxn.all,
-#             family = tweedie) #glmer() doesn't like tweedie
+t2 <- glmer(maxn ~ ecklonia + (1|location/site),
+            data = maxn.all,
+            family = poisson) #glmer() doesn't like tweedie
 
-
-# t3 <- glmmTMB(
-#   maxn ~ bait + (1 | location/site),
-#   family = tweedie(link = "log"),
-#   data = maxn.all) 
-# 
-# summary(t3) ## doesn't like
-
+summary(t2)
+            
 t4 <- glmer(maxn ~ bait + (1|location/site),
             data = maxn.all,
             family = poisson)

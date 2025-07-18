@@ -37,22 +37,12 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
 ## MaxN by STAGE
 
 maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS") %>%
-  dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
-                site = as.factor(site), stage = as.factor(stage))%>%
-  dplyr::mutate(depth_m = as.numeric(depth_m), 
-                longitude_dd = as.numeric(longitude_dd),
-                latitude_dd = as.numeric(latitude_dd))%>%
-  dplyr::mutate(date = substr(date_time, 1, 10))%>%
-  dplyr::mutate(time = substr(date_time, 12, 19))%>%
-  dplyr::mutate(date = as.factor(date))%>%
   left_join(habitat)%>%
   dplyr::filter(opcode != "046")%>%
   dplyr::filter(opcode != "078")%>% #remove drops only M F and AD recorded
   dplyr::filter(opcode != "082")%>% #remove drops only M F and AD recorded
   dplyr::filter(!stage %in% c("AD", "M", "F"))%>% #filtering out these
   dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
-  dplyr::mutate(titomaxn_s = periodtime * 60)%>% #creating covariate of time to maxn in seconds only
-  dplyr::mutate(titomaxn_m = periodtime)%>% #creating covariate of titomaxn in mins (same as periodtime)
   clean_names() %>% 
   glimpse()
 

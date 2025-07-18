@@ -33,6 +33,13 @@ metadata <- read_metadata(here::here("./data/raw/bait_comp/em export"),
   dplyr::mutate(date_time = mdy_hm(date_time, tz = "GMT")) %>% 
   dplyr::mutate(date_time = with_tz(date_time, tzone = "Asia/Singapore"))%>%
   dplyr::mutate(date_time = format(date_time, "%Y/%m/%dT%H:%M:%S")) %>%
+  dplyr::mutate(date = substr(date_time, 1, 10))%>%
+  dplyr::mutate(time = substr(date_time, 12, 19))%>%
+  dplyr::mutate(time_of_day = as.POSIXct(time, format = "%H:%M:%S"))%>%
+  dplyr::mutate(time_sec = as.numeric(format(time_of_day, "%H")) * 3600 +
+                  as.numeric(format(time_of_day, "%M")) * 60 +
+                  as.numeric(format(time_of_day, "%S")))%>%
+  dplyr::mutate(time_hr = as.numeric(time_sec/3600))%>%
   glimpse()
 
 #saving metadata as RDS
@@ -47,7 +54,12 @@ saveRDS(metadata, file = here::here(paste0("./data/tidy/",
 ## points -- MaxN ##########
 ############################
 
-metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")
+rm(list=ls()) # Clear memory
+
+name <- "2024_Wudjari_bait_comp" #set study name
+
+metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds")%>%
+  glimpse()
 
 maxn.all <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
   dplyr::mutate(periodtime = as.numeric(periodtime),
@@ -70,6 +82,15 @@ maxn.all <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
   mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
   mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
   tidyr::replace_na(list(maxn=0))%>%
+  dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
+  dplyr::mutate(titomaxn_s = periodtime * 60)%>% #creating covariate of time to maxn in seconds only
+  dplyr::mutate(titomaxn_m = periodtime)%>% #creating covariate of titomaxn in mins (same as periodtime)
+  dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
+                site = as.factor(site), date = as.factor(date))%>% #removed mutate(species = 'gouldii')
+  dplyr::mutate(depth_m = as.numeric(depth_m), 
+                longitude_dd = as.numeric(longitude_dd),
+                latitude_dd = as.numeric(latitude_dd))%>%
+  clean_names()%>%
   glimpse()
 
 
@@ -85,8 +106,13 @@ saveRDS(count.maxn.all, file = here::here(paste0("./data/tidy/",
 ## points -- maxn by stage BY OPCODE ##########
 ###############################################
 
+rm(list=ls()) # Clear memory
+
+name <- "2024_Wudjari_bait_comp" #set study name
+
 #by stage
-metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds") 
+metadata <- readRDS("./data/tidy/2024_Wudjari_bait_comp_Metadata.rds") %>%
+  glimpse()
 
 maxn.stage <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
   dplyr::mutate(periodtime = as.numeric(periodtime),
@@ -126,6 +152,13 @@ count.maxn.stage <- maxn.stage%>%
   dplyr::select(opcode, family, genus,species, stage, maxn, periodtime)%>% 
   left_join(metadata)%>% ######## FIGURE OUT THE JOIN
   dplyr::filter(maxn_by_size == "Yes")%>%
+  dplyr::mutate(titomaxn_s = periodtime * 60)%>% #creating covariate of time to maxn in seconds only
+  dplyr::mutate(titomaxn_m = periodtime)%>% #creating covariate of titomaxn in mins (same as periodtime)
+  dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
+                site = as.factor(site), stage = as.factor(stage), date = as.factor(date))%>%
+  dplyr::mutate(depth_m = as.numeric(depth_m), 
+                longitude_dd = as.numeric(longitude_dd),
+                latitude_dd = as.numeric(latitude_dd))%>%
   glimpse()
 
 length(unique(count.maxn.stage$opcode)) #should be 99 *8 = 792
@@ -138,6 +171,7 @@ saveRDS(count.maxn.stage,
 #########################################################################
 ######## SUM MaxN by Stage (removing the individual stages and summing them)
 
+## TODO -- tidy from here 
 maxn.sum.stage <- count.maxn.stage %>%
   dplyr::group_by(opcode, family, genus, species)%>%
   dplyr::summarise(maxn_sum = sum(maxn))%>%
