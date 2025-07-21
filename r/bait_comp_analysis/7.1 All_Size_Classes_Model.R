@@ -37,22 +37,12 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
 ## MaxN by STAGE
 
 maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS") %>%
-  dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
-                site = as.factor(site), stage = as.factor(stage))%>%
-  dplyr::mutate(depth_m = as.numeric(depth_m), 
-                longitude_dd = as.numeric(longitude_dd),
-                latitude_dd = as.numeric(latitude_dd))%>%
-  dplyr::mutate(date = substr(date_time, 1, 10))%>%
-  dplyr::mutate(time = substr(date_time, 12, 19))%>%
-  dplyr::mutate(date = as.factor(date))%>%
   left_join(habitat)%>%
   dplyr::filter(opcode != "046")%>%
   dplyr::filter(opcode != "078")%>% #remove drops only M F and AD recorded
   dplyr::filter(opcode != "082")%>% #remove drops only M F and AD recorded
   dplyr::filter(!stage %in% c("AD", "M", "F"))%>% #filtering out these
   dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
-  dplyr::mutate(titomaxn_s = periodtime * 60)%>% #creating covariate of time to maxn in seconds only
-  dplyr::mutate(titomaxn_m = periodtime)%>% #creating covariate of titomaxn in mins (same as periodtime)
   clean_names() %>% 
   glimpse()
 
@@ -61,9 +51,239 @@ length(unique(maxn.stage$opcode))
 length(unique(maxn.stage$stage))
 #96*8 = 768
 #96*5 = 480 #after removing AD, F, M
-sum(maxn.stage$maxn)
 
-##############################
+
+
+###########################################################################
+
+## maxn.stage dynamite plot by bait
+ggplot(maxn.stage, aes(x = bait, y = maxn, fill = bait)) +
+  stat_summary(fun = mean, geom = "bar", width = 0.6) +  # Bar plot with mean
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5, color = "black") +  # SE as error bars
+  labs(x = "Bait", y = "mean MaxN +/- se") +
+  facet_wrap(.~stage, ncol = 2)+
+  theme_cowplot()+
+  theme(legend.position = "none")
+
+# maxn.stage maxn by other variables - remove after this
+# ggplot(maxn.stage, aes(x = reef, y = maxn)) +
+#   geom_jitter(alpha = 0.5) +
+#   geom_smooth(method = "lm", colour = "darkgreen", se = TRUE)+
+#   theme_cowplot()+
+#   facet_wrap(.~stage, ncol = 2)+
+#   theme(legend.position = "none")
+
+
+maxn.stage %>%
+  group_by(bait) %>%
+  summarise(
+    mean_maxn = mean(maxn, na.rm = TRUE),
+    median_maxn = median(maxn, na.rm = TRUE),
+    min_maxn = min(maxn, na.rm = TRUE),
+    max_maxn = max(maxn, na.rm = TRUE),
+    sd_maxn = sd(maxn, na.rm = TRUE),
+    range_maxn = max_maxn - min_maxn)
+
+
+#plot freq
+ggplot(maxn.stage, aes(x = maxn)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Maxn Values",
+       x = "Maxn Value",
+       y = "Count") +
+  # scale_y_continuous(
+  #   breaks = c(0, 5, 10, 15), 
+  #   limits = c(0, 15)) +
+  # scale_x_continuous(
+  #   breaks = c(0:8))+
+  facet_wrap(.~stage, ncol = 2)+
+  theme_cowplot()
+
+
+##occurrence of each size class 
+stage_sums <- maxn.stage %>%
+  group_by(stage) %>%
+  summarise(total_maxn = sum(maxn, na.rm = TRUE)) %>%
+  arrange(stage)%>%
+  glimpse()
+
+#plot
+ggplot(stage_sums, aes(x = stage, y = total_maxn)) +
+  geom_col(fill = "darkgreen") +
+  labs(
+    x = "Size class (mm)",
+    y = "Total MaxN",
+    title = "Total MaxN per Size Class"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+##################################
+## Stepwise modelling approach
+
+sc1 <- glmer(maxn ~ bait + stage + (1|location/site), data = maxn.stage,
+            family = "poisson")
+
+summary(sc1)
+Anova(sc1)
+#r2_nakagawa(p1) #r2 using performance package
+
+## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
+#deviance / residual degrees of freedom
+
+deviance(sc1)/df.residual(sc1)
+
+# Compare the mean and variance of response
+mean(maxn.stage$maxn)/var(maxn.stage$maxn)
+
+
+#plotting residuals
+
+r <- residuals(sc1)
+
+# Plot residuals - if systematic patterns (ie funnel shape) 
+# indicates heteroscedasticity
+# also look for large residuals not explained by the model
+plot(r, main = "Residuals from Poisson MaxN(stage)", 
+     xlab = "Index", ylab = "Residuals")
+
+pears.sc1 <- residuals(sc1, type = "pearson")
+var(pears.sc1) #looks like there are some patterns
+
+# running some posthocs
+post <- emmeans(sc1, ~ bait)  # Specify the fixed factor of interest
+
+# Perform pairwise comparisons
+pairs(post)
+
+## visualising post-hoc tests
+
+pairwise_results <- contrast(post, method = "pairwise")
+
+# Convert pairwise results to a data frame
+pairwise_df <- as.data.frame(pairwise_results)
+
+#plot
+ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
+  labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + stage") +
+  theme_minimal() +
+  coord_flip()
+
+#posthoc on stage
+post2 <- emmeans(sc1, ~ stage)  # Specify the fixed factor of interest
+
+# Perform pairwise comparisons
+pairs(post2)
+
+## visualising post-hoc tests
+
+pairwise_results <- contrast(post2, method = "pairwise")
+
+# Convert pairwise results to a data frame
+pairwise_df <- as.data.frame(pairwise_results)
+
+#plot
+ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
+  labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + stage") +
+  theme_minimal() +
+  coord_flip()
+
+
+
+## interaction between bait and stage
+sc3 <- glmer(maxn ~ bait*stage + (1|location/site), data = maxn.stage,
+             family = "poisson")
+summary(sc3)
+Anova(sc3) #no interaction effect - moving on to next model
+
+## depth
+sc4 <- glmer(maxn ~ bait + stage + depth_m +(1|location/stage), data = maxn.stage,
+             family = "poisson")
+
+
+AIC(sc1, sc4)
+
+## mean relief
+sc5 <- glmer(maxn ~ bait + stage + mean_relief +(1|location/site), data = maxn.stage,
+             family = "poisson")
+AIC(sc4, sc5)
+
+## ecklonia
+sc6 <- glmer(maxn ~ bait + stage + ecklonia +(1|location/site), data = maxn.stage,
+             family = "poisson")
+
+AIC(sc4, sc6)
+
+## scytothalia
+sc7 <- glmer(maxn ~ bait + stage + scytothalia +(1|location/site), data = maxn.stage,
+             family = "poisson")
+
+AIC(sc4, sc7)
+
+## macroalgae
+sc8 <- glmer(maxn ~ bait + stage + macroalgae +(1|location/site
+                                                ), data = maxn.stage,
+             family = "poisson")
+AIC(sc4, sc8)
+
+sc9 <- glmer(maxn ~ bait + stage + time_hr +(1|location/site), 
+             data = maxn.stage,
+              family = "poisson")
+
+AIC(sc4, sc9)
+
+### models without bait
+## depth_m no bait
+nob1 <- glmer(maxn ~ stage + depth_m + (1|location/site), data = maxn.stage,
+             family = "poisson")
+
+AIC(sc4, nob1)
+
+
+## ecklonia no bait
+nob2 <- glmer(maxn ~ stage + ecklonia + (1|location/site), data = maxn.stage,
+              family = "poisson")
+
+AIC(sc4, nob2)
+
+
+nob3 <- glmer(maxn ~ stage + time_hr + (1|location/site), data = maxn.stage,
+              family = "poisson")
+
+AIC(sc4, nob3)
+
+### with depth_m, ecklonia & bait
+big1 <- glmer(maxn ~ bait + stage + ecklonia + depth_m +  (1|location/site), 
+              data = maxn.stage,
+              family = "poisson")
+
+AIC(sc4, big1)
+
+#with stage as a random effect
+big2 <- glmer(maxn ~ bait + ecklonia + depth_m + (1|stage) + (1|location/site), 
+              data = maxn.stage,
+              family = "poisson")
+
+AIC(sc4, big2) #shouldn't compare with AIC but out of interest
+summary(big2)
+
+###########
+## BEST MODEL = sc4
+## depth
+sc4 <- glmer(maxn ~ bait + stage + depth_m +(1|location/stage), data = maxn.stage,
+             family = "poisson")
+
+
+AIC(sc1, sc4)
+
+############################################################################3
+##############################################################################
 ## best model
 sc4 <- glmer(maxn ~ bait + stage + depth_m + (1|location/stage), data = maxn.stage,
              family = "poisson")
@@ -71,6 +291,7 @@ summary(sc4)
 Anova(sc4)
 
 deviance(sc4)/df.residual(sc4)
+
 
 #plotting residuals
 r <- residuals(sc4)
@@ -165,7 +386,7 @@ depth
 #################
 
 # 
-folder_path <- "./plots/baitcomp/"
+folder_path <- "./plots/baitcomp/maxn.stage"
 
 # change title
 png(file.path(folder_path, "maxn.stage.bestmodel-depth.png"), width = 600, height = 400)
@@ -218,7 +439,7 @@ maxnSC.bait.post
 #################
 
 # 
-folder_path <- "./plots/baitcomp/"
+folder_path <- "./plots/baitcomp/maxn.stage"
 
 # change title
 png(file.path(folder_path, "maxn.stage.bestmodel-bait.png"), width = 600, height = 400)
@@ -229,5 +450,6 @@ maxnSC.bait.post
 
 # Close the PNG device
 dev.off()
+
 
 

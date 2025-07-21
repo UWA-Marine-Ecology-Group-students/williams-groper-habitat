@@ -1,5 +1,5 @@
 ###########################
-## Exploratory GAMMS - MaxN(stage)
+## Gamms - Maxn.stage
 ##########################
 
 rm(list=ls()) # Clear memory
@@ -20,85 +20,64 @@ library(viridis)
 library(terra)
 library(sf)
 library(patchwork)
-#library(corrr)
 
 # set study name
 
-#name <- "2024_Wudjari_bait_comp"
-name <- "bc"
+name <- "2024_Wudjari_bait_comp"
 
 habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
   glimpse()
 
 
-## MaxN(stage) dataframe
-
 maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS") %>%
-  dplyr::mutate(species = "gouldii", bait = as.factor(bait), location = as.factor(location))%>%
-  dplyr::mutate(depth_m = as.numeric(depth_m))%>%
-  dplyr::mutate(date = substr(date_time, 1, 10))%>%
-  dplyr::mutate(time = substr(date_time, 12, 19))%>%
-  dplyr::mutate(date = as.factor(date))%>%
-  dplyr::group_by(opcode, stage)%>%
-  dplyr::slice_max(order_by = maxn, n=1, with_ties = FALSE)%>%
-  dplyr::ungroup()%>%
-  # dplyr::mutate(location = factor(location, levels = c("mart", "twin", "arid", "middle")))%>% #reordering
-  #left_join(habitat)%>%
-  #left_join(site)%>%
-  #dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
-  #              latitude_dd = as.numeric(latitude_dd))%>%
-  #dplyr::mutate(site = as.factor(site))%>%
-  #dplyr::mutate(site = factor(site, levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
-  glimpse()
-
-##DF with the MaxN per Stage summed for each opcode
-
-sum.stage <- maxn.stage %>% ##DF with the MaxN per Stage summed for each opcode
-  dplyr::group_by(opcode, family, genus, species, bait, 
-                  longitude_dd, latitude_dd, date_time, 
-                  location, depth_m, date, time) %>%
-  dplyr::summarise(maxn=sum(maxn))%>%
-  dplyr::ungroup()%>%
   left_join(habitat)%>%
-  # left_join(site)%>%
-  dplyr::mutate(longitude_dd = as.numeric(longitude_dd), 
-                latitude_dd = as.numeric(latitude_dd))%>%
-  # dplyr::mutate(site = as.factor(site))%>%
-  # dplyr::mutate(site = factor(site, 
-  #                             levels = c("mart", "twin", "ct", "ruby", "arid", "middle")))%>% 
-  dplyr::mutate(Canopy = Scytothalia + Ecklonia + Canopy)%>%
+  dplyr::filter(opcode != "046")%>%
+  dplyr::filter(opcode != "078")%>% #remove drops only M F and AD recorded
+  dplyr::filter(opcode != "082")%>% #remove drops only M F and AD recorded
+  dplyr::filter(!stage %in% c("AD", "M", "F"))%>% #filtering out these
+  dplyr::filter(!stage %in% c("1100-1299mm"))%>% # because loads of zeros
+  dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
+  clean_names() %>% 
   glimpse()
 
-
-
+unique(maxn.stage$stage)
 # Set the predictors for modeling - don't include factors - just continuous var 
-pred.vars <- c("depth_m", "Macroalgae", "Scytothalia", "Ecklonia", "Sargassum",
-               "Canopy", "Sessile_inverts", 
-               "Sand", "reef", "mean.relief")
+pred.vars <- c("depth_m", "macroalgae", "scytothalia", "ecklonia", "sargassum",
+               "canopy", "sessile_inverts", "substrate_hard", 
+               "sand", "reef", "mean_relief")
 
 
 # Check the correlations between predictor variables - looking for NAs
-summary(sum.stage[,pred.vars])
+summary(maxn.stage[,pred.vars])
 
 
 #checking for correlations between variables
-round(cor(sum.stage[ , pred.vars]), 2)
+round(cor(maxn.stage[ , pred.vars]), 2)
 
 # check individual predictors to see if any need transformed
-CheckEM::plot_transformations(pred.vars = pred.vars, dat = sum.stage)
+CheckEM::plot_transformations(pred.vars = pred.vars, dat = maxn.stage)
+
+## code to export 
+# outdir <- "output/baitcomp/maxn.stage"
+# for (var in pred.vars) {
+#   png(filename = file.path(outdir, paste0(var, ".png")), width = 800, height = 600, res = 150)
+#   CheckEM::plot_transformations(pred.vars = var, dat = maxn.stage)
+#   dev.off()
+# }
 
 #Reset the predictor variables to remove any highly correlated variables and include any transformed variables.
-pred.vars <- c("depth_m", "Macroalgae", "Canopy", "mean.relief") 
-
+pred.vars <- c("depth_m", "macroalgae", "ecklonia", "scytothalia",
+               "mean_relief", "time_hr") 
+## not sure about scytothalia - 
 
 #Check to make sure response variables have less than 80% zeroes. 
 #Full-subset GAM modelling will produce unreliable results if your data is too zero inflated.
 
-unique.vars <- unique(as.character(sum.stage$species))
+unique.vars <- unique(as.character(maxn.stage$species))
 
 resp.vars <- character()
 for(i in 1:length(unique.vars)){
-  temp.dat <- sum.stage[which(sum.stage$species == unique.vars[i]), ]
+  temp.dat <- maxn.stage[which(maxn.stage$species == unique.vars[i]), ]
   if(length(which(temp.dat$maxn == 0)) / nrow(temp.dat) < 0.8){
     resp.vars <- c(resp.vars, unique.vars[i])}
 }
@@ -112,25 +91,28 @@ out.all <- list()
 var.imp <- list()
 
 #specify cyclic or factor co-variates
-#cyclic.vars = c("time") #circular variables that can be plotted on a clock-face
-factor.vars <- c("bait") #don't include the RE factor
+cyclic.vars <- c("time_hr") #circular variables that can be plotted on a clock-face
+factor.vars <- c("bait", "stage") #don't include the RE factor
 
 ## Running Full Sub-set Gamms
 for(i in 1:length(resp.vars)){
-  use.dat = as.data.frame(sum.stage[which(sum.stage$species == resp.vars[i]),])
+  use.dat = as.data.frame(maxn.stage[which(maxn.stage$species == resp.vars[i]),])
   print(resp.vars[i])
   
-  Model1  <- gam(maxn ~ bait + s(mean.relief, k = 3, bs = 'cr') +
-                   s(location, bs = 're'), #random effect
-                 family = gaussian(link = "identity"),  data = use.dat)
+  Model1  <- gam(maxn ~ s(ecklonia, k = 3, bs = 'cr') +
+                   s(location, site, bs = 're'), #random effect
+                 family = tw(),  data = use.dat) #check family
   
   model.set <- generate.model.set(use.dat = use.dat,
                                   test.fit = Model1,
                                   pred.vars.cont = pred.vars,
                                   pred.vars.fact = factor.vars, 
                                   factor.smooth.interactions = NA,
-                                  #cyclic.vars = "aspect",
-                                  null.terms = "s(location, bs ='re')", #repeat R.E. here -- check
+                                  factor.factor.interactions= F,
+                                  smooth.smooth.interactions= F,
+                                  cyclic.vars = cyclic.vars,
+                                  max.predictors = 4,
+                                  null.terms = "s(location, site, bs ='re')", #repeat R.E. here -- check
                                   k = 3)
   
   out.list <- fit.model.set(model.set,
@@ -142,7 +124,7 @@ for(i in 1:length(resp.vars)){
   mod.table = out.list$mod.data.out 
   mod.table = mod.table[order(mod.table$AICc),]
   mod.table$cumsum.wi = cumsum(mod.table$wi.AICc)
-  out.i = mod.table[which(mod.table$delta.AICc <= 2),]
+  out.i = mod.table[which(mod.table$delta.AICc <= 100),]
   out.all = c(out.all,list(out.i))
   var.imp = c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw))
   
@@ -171,16 +153,9 @@ write.csv(all.mod.fits[ , -2], file = paste(outdir, paste(name, "all.mod.fits.cs
 write.csv(all.var.imp, file = paste(outdir, paste(name, "all.var.imp.csv", sep = "_"), sep = "/"))
 
 
-###############################################################################
-###############################################################################
-# 
-# gamm1 <- gam(maxn ~ s(depth_m, k = 3, bs = 'cr') + s(Ecklonia, k = 3, bs = 'cr')+  
-#                s(location, bs ='re'),#location as random effect
-#              family = gaussian(link = "identity"),  data = use.dat)
-# summary(gamm1)
-
 
 ###########################################################################
+########### IMPORTANCE PLOTS
 # Convert wide to long format
 importance_long <- all.var.imp %>%
   pivot_longer(

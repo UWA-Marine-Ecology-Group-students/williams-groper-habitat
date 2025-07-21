@@ -25,6 +25,7 @@ name <- "2024_Wudjari_bait_comp"
 habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
   glimpse()
 
+
 ## MaxN by STAGE
 
 sum.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.sum.stage.rds")%>%
@@ -77,12 +78,12 @@ pred.vars <- c("depth_m", "macroalgae", "ecklonia",
 #Check to make sure response variables have less than 80% zeroes. 
 #Full-subset GAM modelling will produce unreliable results if your data is too zero inflated.
 
-unique.vars <- unique(as.character(maxn.all$species))
+unique.vars <- unique(as.character(sum.stage$species))
 
 resp.vars <- character()
 for(i in 1:length(unique.vars)){
-  temp.dat <- maxn.all[which(maxn.all$species == unique.vars[i]), ]
-  if(length(which(temp.dat$maxn == 0)) / nrow(temp.dat) < 0.8){
+  temp.dat <- sum.stage[which(sum.stage$species == unique.vars[i]), ]
+  if(length(which(temp.dat$maxn_sum == 0)) / nrow(temp.dat) < 0.8){
     resp.vars <- c(resp.vars, unique.vars[i])}
 }
 resp.vars  
@@ -90,7 +91,7 @@ resp.vars
 ##add directory to save model outputs & set up environment for model selection
 ### Re-run from here down everytime
 
-outdir <- ("output/baitcomp/maxn.all") 
+outdir <- ("output/baitcomp/sum.stage") 
 out.all <- list()
 var.imp <- list()
 
@@ -100,10 +101,10 @@ factor.vars <- c("bait") #don't include the RE factor
 
 ## Running Full Sub-set Gamms
 for(i in 1:length(resp.vars)){
-  use.dat = as.data.frame(maxn.all[which(maxn.all$species == resp.vars[i]),])
+  use.dat = as.data.frame(sum.stage[which(sum.stage$species == resp.vars[i]),])
   print(resp.vars[i])
   
-  Model1  <- gam(maxn ~ s(ecklonia, k = 5, bs = 'cr') +
+  Model1  <- gam(maxn_sum ~ s(ecklonia, k = 5, bs = 'cr') +
                    s(location, site, bs = 're'), #random effect
                  family = tw(),  data = use.dat) #check family
   

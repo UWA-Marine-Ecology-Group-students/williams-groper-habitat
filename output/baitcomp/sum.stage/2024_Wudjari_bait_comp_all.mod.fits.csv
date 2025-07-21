@@ -1,0 +1,8 @@
+"","species","formula","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth_m","macroalgae","ecklonia","mean_relief","time_hr","bait","cumsum.wi"
+"bait+depth_m+ecklonia","gouldii","s(depth_m, k = 5, bs = ""cr"") + s(ecklonia, k = 5, bs = ""cr"") + bait + s(location, site, bs = ""re"")",163.324855539906,184.298824743612,0.19682,NA,7.44,1,0,3.637,0.407,0.055,1,0,1,0,0,1,0.407
+"depth_m+ecklonia+time_hr","gouldii","s(depth_m, k = 5, bs = ""cr"") + s(ecklonia, k = 5, bs = ""cr"") + s(time_hr, k = 5, bs = ""cc"") + s(location, site, bs = ""re"")",164.07076771342,180.661611310728,0.1539,NA,6.42,2,0.746,0,0.28,0.34,1,0,1,0,1,0,0.687
+"depth_m+ecklonia","gouldii","s(depth_m, k = 5, bs = ""cr"") + s(ecklonia, k = 5, bs = ""cr"") + s(location, site, bs = ""re"")",164.071077064179,180.662280264136,0.15391,NA,5.42,1,0.746,0.001,0.28,0.34,1,0,1,0,0,0,0.967
+"bait+ecklonia","gouldii","s(ecklonia, k = 5, bs = ""cr"") + bait + s(location, site, bs = ""re"")",170.103458517712,184.69230319685,0.08198,NA,5,1,6.779,4.031,0.014,0.045,0,0,1,0,0,1,0.981
+"bait+ecklonia+time_hr","gouldii","s(ecklonia, k = 5, bs = ""cr"") + s(time_hr, k = 5, bs = ""cc"") + bait + s(location, site, bs = ""re"")",170.61869640292,186.205160132093,0.08605,NA,6,2,7.294,5.544,0.011,0.021,0,0,1,0,1,1,0.992
+"ecklonia","gouldii","s(ecklonia, k = 5, bs = ""cr"") + s(location, site, bs = ""re"")",172.435723173473,183.027325217308,0.03394,NA,3.15,1,9.111,2.366,0.004,0.104,0,0,1,0,0,0,0.996
+"ecklonia+time_hr","gouldii","s(ecklonia, k = 5, bs = ""cr"") + s(time_hr, k = 5, bs = ""cc"") + s(location, site, bs = ""re"")",172.500840883513,183.215925128588,0.03438,NA,4.14,2,9.176,2.554,0.004,0.095,0,0,1,0,1,0,1
