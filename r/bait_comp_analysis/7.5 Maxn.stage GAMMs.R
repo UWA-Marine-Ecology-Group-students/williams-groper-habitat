@@ -100,7 +100,8 @@ for(i in 1:length(resp.vars)){
   print(resp.vars[i])
   
   Model1  <- gam(maxn ~ s(ecklonia, k = 5, bs = 'cr') +
-                   s(location, site, bs = 're'), #random effect
+                   s(location, site, bs = 're') + 
+                   s(opcode, bs = 're'), #random effect
                  family = poisson(),  data = use.dat) #check family
   
   model.set <- generate.model.set(use.dat = use.dat,
@@ -112,7 +113,7 @@ for(i in 1:length(resp.vars)){
                                   smooth.smooth.interactions= F,
                                   cyclic.vars = cyclic.vars,
                                   max.predictors = 4,
-                                  null.terms = "s(location, site, bs ='re')", #repeat R.E. here -- check
+                                  null.terms = "s(location, site, bs ='re') + s(opcode, bs = 're')", #repeat R.E. here -- check
                                   k = 5)
   
   out.list <- fit.model.set(model.set,
@@ -124,7 +125,7 @@ for(i in 1:length(resp.vars)){
   mod.table = out.list$mod.data.out 
   mod.table = mod.table[order(mod.table$AICc),]
   mod.table$cumsum.wi = cumsum(mod.table$wi.AICc)
-  out.i = mod.table[which(mod.table$delta.AICc <= 20),]
+  out.i = mod.table[which(mod.table$delta.AICc <= 5),]
   out.all = c(out.all,list(out.i))
   var.imp = c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw))
   
@@ -157,27 +158,27 @@ write.csv(all.var.imp, file = paste(outdir, paste(name, "all.var.imp.csv", sep =
 ###########################################################################
 ########### IMPORTANCE PLOTS
 # Convert wide to long format
-importance_long <- all.var.imp %>%
-  pivot_longer(
-    cols = everything(),        # Specify all columns to pivot
-    names_to = "Feature",       # New column for feature names
-    values_to = "Importance"    # New column for importance values
-  )
-
-
-# Heatmap for one model
-
-ggplot(importance_long, aes(x = Feature, y = 1, fill = Importance)) +
-  geom_tile() +  # Create the tile
-  scale_fill_gradient(low = "white", high = "red") +  # Color gradient
-  labs(
-    title = "Importance Scores ",
-    x = "Feature",
-    y = NULL,
-    fill = "Importance"
-  ) +
-  theme_cowplot() +
-  theme(axis.text.y = element_blank(),  # Hide y-axis text (since it's just one row)
-        axis.ticks.y = element_blank(),  # Hide y-axis ticks
-        axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
-
+# importance_long <- all.var.imp %>%
+#   pivot_longer(
+#     cols = everything(),        # Specify all columns to pivot
+#     names_to = "Feature",       # New column for feature names
+#     values_to = "Importance"    # New column for importance values
+#   )
+# 
+# 
+# # Heatmap for one model
+# 
+# ggplot(importance_long, aes(x = Feature, y = 1, fill = Importance)) +
+#   geom_tile() +  # Create the tile
+#   scale_fill_gradient(low = "white", high = "red") +  # Color gradient
+#   labs(
+#     title = "Importance Scores ",
+#     x = "Feature",
+#     y = NULL,
+#     fill = "Importance"
+#   ) +
+#   theme_cowplot() +
+#   theme(axis.text.y = element_blank(),  # Hide y-axis text (since it's just one row)
+#         axis.ticks.y = element_blank(),  # Hide y-axis ticks
+#         axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+# 

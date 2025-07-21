@@ -123,7 +123,7 @@ ggplot(stage_sums, aes(x = stage, y = total_maxn)) +
 ##################################
 ## Stepwise modelling approach
 
-sc1 <- glmer(maxn ~ bait + stage + (1|location/site), data = maxn.stage,
+sc1 <- glmer(maxn ~ bait + stage + (1|location/site) + (1|opcode), data = maxn.stage,
             family = "poisson")
 
 summary(sc1)
@@ -150,51 +150,83 @@ plot(r, main = "Residuals from Poisson MaxN(stage)",
      xlab = "Index", ylab = "Residuals")
 
 pears.sc1 <- residuals(sc1, type = "pearson")
-var(pears.sc1) #looks like there are some patterns
+var(pears.sc1) #considerably underdispersed 
 
-# running some posthocs
-post <- emmeans(sc1, ~ bait)  # Specify the fixed factor of interest
+# # running some posthocs
+# post <- emmeans(sc1, ~ bait)  # Specify the fixed factor of interest
+# 
+# # Perform pairwise comparisons
+# pairs(post)
+# 
+# ## visualising post-hoc tests
+# 
+# pairwise_results <- contrast(post, method = "pairwise")
+# 
+# # Convert pairwise results to a data frame
+# pairwise_df <- as.data.frame(pairwise_results)
+# 
+# #plot
+# ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
+#   geom_point(size = 3) +
+#   geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
+#   labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + stage") +
+#   theme_minimal() +
+#   coord_flip()
+# 
+# #posthoc on stage
+# post2 <- emmeans(sc1, ~ stage)  # Specify the fixed factor of interest
+# 
+# # Perform pairwise comparisons
+# pairs(post2)
+# 
+# ## visualising post-hoc tests
+# 
+# pairwise_results <- contrast(post2, method = "pairwise")
+# 
+# # Convert pairwise results to a data frame
+# pairwise_df <- as.data.frame(pairwise_results)
+# 
+# #plot
+# ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
+#   geom_point(size = 3) +
+#   geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
+#   labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + stage") +
+#   theme_minimal() +
+#   coord_flip()
 
-# Perform pairwise comparisons
-pairs(post)
+## changing to compois distribution -- computationally more hectic
 
-## visualising post-hoc tests
+sc2 <- glmmTMB(maxn ~ bait + stage + (1|location/site) + (1|opcode), 
+               data = maxn.stage,
+             family = compois())
 
-pairwise_results <- contrast(post, method = "pairwise")
+summary(sc2)
+AIC(sc1, sc2) #cp model better
+BIC(sc1, sc2)
+#pearson residuals
+resid_cp <- residuals(sc2, type = "pearson")
+hist(resid_cp, main = "Histogram of Pearson Residuals", breaks = 30)
 
-# Convert pairwise results to a data frame
-pairwise_df <- as.data.frame(pairwise_results)
+#residals vs fitted
+fitted_cp <- fitted(sc2)
+plot(fitted_cp, resid_cp,
+     main = "Pearson Residuals vs Fitted Values",
+     xlab = "Fitted values", ylab = "Pearson residuals")
+abline(h = 0, col = "red")
 
-#plot
-ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
-  geom_point(size = 3) +
-  geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
-  labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + stage") +
-  theme_minimal() +
-  coord_flip()
+#check dispersion manually
+disp_cp <- sum(resid_cp^2) / df.residual(sc2)
+print(disp_cp)
+# Should be close to 1 if dispersion is well-controlled
 
-#posthoc on stage
-post2 <- emmeans(sc1, ~ stage)  # Specify the fixed factor of interest
+library(DHARMa)
 
-# Perform pairwise comparisons
-pairs(post2)
-
-## visualising post-hoc tests
-
-pairwise_results <- contrast(post2, method = "pairwise")
-
-# Convert pairwise results to a data frame
-pairwise_df <- as.data.frame(pairwise_results)
-
-#plot
-ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
-  geom_point(size = 3) +
-  geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
-  labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + stage") +
-  theme_minimal() +
-  coord_flip()
+simres_cp <- simulateResiduals(sc2)
+plot(simres_cp)
 
 
+## TODO --- re analyse from here 
+# add opcode as random effect & change distribution family to compois
 
 ## interaction between bait and stage
 sc3 <- glmer(maxn ~ bait*stage + (1|location/site), data = maxn.stage,
