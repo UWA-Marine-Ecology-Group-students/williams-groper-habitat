@@ -504,3 +504,55 @@ AIC(mod6, mod8)
 best <- glmer(maxn ~ depth_m + bait + stage + (1|location/site),
               data = noelders,
               family = poisson)
+
+summary(best)
+
+deviance(best)/df.residual(best)
+#0.8156
+
+#plotting residuals
+r <- residuals(best)
+plot(r, main = "Residuals from Poisson MaxN(stage)", 
+     xlab = "Index", ylab = "Residuals")
+#same weird shape
+
+pears.best <- residuals(best, type = "pearson")
+var(pears.best) #0.792
+
+plot(fitted(best), pears.best)
+abline(h = 0, col = "red")
+
+hist(pears.best, breaks = 30, main = "Histogram of Pearson Residuals")
+
+overdispersion <- sum(pears.best^2) / df.residual(best)
+print(overdispersion)
+
+# model is mildly underdispersed so going to check with a com-pois model
+library(glmmTMB)
+
+model_cp <- glmmTMB(maxn ~ depth_m + bait + stage + (1|location/site),
+                    data = noelders,
+                    family = compois())
+summary(model_cp)
+AIC(best, model_cp) #cp model better
+BIC(best, model_cp)
+#pearson residuals
+resid_cp <- residuals(model_cp, type = "pearson")
+hist(resid_cp, main = "Histogram of Pearson Residuals", breaks = 30)
+
+#residals vs fitted
+fitted_cp <- fitted(model_cp)
+plot(fitted_cp, resid_cp,
+     main = "Pearson Residuals vs Fitted Values",
+     xlab = "Fitted values", ylab = "Pearson residuals")
+abline(h = 0, col = "red")
+
+#check dispersion manually
+disp_cp <- sum(resid_cp^2) / df.residual(model_cp)
+print(disp_cp)
+# Should be close to 1 if dispersion is well-controlled
+
+library(DHARMa)
+
+simres_cp <- simulateResiduals(model_cp)
+plot(simres_cp)
