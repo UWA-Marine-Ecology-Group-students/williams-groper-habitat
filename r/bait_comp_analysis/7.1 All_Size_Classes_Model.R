@@ -451,5 +451,56 @@ maxnSC.bait.post
 # Close the PNG device
 dev.off()
 
+######################################3
+## without the big ones
+noelders <- maxn.stage %>%
+  dplyr::filter(!stage %in% c("1100-1299mm"))%>%
+  glimpse()
 
 
+mod1 <- glmer(maxn ~ bait + stage + (1|location/site),
+              data = noelders,
+              family = poisson)
+summary(mod1)
+
+mod2 <- glmer(maxn ~ ecklonia + stage + (1|location/site),
+              data = noelders,
+              family = poisson)
+AIC(mod1, mod2)
+
+mod3 <- glmer(maxn ~ depth_m + stage + (1|location/site),
+              data = noelders,
+              family = poisson)
+AIC(mod1, mod3) #mod 3 better
+
+
+mod4 <- glmer(maxn ~ depth_m + bait + (1|location/site),
+              data = noelders,
+              family = poisson)
+AIC(mod3, mod4) #mod 4 better - but also need to include stage hah
+
+mod5 <- glmer(maxn ~ time_hr + stage + (1|location/site),
+                   data = noelders,
+                   family = poisson)
+AIC(mod3, mod5)
+
+mod6 <- glmer(maxn ~ depth_m + bait + stage + (1|location/site),
+              data = noelders,
+              family = poisson)
+AIC(mod3, mod6) #mod6 better
+
+mod7 <- glmer(maxn ~ ecklonia + bait + stage + (1|location/site),
+              data = noelders,
+              family = poisson)
+AIC(mod6, mod7)
+
+mod8 <- glmer(maxn ~ depth_m + bait + stage +  ecklonia + (1|location/site),
+              data = noelders,
+              family = poisson)
+AIC(mod6, mod8)
+
+### best model without elders 
+
+best <- glmer(maxn ~ depth_m + bait + stage + (1|location/site),
+              data = noelders,
+              family = poisson)

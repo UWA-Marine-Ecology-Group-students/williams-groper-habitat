@@ -66,7 +66,7 @@ CheckEM::plot_transformations(pred.vars = pred.vars, dat = maxn.stage)
 # }
 
 #Reset the predictor variables to remove any highly correlated variables and include any transformed variables.
-pred.vars <- c("depth_m", "macroalgae", "ecklonia", "scytothalia",
+pred.vars <- c("depth_m", "macroalgae", "ecklonia",
                "mean_relief", "time_hr") 
 ## not sure about scytothalia - 
 
@@ -99,7 +99,7 @@ for(i in 1:length(resp.vars)){
   use.dat = as.data.frame(maxn.stage[which(maxn.stage$species == resp.vars[i]),])
   print(resp.vars[i])
   
-  Model1  <- gam(maxn ~ s(ecklonia, k = 3, bs = 'cr') +
+  Model1  <- gam(maxn ~ s(ecklonia, k = 5, bs = 'cr') +
                    s(location, site, bs = 're'), #random effect
                  family = tw(),  data = use.dat) #check family
   
@@ -113,7 +113,7 @@ for(i in 1:length(resp.vars)){
                                   cyclic.vars = cyclic.vars,
                                   max.predictors = 4,
                                   null.terms = "s(location, site, bs ='re')", #repeat R.E. here -- check
-                                  k = 3)
+                                  k = 5)
   
   out.list <- fit.model.set(model.set,
                             max.models = 600,
@@ -124,7 +124,7 @@ for(i in 1:length(resp.vars)){
   mod.table = out.list$mod.data.out 
   mod.table = mod.table[order(mod.table$AICc),]
   mod.table$cumsum.wi = cumsum(mod.table$wi.AICc)
-  out.i = mod.table[which(mod.table$delta.AICc <= 100),]
+  out.i = mod.table[which(mod.table$delta.AICc <= 20),]
   out.all = c(out.all,list(out.i))
   var.imp = c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw))
   
