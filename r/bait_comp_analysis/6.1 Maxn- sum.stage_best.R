@@ -6,6 +6,7 @@ rm(list=ls())
 
 # libraries----
 #library(devtools)
+library(CheckEM)
 library(tidyverse)
 #library(mgcv)
 #library(MuMIn)
@@ -51,23 +52,6 @@ sum.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.sum.stage.rds")%>
   clean_names()%>%
   glimpse()
 
-
-##TODO
-## sussing Time of day -- move up when done
-
-sum.stage$time_of_day <- as.POSIXct(sum.stage$time, format = "%H:%M:%S")
-# Convert to seconds since midnight
-
-sum.stage$time_sec <- as.numeric(format(sum.stage$time_of_day, "%H")) * 3600 +
-  as.numeric(format(sum.stage$time_of_day, "%M")) * 60 +
-  as.numeric(format(sum.stage$time_of_day, "%S"))
-sum.stage$time_hr <- sum.stage$time_sec / 3600
-
-#with time as factor
-sum.stage$time_block <- cut(sum.stage$time_hr,
-                             breaks = c(0, 6, 12, 18, 24),
-                             labels = c("Night", "Morning", "Afternoon", "Evening"),
-                             right = FALSE)
 
 ################################################################################
 ################################################################################ 

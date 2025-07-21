@@ -7,6 +7,7 @@ rm(list=ls())
 # libraries----
 #library(devtools)
 library(tidyverse)
+library(CheckEM)
 #library(mgcv)
 library(MuMIn)
 library(car)
@@ -105,21 +106,33 @@ ggplot(sum.stage, aes(x= bait, y = maxn_sum, fill = bait))+
 
 # Checking predictor variables and running a Generalized Linear Model (GLM)
 ## Check correlation of co-variates
-ggplot() +
-  geom_point(data = sum.stage, aes(x = macroalgae, y = scytothalia))
+# Set the predictors for modeling - don't include factors - just continuous var 
+pred.vars <- c("depth_m", "macroalgae", "scytothalia", "ecklonia",
+               "sessile_inverts", "mean_relief", "time_hr") 
 
-cor(sum.stage$macroalgae, sum.stage$scytothalia)
+# Check the correlations between predictor variables - looking for NAs
+summary(sum.stage[,pred.vars])
 
-ggplot() +
-  geom_point(data = sum.stage, aes(x = macroalgae, y = ecklonia))
 
-cor(sum.stage$macroalgae, sum.stage$ecklonia)
+#checking for correlations between variables
+round(cor(sum.stage[ , pred.vars]), 2)
+
+# check individual predictors to see if any need transformed
+CheckEM::plot_transformations(pred.vars = pred.vars, dat = sum.stage) #throwing error but worked in MaxNmodels script
+
+outdir <- "output/baitcomp/sum.stage"
+for (var in pred.vars) {
+  png(filename = file.path(outdir, paste0(var, ".png")), width = 800, height = 600, res = 150)
+  CheckEM::plot_transformations(pred.vars = var, dat = sum.stage)
+  dev.off()
+}
+
 
 ##############################
 ## visualising relationships between covariates and response
 
 ggplot() +
-  geom_point(data = sum.stage, aes(x = canopy, y = maxn_sum))
+  geom_point(data = sum.stage, aes(x = bait, y = ecklonia))
 
 #doesn't look like there's much of a relationship between any
 
@@ -131,8 +144,6 @@ p1 <- glmer(maxn_sum ~ bait + (1|location/site), data = sum.stage,
 
 summary(p1)
 Anova(p1)
-
-#r2_nakagawa(p1) #r2 using performance package
 
 ## CHECKING OVERDISPERSION OF POISSON DISTRIBUTION
 #deviance / residual degrees of freedom
@@ -201,13 +212,57 @@ plot(pears1, main = "Pearson - MaxN(stage)~bait")
 sim_res <- simulateResiduals(fittedModel = nb1)
 plot(sim_res)
 
+## Testing other predictors besides bait with one predictor only specified
 
+b1 <- glmer(maxn_sum ~ ecklonia + (1|location/site), data = sum.stage,
+            family = "poisson")
+
+AIC(p1, b1)
+
+b2 <- glmer(maxn_sum ~ canopy + (1|location/site), data = sum.stage,
+            family = "poisson")
+
+AIC(p1, b2)
+
+b3 <- glmer(maxn_sum ~ depth_m + (1|location/site), data = sum.stage,
+            family = "poisson")
+
+
+AIC(p1, b3)
+
+b4 <- glmer(maxn_sum ~ scytothalia + (1|location/site), data = sum.stage,
+            family = "poisson")
+
+
+AIC(p1, b4)
+
+b5 <- glmer(maxn_sum ~ mean_relief + (1|location/site), data = sum.stage,
+            family = "poisson")
+
+
+AIC(p1, b5)
+
+#time
+b6 <- glmer(maxn_sum ~ time_hr + (1|location/site), data = sum.stage,
+            family = "poisson")
+
+
+AIC(p1, b6)
+
+#sessile_inverts
+
+b7 <- glmer(maxn_sum ~ sessile_inverts + (1|location/site), data = sum.stage,
+            family = "poisson")
+
+
+AIC(p1, b7)
 #bait + depth_m 
 
 p2 <- glmer(maxn_sum ~ bait + depth_m + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p2)
 Anova(p2)
+AIC(p1, p2)
 
 ## checking for overdispersion
 # dispersion statistic 
@@ -232,73 +287,7 @@ var(pears)
 # Plot Pearson residuals
 plot(pears)
 
-#with DHARMa package - check residuals
-# sim_res <- simulateResiduals(fittedModel = p2)
-# plot(sim_res)
-# 
-# ##refit with NB
-# nb2 <- glmmTMB(maxn_sum~bait + depth_m + (1|location), 
-#         data = sum.stage, 
-#         family = "nbinom2")
-# 
-# summary(nb2)
-# Anova(nb2)
-
-## checking for overdispersion
-# dispersion statistic 
-
-# deviance(nb2)/df.residual(nb2)
-# 
-# #plotting residuals
-# 
-# nbr1 <- residuals(nb2)
-# 
-# # Plot residuals - if systematic patterns (ie funnel shape) indicates heteroscedasticity
-# # also look for large residuals not explained by the model
-# plot(nbr1, xlab = "Index", ylab = "Residuals")
-# 
-# ## Pearson residuals - 
-# # checking to see if variance of residuals is larger than expected
-# 
-# pears1 <- residuals(nb2, type = "pearson")
-# 
-# #Calculate variance of the pearson residuals - 
-# #if around 1 indicates that poisson assumption
-# # of constant variance is actually reasonable - 
-# # but as this is a negative binomial would expect
-# # it to be larger than 1
-# var(pears1)
-# 
-# # Plot Pearson residuals
-# plot(pears1, main = "Pearson - MaxN(stage)~bait")
-# 
-# #with DHARMa package - check residuals
-# sim_res <- simulateResiduals(fittedModel = nb2)
-# plot(sim_res)
-# 
-# # Post - hoc for best model
-# 
-# post <- emmeans(p2, ~ bait)  # Specify the fixed factor of interest
-# 
-# # Perform pairwise comparisons
-# pairs(post)
-# 
-# ## visualising post-hoc tests
-# 
-# pairwise_results <- contrast(post, method = "pairwise")
-# 
-# # Convert pairwise results to a data frame
-# pairwise_df <- as.data.frame(pairwise_results)
-# 
-# #plot
-# ggplot(pairwise_df, aes(x = contrast, y = estimate)) +
-#   geom_point(size = 3) +
-#   geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE), width = 0.2) +
-#   labs(x = "Pairwise Comparisons", y = "Estimate", title = "MaxN(stage) ~ bait + depth_m") +
-#   theme_minimal() +
-#   coord_flip()
-# 
-
+## 
 
 ###########################################################################
 #depth + reef
@@ -307,50 +296,56 @@ p3 <- glmer(maxn_sum ~ bait + depth_m + reef + (1|location/site), data = sum.sta
             family = "poisson")
 summary(p3)
 Anova(p3)
+AIC(p1, p3)
 
 #depth + ecklonia
 p4 <- glmer(maxn_sum ~ bait + depth_m + ecklonia + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p4)
 Anova(p4)
+AIC(p1, p4)
 
 #ecklonia
 p5 <- glmer(maxn_sum ~ bait + ecklonia + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p5)
 Anova(p5)
+AIC(p1, p5)
 
 #scyto
 p6 <- glmer(maxn_sum ~ bait + scytothalia + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p6)
 Anova(p6)
-
+AIC(p1, p6)
 #reef
 p7 <- glmer(maxn_sum ~ bait + reef + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p7)
-
+AIC(p1, p7)
 
 #mean_relief
 p8 <- glmer(maxn_sum ~ bait + mean_relief + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p8)
-
+AIC(p1, p8)
 
 #macroalgae
 p9 <- glmer(maxn_sum ~ bait + macroalgae + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p9)
+AIC(p1, p9)
 
 #canopy
 p10 <- glmer(maxn_sum ~ bait + canopy + (1|location/site), data = sum.stage,
             family = "poisson")
 summary(p10)
+AIC(p1, p10)
 
+p11 <- glmer(maxn_sum ~ bait + time_hr +(1|location/site), data = sum.stage,
+family = "poisson")
 
-ggplot() +
-  geom_point(data = sum.stage, aes(x = maxn_sum, y = canopy))
+AIC(p1, p11)
 
 #############################################################################
 ### Running as presence/absence
