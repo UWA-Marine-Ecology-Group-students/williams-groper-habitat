@@ -17,7 +17,6 @@ library(viridis)
 library(terra)
 library(sf)
 library(patchwork)
-#library(corrr)
 
 # set study name
 
@@ -50,14 +49,23 @@ pred.vars <- c("depth_m", "macroalgae", "scytothalia", "ecklonia",
 
 
 # Check the correlations between predictor variables - looking for NAs
-summary(maxn.all[,pred.vars])
+summary(sum.stage[,pred.vars])
 
 
 #checking for correlations between variables
-round(cor(maxn.all[ , pred.vars]), 2)
+round(cor(sum.stage[ , pred.vars]), 2)
 
 # check individual predictors to see if any need transformed
-CheckEM::plot_transformations(pred.vars = pred.vars, dat = maxn.all)
+CheckEM::plot_transformations(pred.vars = pred.vars, dat = sum.stage)
+
+## code to export
+outdir <- "output/baitcomp/sum.stage"
+for (var in pred.vars) {
+  png(filename = file.path(outdir, paste0(var, ".png")), width = 800, height = 600, res = 150)
+  CheckEM::plot_transformations(pred.vars = var, dat = sum.stage)
+  dev.off()
+}
+
 
 # Reset the predictor variables to remove any highly correlated variables 
 # and include any transformed variables.
