@@ -102,7 +102,7 @@ for(i in 1:length(resp.vars)){
   Model1  <- gam(maxn ~ s(ecklonia, k = 5, bs = 'cr') +
                    s(location, site, bs = 're') + 
                    s(opcode, bs = 're'), #random effect
-                 family = poisson(),  data = use.dat) #check family
+                 family = tw(),  data = use.dat) #check family
   
   model.set <- generate.model.set(use.dat = use.dat,
                                   test.fit = Model1,

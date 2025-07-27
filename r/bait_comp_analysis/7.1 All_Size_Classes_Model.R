@@ -47,6 +47,7 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   glimpse()
 
 
+
 length(unique(maxn.stage$opcode))
 length(unique(maxn.stage$stage))
 #96*8 = 768
@@ -225,116 +226,130 @@ simres_cp <- simulateResiduals(sc2)
 plot(simres_cp)
 
 
-## TODO --- re analyse from here 
-# add opcode as random effect & change distribution family to compois
-
 ## interaction between bait and stage
-sc3 <- glmer(maxn ~ bait*stage + (1|location/site), data = maxn.stage,
-             family = "poisson")
+sc3 <- glmmTMB(maxn ~ bait*stage + (1|location/site) + (1|opcode), data = maxn.stage,
+             family = compois())
 summary(sc3)
 Anova(sc3) #no interaction effect - moving on to next model
 
 ## depth
-sc4 <- glmer(maxn ~ bait + stage + depth_m +(1|location/stage), data = maxn.stage,
-             family = "poisson")
+sc4 <- glmmTMB(maxn ~ bait + stage + depth_m +(1|location/stage) + (1|opcode), 
+             data = maxn.stage,
+             family = compois())
 
 
-AIC(sc1, sc4)
+AIC(sc2, sc4)
+BIC(sc2, sc4)
 
 ## mean relief
-sc5 <- glmer(maxn ~ bait + stage + mean_relief +(1|location/site), data = maxn.stage,
-             family = "poisson")
-AIC(sc4, sc5)
+  sc5 <- glmmTMB(maxn ~ bait + stage + mean_relief +(1|location/stage) + (1|opcode), 
+                 data = maxn.stage,
+                 family = compois())
+AIC(sc4, sc5) 
 
 ## ecklonia
-sc6 <- glmer(maxn ~ bait + stage + ecklonia +(1|location/site), data = maxn.stage,
-             family = "poisson")
+sc6 <- glmmTMB(maxn ~ bait + stage + ecklonia +(1|location/stage) + (1|opcode), 
+               data = maxn.stage,
+               family = compois())
 
-AIC(sc4, sc6)
+AIC(sc4, sc6) #sc4 still better
 
+#checking more complex model with ecklonia just in case
+sc6.5 <- glmmTMB(maxn ~ bait + stage + depth_m + ecklonia +(1|location/stage) + (1|opcode), 
+                 data = maxn.stage,
+                 family = compois())
+
+AIC(sc4, sc6.5)
 ## scytothalia
-sc7 <- glmer(maxn ~ bait + stage + scytothalia +(1|location/site), data = maxn.stage,
-             family = "poisson")
+
+sc7 <- glmmTMB(maxn ~ bait + stage + scytothalia + (1|location/stage) + (1|opcode), 
+               data = maxn.stage,
+               family = compois())
 
 AIC(sc4, sc7)
 
 ## macroalgae
-sc8 <- glmer(maxn ~ bait + stage + macroalgae +(1|location/site
-                                                ), data = maxn.stage,
-             family = "poisson")
+sc8 <- glmmTMB(maxn ~ bait + stage + macroalgae + (1|location/stage) + (1|opcode), 
+               data = maxn.stage,
+               family = compois())
 AIC(sc4, sc8)
 
-sc9 <- glmer(maxn ~ bait + stage + time_hr +(1|location/site), 
-             data = maxn.stage,
-              family = "poisson")
+##time_hr
+
+sc9 <- glmmTMB(maxn ~ bait + stage + time_hr + (1|location/stage) + (1|opcode), 
+               data = maxn.stage,
+               family = compois())
 
 AIC(sc4, sc9)
 
 ### models without bait
 ## depth_m no bait
-nob1 <- glmer(maxn ~ stage + depth_m + (1|location/site), data = maxn.stage,
-             family = "poisson")
+nob1 <- glmmTMB(maxn ~ stage + depth_m + (1|location/stage) + (1|opcode), 
+                data = maxn.stage,
+                family = compois())
 
 AIC(sc4, nob1)
 
-
 ## ecklonia no bait
-nob2 <- glmer(maxn ~ stage + ecklonia + (1|location/site), data = maxn.stage,
-              family = "poisson")
+nob2 <- glmmTMB(maxn ~ stage + ecklonia + (1|location/stage) + (1|opcode), 
+                data = maxn.stage,
+                family = compois())
 
 AIC(sc4, nob2)
 
 
-nob3 <- glmer(maxn ~ stage + time_hr + (1|location/site), data = maxn.stage,
-              family = "poisson")
+nob3 <- glmmTMB(maxn ~ stage + time_hr + (1|location/stage) + (1|opcode), 
+                data = maxn.stage,
+                family = compois())
 
 AIC(sc4, nob3)
 
-### with depth_m, ecklonia & bait
-big1 <- glmer(maxn ~ bait + stage + ecklonia + depth_m +  (1|location/site), 
-              data = maxn.stage,
-              family = "poisson")
-
-AIC(sc4, big1)
-
 #with stage as a random effect
-big2 <- glmer(maxn ~ bait + ecklonia + depth_m + (1|stage) + (1|location/site), 
+big2 <- glmmTMB(maxn ~ bait + ecklonia + depth_m + 
+                  (1|stage) + (1|location/site) + (1|opcode), 
               data = maxn.stage,
-              family = "poisson")
+              family = compois())
 
 AIC(sc4, big2) #shouldn't compare with AIC but out of interest
 summary(big2)
 
-###########
-## BEST MODEL = sc4
-## depth
-sc4 <- glmer(maxn ~ bait + stage + depth_m +(1|location/stage), data = maxn.stage,
-             family = "poisson")
-
-
-AIC(sc1, sc4)
 
 ############################################################################3
 ##############################################################################
 ## best model
-sc4 <- glmer(maxn ~ bait + stage + depth_m + (1|location/stage), data = maxn.stage,
-             family = "poisson")
+sc4 <- glmmTMB(maxn ~ bait + stage + depth_m +(1|location/stage) + (1|opcode), 
+               data = maxn.stage,
+               family = compois())
+
 summary(sc4)
 Anova(sc4)
 
-deviance(sc4)/df.residual(sc4)
+##### Checking model fit
+#pearson residuals
+resid_cp <- residuals(sc4, type = "pearson")
+hist(resid_cp, main = "Histogram of Pearson Residuals", breaks = 30)
 
+#residals vs fitted
+fitted_cp <- fitted(sc4)
+plot(fitted_cp, resid_cp,
+     main = "Pearson Residuals vs Fitted Values",
+     xlab = "Fitted values", ylab = "Pearson residuals")
+abline(h = 0, col = "red")
 
-#plotting residuals
-r <- residuals(sc4)
-plot(r, main = "Residuals from Poisson MaxN(stage)", 
-     xlab = "Index", ylab = "Residuals")
-#same weird shape
+#check dispersion manually
+disp_cp <- sum(resid_cp^2) / df.residual(sc4)
+print(disp_cp)
+# Should be close to 1 if dispersion is well-controlled
 
-pears.sc4 <- residuals(sc4, type = "pearson")
-var(pears.sc4) 
+library(DHARMa)
 
+simres_cp <- simulateResiduals(sc4)
+plot(simres_cp)
+testDispersion(simres_cp) #testing for underdispersion
+
+###### POSTHOCS
 # running some posthocs
+library(emmeans)
 post <- emmeans(sc4, ~ bait)  # Specify the fixed factor of interest
 
 # Perform pairwise comparisons
@@ -490,101 +505,82 @@ noelders <- maxn.stage %>%
   glimpse()
 
 
-mod1 <- glmer(maxn ~ bait + stage + (1|location/site),
+mod1 <- glmmTMB(maxn ~ bait + stage + (1|location/site) + (1|opcode),
               data = noelders,
-              family = poisson)
+              family = compois())
 summary(mod1)
 
-mod2 <- glmer(maxn ~ ecklonia + stage + (1|location/site),
+mod2 <- glmmTMB(maxn ~ ecklonia + stage + (1|location/site) + (1|opcode),
               data = noelders,
-              family = poisson)
+              family = compois())
+
 AIC(mod1, mod2)
 
-mod3 <- glmer(maxn ~ depth_m + stage + (1|location/site),
+mod3 <- glmmTMB(maxn ~ depth_m + stage + (1|location/site) + (1|opcode),
               data = noelders,
-              family = poisson)
+              family = compois())
 AIC(mod1, mod3) #mod 3 better
 
 
-mod4 <- glmer(maxn ~ depth_m + bait + (1|location/site),
+mod4 <- glmmTMB(maxn ~ depth_m + bait + (1|location/site) + (1|opcode),
               data = noelders,
-              family = poisson)
-AIC(mod3, mod4) #mod 4 better - but also need to include stage hah
+              family = compois())
 
-mod5 <- glmer(maxn ~ time_hr + stage + (1|location/site),
+AIC(mod3, mod4) #mod 4 had convergence issue
+
+mod5 <- glmmTMB(maxn ~ time_hr + stage + (1|location/site) + (1|opcode),
                    data = noelders,
-                   family = poisson)
+                   family = compois())
 AIC(mod3, mod5)
 
-mod6 <- glmer(maxn ~ depth_m + bait + stage + (1|location/site),
-              data = noelders,
-              family = poisson)
-AIC(mod3, mod6) #mod6 better
 
-mod7 <- glmer(maxn ~ ecklonia + bait + stage + (1|location/site),
+mod6 <- glmmTMB(maxn ~ depth_m + bait + stage + (1|location/site) + (1|opcode),
               data = noelders,
-              family = poisson)
-AIC(mod6, mod7)
+              family = compois())
 
-mod8 <- glmer(maxn ~ depth_m + bait + stage +  ecklonia + (1|location/site),
+AIC(mod3, mod6) #mod6 better - but not by enough
+
+mod7 <- glmmTMB(maxn ~ ecklonia + bait + stage + (1|location/site) + (1|opcode),
               data = noelders,
-              family = poisson)
-AIC(mod6, mod8)
+              family = compois())
+AIC(mod3, mod7)
+
+
+mod8 <- glmmTMB(maxn ~ depth_m + bait + stage +  ecklonia + 
+                  (1|location/site) + (1|opcode),
+              data = noelders,
+              family = compois())
+AIC(mod3, mod8)
 
 ### best model without elders 
 
-best <- glmer(maxn ~ depth_m + bait + stage + (1|location/site),
-              data = noelders,
-              family = poisson)
+best <- glmmTMB(maxn ~ depth_m + stage + (1|location/site) + (1|opcode),
+                data = noelders,
+                family = compois())
 
 summary(best)
 
-deviance(best)/df.residual(best)
-#0.8156
-
-#plotting residuals
-r <- residuals(best)
-plot(r, main = "Residuals from Poisson MaxN(stage)", 
-     xlab = "Index", ylab = "Residuals")
-#same weird shape
-
-pears.best <- residuals(best, type = "pearson")
-var(pears.best) #0.792
-
-plot(fitted(best), pears.best)
-abline(h = 0, col = "red")
-
-hist(pears.best, breaks = 30, main = "Histogram of Pearson Residuals")
-
-overdispersion <- sum(pears.best^2) / df.residual(best)
-print(overdispersion)
-
-# model is mildly underdispersed so going to check with a com-pois model
-library(glmmTMB)
-
-model_cp <- glmmTMB(maxn ~ depth_m + bait + stage + (1|location/site),
-                    data = noelders,
-                    family = compois())
-summary(model_cp)
-AIC(best, model_cp) #cp model better
-BIC(best, model_cp)
+##### Checking model fit
 #pearson residuals
-resid_cp <- residuals(model_cp, type = "pearson")
+resid_cp <- residuals(best, type = "pearson")
 hist(resid_cp, main = "Histogram of Pearson Residuals", breaks = 30)
 
 #residals vs fitted
-fitted_cp <- fitted(model_cp)
+fitted_cp <- fitted(best)
 plot(fitted_cp, resid_cp,
      main = "Pearson Residuals vs Fitted Values",
      xlab = "Fitted values", ylab = "Pearson residuals")
 abline(h = 0, col = "red")
 
 #check dispersion manually
-disp_cp <- sum(resid_cp^2) / df.residual(model_cp)
+disp_cp <- sum(resid_cp^2) / df.residual(best)
 print(disp_cp)
 # Should be close to 1 if dispersion is well-controlled
 
-library(DHARMa)
+#library(DHARMa)
 
-simres_cp <- simulateResiduals(model_cp)
+simres_cp <- simulateResiduals(best)
 plot(simres_cp)
+testDispersion(simres_cp) #testing for underdispersion
+
+
