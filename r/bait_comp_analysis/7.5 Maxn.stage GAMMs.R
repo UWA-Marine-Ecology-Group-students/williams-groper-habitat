@@ -37,6 +37,7 @@ maxn.stage <- readRDS("./data/tidy/2024_Wudjari_bait_comp_count.maxn.stage.RDS")
   dplyr::filter(!stage %in% c("AD", "M", "F"))%>% #filtering out these
   dplyr::filter(!stage %in% c("1100-1299mm"))%>% # because loads of zeros
   dplyr::mutate(presence = ifelse(maxn > 0, 1, 0))%>%
+  dplyr::mutate(opcode = as.factor(opcode))%>%
   clean_names() %>% 
   glimpse()
 
@@ -100,9 +101,9 @@ for(i in 1:length(resp.vars)){
   print(resp.vars[i])
   
   Model1  <- gam(maxn ~ s(ecklonia, k = 5, bs = 'cr') +
-                   s(location, site, bs = 're') + 
-                   s(opcode, bs = 're'), #random effect
-                 family = tw(),  data = use.dat) #check family
+                   s(location, site, bs = 're') + s(opcode, bs = 're'), #random effect
+                 family = quasipoisson(),  
+                 data = use.dat) 
   
   model.set <- generate.model.set(use.dat = use.dat,
                                   test.fit = Model1,
@@ -129,16 +130,41 @@ for(i in 1:length(resp.vars)){
   out.all = c(out.all,list(out.i))
   var.imp = c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw))
   
-  for(m in 1:nrow(out.i)){
-    best.model.name = as.character(out.i$modname[m])
-    #png(file = here::here(paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/")))
-    png(filename = paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/"))
-    if(best.model.name != "null"){
-      par(mfrow = c(3,1), mar = c(9, 4, 3, 1))
-      best.model = out.list$success.models[[best.model.name]]
-      plot(best.model, all.terms = T,pages = 1,residuals = T,pch = 16)
-      mtext(side = 2, text = resp.vars[i], outer = F)}  
-    dev.off()
+  # for(m in 1:nrow(out.i)){
+  #   best.model.name = as.character(out.i$modname[m])
+  #   #png(file = here::here(paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/")))
+  #   png(filename = paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/"))
+  #   if(best.model.name != "null"){
+  #     par(mfrow = c(3,1), mar = c(9, 4, 3, 1))
+  #     best.model = out.list$success.models[[best.model.name]]
+  #     plot(best.model, all.terms = T,pages = 1,residuals = T,pch = 16)
+  #     mtext(side = 2, text = resp.vars[i], outer = F)}  
+  #   dev.off()
+  
+  for(m in 1:nrow(out.i)) {
+    best.model.name <- as.character(out.i$modname[m])
+    
+    # Skip if name is NA or "null"
+    if (!is.na(best.model.name) && best.model.name %in% names(out.list$success.models)) {
+      best.model <- out.list$success.models[[best.model.name]]
+      
+      # Build the file path
+      out.file <- paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/")
+      png(filename = out.file)
+      
+      # Plot only if smooth terms exist
+      if (!is.null(best.model) && length(best.model$smooth) > 0) {
+        par(mfrow = c(3,1), mar = c(9, 4, 3, 1))
+        plot(best.model, all.terms = TRUE, pages = 1, residuals = TRUE, pch = 16)
+        mtext(side = 2, text = resp.vars[i], outer = FALSE)
+      } else {
+        message(paste("No smooth terms to plot in", best.model.name))
+      }
+      
+      dev.off()
+    } else {
+      message(paste("Skipping null or missing model:", best.model.name))
+    }
   }
 }
 
@@ -149,10 +175,8 @@ names(var.imp) <- resp.vars
 all.mod.fits <- list_rbind(out.all, names_to = "species")
 all.var.imp  <- as.data.frame(do.call("rbind", var.imp))
 
-
 write.csv(all.mod.fits[ , -2], file = paste(outdir, paste(name, "all.mod.fits.csv", sep = "_"), sep = "/"))
 write.csv(all.var.imp, file = paste(outdir, paste(name, "all.var.imp.csv", sep = "_"), sep = "/"))
-
 
 
 ###########################################################################
