@@ -221,15 +221,15 @@ time.of.arrival <- read_points(here::here("./data/raw/bait_comp/em export")) %>%
     dplyr::select(opcode, periodtime, family, genus, species, stage, number, 
                 frame)%>%
     dplyr::rename(time_of_arrival = periodtime)%>%
-    left_join(metadata)%>%
+    left_join(metadata)%>% ##rightjoin here instead
     dplyr::filter(successful_count == "Yes")%>%
   dplyr::select(-c(behaviour_success, approach_success))%>%
   dplyr::mutate(number = ifelse(is.na(number), 1, number))%>% #one emob with no. missing from point - manually resetting
-  dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
-                site = as.factor(site), stage = as.factor(stage), date = as.factor(date))%>%
-  dplyr::mutate(depth_m = as.numeric(depth_m), 
-                longitude_dd = as.numeric(longitude_dd),
-                latitude_dd = as.numeric(latitude_dd))%>%  
+  # dplyr::mutate(bait = as.factor(bait), location = as.factor(location), 
+  #               site = as.factor(site), stage = as.factor(stage), date = as.factor(date))%>%
+  # dplyr::mutate(depth_m = as.numeric(depth_m), 
+  #               longitude_dd = as.numeric(longitude_dd),
+  #               latitude_dd = as.numeric(latitude_dd))%>%  
   glimpse()
 
 length(unique(time.of.arrival$opcode)) #83 - no. opcodes w. blue groper - see below
@@ -241,6 +241,24 @@ anyNA(time.of.arrival)
 sum(is.na(time.of.arrival))
 time.of.arrival[!complete.cases(time.of.arrival), ] #accidentally removed number in emob
 
+#no zeros
 saveRDS(time.of.arrival, file = here::here(paste0("./data/tidy/",
                                                   name, "_time.of.arrival.rds")))
+
+##TODO -- time of arrival needs zeros for all size classes for all emobs
+
+all_size_classes <- c("0300-0499 mm", "0500-0699 mm", "0700-0899 mm", 
+                      "0900-1099 mm", "1100-1299mm", "M", "F", "AD")
+
+toa.with.zeros <- time.of.arrival %>%
+  right_join(metadata)%>%
+  mutate(family = ifelse(is.na(family), 'Labridae', family))%>%
+  mutate(genus = ifelse(is.na(genus), 'Achoerodus', genus))%>%
+  mutate(species = ifelse(is.na(species), 'gouldii', species))%>%
+  tidyr::complete(nesting(opcode), stage = all_size_classes, fill = list(maxn = 0))%>%
+  glimpse()
+
+length(unique(toa.with.zeros$opcode))
+108*8
+
 

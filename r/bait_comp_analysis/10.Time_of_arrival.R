@@ -39,37 +39,28 @@ habitat <- readRDS("./data/tidy/2024_Wudjari_bait_comp_full.habitat.rds")%>%
 
 
 # read in TOA
-
-
 time.of.arrival <- readRDS("./data/tidy/2024_Wudjari_bait_comp_time.of.arrival.rds") %>%
-  dplyr::mutate(bait = as.factor(bait), location = as.factor(location),
-                site = as.factor(site))%>%
-  dplyr::mutate(depth_m = as.numeric(depth_m),
-                longitude_dd = as.numeric(longitude_dd),
-                latitude_dd = as.numeric(latitude_dd))%>%
-  dplyr::mutate(date = substr(date_time, 1, 10))%>%
-  dplyr::mutate(time = substr(date_time, 12, 19))%>%
-  dplyr::mutate(date = as.factor(date))%>%
   left_join(habitat)%>% #joining to habitat
   dplyr::filter(opcode != "046")%>% #no habitat data for 046
-  dplyr::mutate(toa_s = periodtime * 60)%>% #creating covariate of toa in seconds only
-  dplyr::mutate(toa_m = periodtime)%>% #creating covariate of toa in mins (same as periodtime)
-  dplyr::mutate(time_of_day = as.POSIXct(time, format = "%H:%M:%S"))%>%
-  dplyr::mutate(time_secs = as.numeric(format(time_of_day, "%H")) * 3600 + 
-                  as.numeric(format(time_of_day, "%M")) * 60 +
-                  as.numeric(format(time_of_day, "%S")))%>%
-  dplyr::mutate(time_hr = time_secs / 3600)%>%
+  dplyr::mutate(toa_s = time_of_arrival * 60)%>% #creating covariate of toa in seconds only
+  dplyr::mutate(toa_m = time_of_arrival)%>%
   clean_names()%>%
-  glimpse()
+  glimpse() #dataframe only includes videos where blue groper were seen 
+
+##TODO -- go back to extraction code
+
+test <- time.of.arrival
+
+## removing stage from the data
+# toa.wo.stage <- time.of.arrival %>%
+#   dplyr::group_by(opcode) %>%
+#   dplyr::slice_min(time_of_arrival, with_ties = FALSE) %>%
+#   dplyr::ungroup()%>%
+#   glimpse()
 
 
-
-toa.wo.stage <- time.of.arrival %>%
-  dplyr::group_by(opcode) %>%
-  dplyr::slice_min(periodtime, with_ties = FALSE) %>%
-  dplyr::ungroup()%>%
-  glimpse()
-
+is.na(time.of.arrival$toa_s)
+length(unique(time.of.arrival$opcode))
 
 #### modelling earliest time of arrival without stage
 # distribution family checking
@@ -93,7 +84,22 @@ model <- glmmTMB(toa_s ~ bait + (1 | location/site),
                  family = Gamma(link = "log"))
 
 summary(model)
-Anova(model)
+
+###  checking model fit before comparing with other models
+
+library(DHARMa)
+
+# Simulate residuals from the model
+simres_toa <- simulateResiduals(fittedModel = model, plot = TRUE)
+
+# Dispersion test
+testDispersion(simres_toa)
+
+# Optionally: test for outliers, uniformity, and other assumptions
+testOutliers(simres_toa)
+testUniformity(simres_toa)
+testZeroInflation(simres_toa)  # Not crucial for Gamma models, but can be run
+
 
 model2 <- glmmTMB(toa_s ~ bait + time_hr + (1 | location/site),
                   data = toa.wo.stage,

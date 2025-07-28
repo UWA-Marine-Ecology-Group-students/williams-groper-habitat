@@ -130,43 +130,45 @@ for(i in 1:length(resp.vars)){
   out.all = c(out.all,list(out.i))
   var.imp = c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw))
   
-  # for(m in 1:nrow(out.i)){
-  #   best.model.name = as.character(out.i$modname[m])
-  #   #png(file = here::here(paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/")))
-  #   png(filename = paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/"))
-  #   if(best.model.name != "null"){
-  #     par(mfrow = c(3,1), mar = c(9, 4, 3, 1))
-  #     best.model = out.list$success.models[[best.model.name]]
-  #     plot(best.model, all.terms = T,pages = 1,residuals = T,pch = 16)
-  #     mtext(side = 2, text = resp.vars[i], outer = F)}  
-  #   dev.off()
-  
-  for(m in 1:nrow(out.i)) {
-    best.model.name <- as.character(out.i$modname[m])
-    
-    # Skip if name is NA or "null"
-    if (!is.na(best.model.name) && best.model.name %in% names(out.list$success.models)) {
-      best.model <- out.list$success.models[[best.model.name]]
-      
-      # Build the file path
-      out.file <- paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/")
-      png(filename = out.file)
-      
-      # Plot only if smooth terms exist
-      if (!is.null(best.model) && length(best.model$smooth) > 0) {
-        par(mfrow = c(3,1), mar = c(9, 4, 3, 1))
-        plot(best.model, all.terms = TRUE, pages = 1, residuals = TRUE, pch = 16)
-        mtext(side = 2, text = resp.vars[i], outer = FALSE)
-      } else {
-        message(paste("No smooth terms to plot in", best.model.name))
-      }
-      
-      dev.off()
-    } else {
-      message(paste("Skipping null or missing model:", best.model.name))
-    }
+  for(m in 1:nrow(out.i)){
+    best.model.name = as.character(out.i$modname[m])
+    #png(file = here::here(paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/")))
+    png(filename = paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/"))
+    if(best.model.name != "null"){
+      par(mfrow = c(3,1), mar = c(9, 4, 3, 1))
+      best.model = out.list$success.models[[best.model.name]]
+      plot(best.model, all.terms = T,pages = 1,residuals = T,pch = 16)
+      mtext(side = 2, text = resp.vars[i], outer = F)}
+    dev.off()
   }
 }
+  
+#   for(m in 1:nrow(out.i)) {
+#     best.model.name <- as.character(out.i$modname[m])
+#     
+#     # Skip if name is NA or "null"
+#     if (!is.na(best.model.name) && best.model.name %in% names(out.list$success.models)) {
+#       best.model <- out.list$success.models[[best.model.name]]
+#       
+#       # Build the file path
+#       out.file <- paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/")
+#       png(filename = out.file)
+#       
+#       # Plot only if smooth terms exist
+#       if (!is.null(best.model) && length(best.model$smooth) > 0) {
+#         par(mfrow = c(3,1), mar = c(9, 4, 3, 1))
+#         plot(best.model, all.terms = TRUE, pages = 1, residuals = TRUE, pch = 16)
+#         mtext(side = 2, text = resp.vars[i], outer = FALSE)
+#       } else {
+#         message(paste("No smooth terms to plot in", best.model.name))
+#       }
+#       
+#       dev.off()
+#     } else {
+#       message(paste("Skipping null or missing model:", best.model.name))
+#     }
+#   }
+# }
 
 #Tidy the model fits and importance scores.
 
