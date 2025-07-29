@@ -66,15 +66,20 @@ CheckEM::plot_transformations(pred.vars = pred.vars, dat = maxn.stage)
 #   dev.off()
 # }
 
-#Reset the predictor variables to remove any highly correlated variables and include any transformed variables.
+#Reset the predictor variables to remove any highly correlated variables and 
+#include any transformed variables.
 pred.vars <- c("depth_m", "macroalgae", "ecklonia",
                "mean_relief", "time_hr") 
+
+which(is.na(maxn.stage$maxn))
+
 ## not sure about scytothalia - 
 
 #Check to make sure response variables have less than 80% zeroes. 
 #Full-subset GAM modelling will produce unreliable results if your data is too zero inflated.
 
 unique.vars <- unique(as.character(maxn.stage$species))
+
 
 resp.vars <- character()
 for(i in 1:length(unique.vars)){
@@ -98,10 +103,12 @@ factor.vars <- c("bait", "stage") #don't include the RE factor
 ## Running Full Sub-set Gamms
 for(i in 1:length(resp.vars)){
   use.dat = as.data.frame(maxn.stage[which(maxn.stage$species == resp.vars[i]),])
+  #sapply(use.dat[, pred.vars], function(x) length(unique(x))) 
+  
   print(resp.vars[i])
   
-  Model1  <- gam(maxn ~ s(ecklonia, k = 5, bs = 'cr') +
-                   s(location, site, bs = 're') + s(opcode, bs = 're'), #random effect
+  Model1  <- gam(maxn ~ s(depth_m, k = 3, bs = 'cr') +
+                   s(location, site, bs ='re') + s(opcode, bs = 're'), #random effect
                  family = quasipoisson(),  
                  data = use.dat) 
   
@@ -115,7 +122,8 @@ for(i in 1:length(resp.vars)){
                                   cyclic.vars = cyclic.vars,
                                   max.predictors = 4,
                                   null.terms = "s(location, site, bs ='re') + s(opcode, bs = 're')", #repeat R.E. here -- check
-                                  k = 5)
+                                  # null.terms = "s(location, site, bs ='re')",
+                                  k = 3)
   
   out.list <- fit.model.set(model.set,
                             max.models = 600,
@@ -145,15 +153,15 @@ for(i in 1:length(resp.vars)){
   
 #   for(m in 1:nrow(out.i)) {
 #     best.model.name <- as.character(out.i$modname[m])
-#     
+# 
 #     # Skip if name is NA or "null"
 #     if (!is.na(best.model.name) && best.model.name %in% names(out.list$success.models)) {
 #       best.model <- out.list$success.models[[best.model.name]]
-#       
+# 
 #       # Build the file path
 #       out.file <- paste(outdir, paste(name, m, resp.vars[i], "mod_fits.png", sep = "_"), sep = "/")
 #       png(filename = out.file)
-#       
+# 
 #       # Plot only if smooth terms exist
 #       if (!is.null(best.model) && length(best.model$smooth) > 0) {
 #         par(mfrow = c(3,1), mar = c(9, 4, 3, 1))
@@ -162,7 +170,7 @@ for(i in 1:length(resp.vars)){
 #       } else {
 #         message(paste("No smooth terms to plot in", best.model.name))
 #       }
-#       
+# 
 #       dev.off()
 #     } else {
 #       message(paste("Skipping null or missing model:", best.model.name))
@@ -180,6 +188,20 @@ all.var.imp  <- as.data.frame(do.call("rbind", var.imp))
 write.csv(all.mod.fits[ , -2], file = paste(outdir, paste(name, "all.mod.fits.csv", sep = "_"), sep = "/"))
 write.csv(all.var.imp, file = paste(outdir, paste(name, "all.var.imp.csv", sep = "_"), sep = "/"))
 
+## best model under/overdispersion
+library(DHARMa)
+library(mgcViz)
+bmod <- gam(maxn ~ s(ecklonia, k = 3, bs = "cr") + s(time_hr, k = 3, bs = "cc") + 
+              bait + stage + s(location, site, bs = "re") + s(opcode, bs = "re"),
+            data = maxn.stage)
+
+simres <- DHARMa::simulateResiduals(bmod)
+
+# Plot residuals
+plot(simres)
+
+# Test for dispersion
+testDispersion(simres)
 
 ###########################################################################
 ########### IMPORTANCE PLOTS
